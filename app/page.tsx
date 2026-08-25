@@ -18,11 +18,21 @@ import {
 
 const GENEVA: Point = { code: 'CH6621', name: 'Genève', lat: 46.2044, lon: 6.1432 };
 
-const modeMeta: Record<Mode, { label: string; short: string }> = {
-  car: { label: 'Car', short: 'C' },
-  transit: { label: 'Public transport', short: 'PT' },
-  soft: { label: 'Bike & foot', short: 'A' },
+const modeMeta: Record<Mode, { label: string }> = {
+  car: { label: 'Car' },
+  transit: { label: 'Public transport' },
+  soft: { label: 'Bike & foot' },
 };
+
+function ModeIcon({ mode }: { mode: Mode }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      {mode === 'car' && <><path d="M4 15v-3l2-5h12l2 5v3H4Z" /><path d="M6 12h12" /><circle cx="7" cy="16.5" r="1.5" /><circle cx="17" cy="16.5" r="1.5" /></>}
+      {mode === 'transit' && <><rect x="6" y="3" width="12" height="15" rx="3" /><path d="M8.5 7h7M8 13h8M9 21l2-3m4 0 2 3" /><circle cx="9" cy="15" r="1" /><circle cx="15" cy="15" r="1" /></>}
+      {mode === 'soft' && <><circle cx="6" cy="16" r="3" /><circle cx="18" cy="16" r="3" /><path d="m6 16 4-7 3 7h-7m4-7h4m-1 7 3-6h-3" /></>}
+    </svg>
+  );
+}
 
 const flowMeta = {
   inbound: { label: 'Into canton', colour: '#ef553f' },
@@ -161,18 +171,19 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
           const radius = markerRadius(node.total);
           ctx.beginPath();
           ctx.arc(x, y, radius, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(21,24,19,.11)';
+          ctx.fillStyle = 'rgba(103,107,103,.18)';
           ctx.fill();
           if (!visible) return;
           ctx.beginPath();
           ctx.arc(x, y, markerRadius(visible) * (0.84 + homeShare * 0.16), 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(21,24,19,${0.28 + homeShare * 0.5})`;
+          ctx.fillStyle = `rgba(88,92,88,${0.24 + homeShare * 0.38})`;
           ctx.fill();
           ctx.strokeStyle = 'rgba(250,247,240,.72)';
           ctx.lineWidth = 0.8;
           ctx.stroke();
         });
 
+        let incomingArrivals = 0;
         dots.forEach((dot) => {
           if (!modesRef.current[dot.corridor.mode]) return;
           const origin = project(dot.corridor.origin);
@@ -191,7 +202,8 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
           const tail = curvePoint(start, end, Math.max(0, flow.progress - 0.09), dot.bend);
           const colour = flowMeta[flow.direction].colour;
           const blip = arrivalBlip(flow.progress);
-          if (blip > 0) {
+          if (flow.direction === 'inbound') incomingArrivals += blip;
+          if (blip > 0 && flow.direction !== 'inbound') {
             ctx.save();
             ctx.beginPath();
             ctx.arc(end[0], end[1], 3 + blip * 9, 0, Math.PI * 2);
@@ -226,13 +238,19 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
           ctx.lineWidth = 1.4;
           ctx.stroke();
         }
-        ctx.beginPath();
-        ctx.arc(genevaX, genevaY, 6, 0, Math.PI * 2);
-        ctx.fillStyle = '#c8df3e';
-        ctx.fill();
-        ctx.strokeStyle = '#151813';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        const reception = Math.min(1, incomingArrivals / 3);
+        if (reception > 0) {
+          const cityEdge = map.latLngToContainerPoint([GENEVA.lat, GENEVA.lon + 0.12]);
+          const cityRadius = Math.max(24, Math.abs(cityEdge.x - genevaX));
+          const glow = ctx.createRadialGradient(genevaX, genevaY, 0, genevaX, genevaY, cityRadius);
+          glow.addColorStop(0, `rgba(239,85,63,${0.12 + reception * 0.12})`);
+          glow.addColorStop(0.65, `rgba(239,85,63,${0.06 + reception * 0.08})`);
+          glow.addColorStop(1, 'rgba(239,85,63,0)');
+          ctx.beginPath();
+          ctx.arc(genevaX, genevaY, cityRadius, 0, Math.PI * 2);
+          ctx.fillStyle = glow;
+          ctx.fill();
+        }
       };
 
       drawRef.current = draw;
@@ -411,16 +429,16 @@ export default function Home() {
           <MapCanvas time={time} modes={modes} />
           <div className="mapNote">swisstopo grey national map · {formatNumber(dataSummary.originCommunes)} origins · marker area = commuter volume</div>
           <div className="modeFilters" aria-label="Show transport modes">
-            <span className="filterLabel">Transport shown</span>
             {(Object.keys(modeMeta) as Mode[]).map((mode) => (
               <button
                 key={mode}
                 type="button"
                 aria-pressed={modes[mode]}
+                aria-label={`${modeMeta[mode].label} filter`}
+                data-tooltip={modeMeta[mode].label}
                 onClick={() => setModes((current) => ({ ...current, [mode]: !current[mode] }))}
               >
-                <i aria-hidden="true">{modeMeta[mode].short}</i>
-                {modeMeta[mode].label}
+                <ModeIcon mode={mode} />
               </button>
             ))}
           </div>
@@ -454,7 +472,7 @@ export default function Home() {
             <strong>{formatDelta(dailyPeak.value)}</strong>
             <small>at {formatTime(dailyPeak.minute)}</small>
           </div>
-          <p className="dotKey">Commune markers scale with commuter volume and dim while their commuters are away. Arrivals blip; Geneva’s halo shows net population change.</p>
+          <p className="dotKey">Commune markers scale with commuter volume and dim while their commuters are away. Known arrivals blip; incoming Geneva flows wash across the city because their exact endpoint is not shown.</p>
         </aside>
       </section>
 

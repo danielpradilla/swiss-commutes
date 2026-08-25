@@ -92,34 +92,44 @@ h1 {
   backdrop-filter:blur(8px);
 }
 .modeFilters { position:absolute; z-index:1000; top:15px; left:15px; right:55px; display:flex; flex-wrap:wrap; align-items:center; gap:7px; pointer-events:none; }
-.filterLabel {
-  padding:7px 2px;
-  color:var(--ink);
-  font-size:8px;
-  font-weight:700;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-}
 .modeFilters button {
+  position:relative;
   display:flex;
   align-items:center;
-  gap:7px;
-  min-height:34px;
-  padding:8px 11px;
+  justify-content:center;
+  width:42px;
+  height:42px;
+  padding:0;
   border:1px solid rgba(21,24,19,.42);
-  border-radius:99px;
+  border-radius:50%;
   background:rgba(242,239,231,.9);
   color:var(--ink);
   cursor:pointer;
-  font-size:9px;
-  font-weight:700;
-  letter-spacing:.08em;
-  text-transform:uppercase;
   backdrop-filter:blur(8px);
   pointer-events:auto;
 }
 .modeFilters button[aria-pressed=false] { opacity:.42; }
-.modeFilters i { min-width:22px; height:22px; display:grid; place-items:center; border:1px solid var(--ink); border-radius:50%; font-size:7px; font-style:normal; letter-spacing:0; }
+.modeFilters svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.modeFilters button::after {
+  content:attr(data-tooltip);
+  position:absolute;
+  top:calc(100% + 7px);
+  left:50%;
+  padding:6px 8px;
+  border:1px solid rgba(21,24,19,.35);
+  background:rgba(242,239,231,.96);
+  color:var(--ink);
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  opacity:0;
+  transform:translate(-50%,-3px);
+  transition:opacity .15s,transform .15s;
+  pointer-events:none;
+}
+.modeFilters button:hover::after,.modeFilters button:focus-visible::after { opacity:1; transform:translate(-50%,0); }
 .modeFilters button:focus-visible,.playButton:focus-visible,input:focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
 .flowLegend {
   position:absolute;
@@ -236,8 +246,7 @@ footer p { margin:0; color:var(--muted); font-size:9px; letter-spacing:.1em; tex
   .commuterMap { min-height:480px; }
   .modeFilters { right:12px; left:12px; }
   .mapBase .leaflet-top.leaflet-right { top:52px; }
-  .filterLabel { display:none; }
-  .modeFilters button { flex:1; justify-content:center; padding:8px; }
+  .modeFilters button { flex:0 0 42px; }
   .mapNote { right:12px; left:12px; text-align:center; }
   .flowLegend { right:12px; bottom:47px; }
   .statRail { display:grid; grid-template-columns:repeat(2,1fr); gap:22px 14px; padding:24px 18px; }
