@@ -39,6 +39,10 @@ export function commutersAtHomeShare(minute: number) {
   return Math.max(0, Math.min(1, 1 - sigmoid(minute, 450, 66) + sigmoid(minute, 1035, 76)));
 }
 
+export function arrivalBlip(progress: number) {
+  return Math.max(0, Math.min(1, (progress - 0.8) / 0.2));
+}
+
 export function flowAt(
   minute: number,
   inbound: number,

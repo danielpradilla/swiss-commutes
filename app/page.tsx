@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Map as LeafletMap } from 'leaflet';
 import { corridors, dataSummary, type Mode, type Point } from './commutes';
 import {
+  arrivalBlip,
   borderCrossings,
   commutersAtHomeShare,
   commutersInTransit,
@@ -189,6 +190,17 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
           const point = curvePoint(start, end, flow.progress, dot.bend);
           const tail = curvePoint(start, end, Math.max(0, flow.progress - 0.09), dot.bend);
           const colour = flowMeta[flow.direction].colour;
+          const blip = arrivalBlip(flow.progress);
+          if (blip > 0) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(end[0], end[1], 3 + blip * 9, 0, Math.PI * 2);
+            ctx.strokeStyle = colour;
+            ctx.globalAlpha = 0.85 - blip * 0.6;
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+            ctx.restore();
+          }
           ctx.beginPath();
           ctx.moveTo(tail[0], tail[1]);
           ctx.lineTo(point[0], point[1]);
@@ -442,7 +454,7 @@ export default function Home() {
             <strong>{formatDelta(dailyPeak.value)}</strong>
             <small>at {formatTime(dailyPeak.minute)}</small>
           </div>
-          <p className="dotKey">Commune markers scale with commuter volume and dim while their commuters are away. Geneva’s halo shows net population change.</p>
+          <p className="dotKey">Commune markers scale with commuter volume and dim while their commuters are away. Arrivals blip; Geneva’s halo shows net population change.</p>
         </aside>
       </section>
 
