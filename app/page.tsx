@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Map as LeafletMap } from 'leaflet';
 import {
   borderCrossings,
   commutersInTransit,
   dailyPeak,
+  flowAt,
   formatTime,
   MINUTES_PER_DAY,
   populationChange,
@@ -35,10 +37,15 @@ const corridors: Corridor[] = [
   { origin: { name: 'Vernier', lat: 46.217, lon: 6.084 }, target: MEYRIN, commuters: 13_000, mode: 'soft' },
 ];
 
-const modeMeta: Record<Mode, { label: string; colour: string }> = {
-  car: { label: 'Car', colour: '#ef553f' },
-  transit: { label: 'Public transport', colour: '#24798f' },
-  soft: { label: 'Bike & foot', colour: '#a9c51d' },
+const modeMeta: Record<Mode, { label: string; short: string }> = {
+  car: { label: 'Car', short: 'C' },
+  transit: { label: 'Public transport', short: 'PT' },
+  soft: { label: 'Bike & foot', short: 'A' },
+};
+
+const flowMeta = {
+  inbound: { label: 'Into Geneva', colour: '#ef553f' },
+  outbound: { label: 'Out of Geneva', colour: '#24798f' },
 };
 
 const hash = (value: number) => {
@@ -63,179 +70,149 @@ const dots = corridors.flatMap((corridor, corridorIndex) =>
   }),
 );
 
-const lake = [
-  [6.143, 46.205], [6.19, 46.295], [6.24, 46.383], [6.34, 46.455],
-  [6.49, 46.49], [6.64, 46.52], [6.69, 46.45], [6.57, 46.39],
-  [6.48, 46.37], [6.33, 46.36], [6.22, 46.3],
-];
-
-const canton = [
-  [5.96, 46.135], [6.08, 46.13], [6.2, 46.155], [6.25, 46.23],
-  [6.24, 46.31], [6.1, 46.32], [5.96, 46.25],
-];
-
 const formatNumber = (value: number) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
 const formatDelta = (value: number) => `${value >= 0 ? '+' : '−'}${formatNumber(Math.abs(value))}`;
 
 function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean> }) {
-  const ref = useRef<HTMLCanvasElement>(null);
+  const mapElement = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const drawRef = useRef<() => void>(() => undefined);
+  const timeRef = useRef(time);
+  const modesRef = useRef(modes);
 
   useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-
-    const draw = () => {
-      const box = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.round(box.width * dpr));
-      canvas.height = Math.max(1, Math.round(box.height * dpr));
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.scale(dpr, dpr);
-      const width = box.width;
-      const height = box.height;
-      const bounds = { minLon: 5.73, maxLon: 6.72, minLat: 45.84, maxLat: 46.59 };
-      const project = ([lon, lat]: number[]) => [
-        ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * width,
-        ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat)) * height,
-      ];
-
-      ctx.fillStyle = '#e9e6dc';
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.strokeStyle = 'rgba(21,24,19,.07)';
-      ctx.lineWidth = 1;
-      for (let row = 0; row < 14; row++) {
-        ctx.beginPath();
-        for (let x = -20; x <= width + 20; x += 12) {
-          const y = height * (row + 1) / 15 + Math.sin(x / 52 + row) * 7;
-          x === -20 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
-
-      ctx.beginPath();
-      lake.forEach((point, index) => {
-        const [x, y] = project(point);
-        index ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-      });
-      ctx.closePath();
-      ctx.fillStyle = '#bdd7dc';
-      ctx.fill();
-      ctx.strokeStyle = '#91b7bf';
-      ctx.stroke();
-
-      ctx.beginPath();
-      canton.forEach((point, index) => {
-        const [x, y] = project(point);
-        index ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-      });
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(200,223,62,.15)';
-      ctx.fill();
-      ctx.setLineDash([5, 5]);
-      ctx.strokeStyle = 'rgba(21,24,19,.56)';
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      corridors.forEach((corridor) => {
-        const [ox, oy] = project([corridor.origin.lon, corridor.origin.lat]);
-        const [tx, ty] = project([corridor.target.lon, corridor.target.lat]);
-        ctx.beginPath();
-        ctx.moveTo(ox, oy);
-        ctx.lineTo(tx, ty);
-        ctx.strokeStyle = modeMeta[corridor.mode].colour + '24';
-        ctx.lineWidth = corridor.mode === 'transit' ? 2 : 1;
-        ctx.stroke();
-      });
-
-      const curvePoint = (
-        start: number[],
-        end: number[],
-        progress: number,
-        bend: number,
-      ) => {
-        const dx = end[0] - start[0];
-        const dy = end[1] - start[1];
-        const control = [
-          (start[0] + end[0]) / 2 - dy * bend,
-          (start[1] + end[1]) / 2 + dx * bend,
-        ];
-        const inverse = 1 - progress;
-        return [
-          inverse * inverse * start[0] + 2 * inverse * progress * control[0] + progress * progress * end[0],
-          inverse * inverse * start[1] + 2 * inverse * progress * control[1] + progress * progress * end[1],
-        ];
-      };
-
-      dots.forEach((dot) => {
-        if (!modes[dot.corridor.mode]) return;
-        const origin = project([dot.corridor.origin.lon, dot.corridor.origin.lat]);
-        const target = project([dot.corridor.target.lon, dot.corridor.target.lat]);
-        let start = origin;
-        let end = target;
-        let progress = (time - dot.inbound) / dot.duration;
-        if (progress < 0 || progress > 1) {
-          start = target;
-          end = origin;
-          progress = (time - dot.outbound) / dot.duration;
-        }
-        if (progress < 0 || progress > 1) return;
-        const point = curvePoint(start, end, progress, dot.bend);
-        const tail = curvePoint(start, end, Math.max(0, progress - 0.09), dot.bend);
-        const colour = modeMeta[dot.corridor.mode].colour;
-        ctx.beginPath();
-        ctx.moveTo(tail[0], tail[1]);
-        ctx.lineTo(point[0], point[1]);
-        ctx.strokeStyle = colour + '70';
-        ctx.lineWidth = 1.4;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(point[0], point[1], dot.corridor.mode === 'soft' ? 2.1 : 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = colour;
-        ctx.fill();
-      });
-
-      const labels = [
-        ...Array.from(new Map(corridors.map((item) => [item.origin.name, item.origin])).values()),
-        GENEVA,
-      ];
-      ctx.font = '600 9px Arial';
-      ctx.textBaseline = 'middle';
-      labels.forEach((place) => {
-        const [x, y] = project([place.lon, place.lat]);
-        ctx.beginPath();
-        ctx.arc(x, y, place.name === 'Genève' ? 4 : 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#151813';
-        ctx.fill();
-        ctx.fillText(place.name.toUpperCase(), x + 7, y - 7);
-      });
-
-      const [lakeX, lakeY] = project([6.42, 46.405]);
-      ctx.save();
-      ctx.translate(lakeX, lakeY);
-      ctx.rotate(-0.23);
-      ctx.fillStyle = '#568896';
-      ctx.font = 'italic 12px Georgia';
-      ctx.fillText('Lac Léman', 0, 0);
-      ctx.restore();
-    };
-
-    draw();
-    const observer = new ResizeObserver(draw);
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    timeRef.current = time;
+    modesRef.current = modes;
+    drawRef.current();
   }, [time, modes]);
 
+  useEffect(() => {
+    let disposed = false;
+    let observer: ResizeObserver | undefined;
+
+    void import('leaflet').then((L) => {
+      const container = mapElement.current;
+      const canvas = canvasRef.current;
+      if (disposed || !container || !canvas) return;
+
+      const map = L.map(container, {
+        preferCanvas: true,
+        zoomControl: false,
+        scrollWheelZoom: false,
+        minZoom: 8,
+        maxZoom: 14,
+        maxBounds: [[45.62, 5.38], [46.83, 7.04]],
+        maxBoundsViscosity: 0.8,
+      });
+      mapRef.current = map;
+      map.fitBounds([[45.84, 5.73], [46.59, 6.72]], { padding: [18, 18] });
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+      L.control.zoom({ position: 'topright' }).addTo(map);
+      L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 110 }).addTo(map);
+
+      const draw = () => {
+        const box = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const pixelWidth = Math.max(1, Math.round(box.width * dpr));
+        const pixelHeight = Math.max(1, Math.round(box.height * dpr));
+        if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+          canvas.width = pixelWidth;
+          canvas.height = pixelHeight;
+        }
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, box.width, box.height);
+        const project = (place: Point) => {
+          const point = map.latLngToContainerPoint([place.lat, place.lon]);
+          return [point.x, point.y];
+        };
+
+        corridors.forEach((corridor) => {
+          const [ox, oy] = project(corridor.origin);
+          const [tx, ty] = project(corridor.target);
+          ctx.beginPath();
+          ctx.moveTo(ox, oy);
+          ctx.lineTo(tx, ty);
+          ctx.strokeStyle = 'rgba(21,24,19,.16)';
+          ctx.lineWidth = corridor.mode === 'transit' ? 1.8 : 1;
+          ctx.setLineDash(corridor.mode === 'transit' ? [5, 4] : corridor.mode === 'soft' ? [2, 4] : []);
+          ctx.stroke();
+        });
+        ctx.setLineDash([]);
+
+        const curvePoint = (start: number[], end: number[], progress: number, bend: number) => {
+          const dx = end[0] - start[0];
+          const dy = end[1] - start[1];
+          const control = [(start[0] + end[0]) / 2 - dy * bend, (start[1] + end[1]) / 2 + dx * bend];
+          const inverse = 1 - progress;
+          return [
+            inverse * inverse * start[0] + 2 * inverse * progress * control[0] + progress * progress * end[0],
+            inverse * inverse * start[1] + 2 * inverse * progress * control[1] + progress * progress * end[1],
+          ];
+        };
+
+        dots.forEach((dot) => {
+          if (!modesRef.current[dot.corridor.mode]) return;
+          const origin = project(dot.corridor.origin);
+          const target = project(dot.corridor.target);
+          const flow = flowAt(timeRef.current, dot.inbound, dot.outbound, dot.duration);
+          if (!flow) return;
+          const start = flow.direction === 'inbound' ? origin : target;
+          const end = flow.direction === 'inbound' ? target : origin;
+          const point = curvePoint(start, end, flow.progress, dot.bend);
+          const tail = curvePoint(start, end, Math.max(0, flow.progress - 0.09), dot.bend);
+          const colour = flowMeta[flow.direction].colour;
+          ctx.beginPath();
+          ctx.moveTo(tail[0], tail[1]);
+          ctx.lineTo(point[0], point[1]);
+          ctx.strokeStyle = colour + '8a';
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(point[0], point[1], dot.corridor.mode === 'soft' ? 2.2 : 2.7, 0, Math.PI * 2);
+          ctx.fillStyle = colour;
+          ctx.fill();
+        });
+
+        const [genevaX, genevaY] = project(GENEVA);
+        ctx.beginPath();
+        ctx.arc(genevaX, genevaY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#c8df3e';
+        ctx.fill();
+        ctx.strokeStyle = '#151813';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      };
+
+      drawRef.current = draw;
+      map.on('move zoom resize', draw);
+      observer = new ResizeObserver(() => {
+        map.invalidateSize();
+        draw();
+      });
+      observer.observe(container);
+      draw();
+    });
+
+    return () => {
+      disposed = true;
+      observer?.disconnect();
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
   return (
-    <canvas
-      ref={ref}
-      className="commuterMap"
-      role="img"
-      aria-label={`Animated commuter map of greater Geneva at ${formatTime(time)}`}
-    >
-      Animated map of commuter flows in greater Geneva.
-    </canvas>
+    <div className="commuterMap" role="region" aria-label={`Interactive commuter map of greater Geneva at ${formatTime(time)}`}>
+      <div ref={mapElement} className="mapBase" />
+      <canvas ref={canvasRef} className="commuterOverlay" aria-hidden="true" />
+    </div>
   );
 }
 
@@ -386,8 +363,9 @@ export default function Home() {
       <section className="dashboard" aria-label="Geneva commuter map and current statistics">
         <div className="mapPanel">
           <MapCanvas time={time} modes={modes} />
-          <div className="mapNote">Simplified geographic view · not live tracking</div>
+          <div className="mapNote">Live OSM basemap · pan or zoom · routes modelled</div>
           <div className="modeFilters" aria-label="Show transport modes">
+            <span className="filterLabel">Transport shown</span>
             {(Object.keys(modeMeta) as Mode[]).map((mode) => (
               <button
                 key={mode}
@@ -395,10 +373,14 @@ export default function Home() {
                 aria-pressed={modes[mode]}
                 onClick={() => setModes((current) => ({ ...current, [mode]: !current[mode] }))}
               >
-                <i style={{ background: modeMeta[mode].colour }} />
+                <i aria-hidden="true">{modeMeta[mode].short}</i>
                 {modeMeta[mode].label}
               </button>
             ))}
+          </div>
+          <div className="flowLegend" aria-label="Flow direction colors">
+            <span><i className="inbound" />{flowMeta.inbound.label}</span>
+            <span><i className="outbound" />{flowMeta.outbound.label}</span>
           </div>
         </div>
 
@@ -437,8 +419,8 @@ export default function Home() {
             <strong>{formatDelta(stats.population)}</strong>
           </div>
           <div className="chartLegend">
-            <span><i className="up" /> Increase</span>
-            <span><i className="down" /> Decrease</span>
+            <span><i className="up" /> Above baseline</span>
+            <span><i className="down" /> Below baseline</span>
             <span><i className="maximum" /> Maximum</span>
           </div>
         </div>
@@ -497,7 +479,7 @@ export default function Home() {
           </a>
           <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">
             <span>05 · Network context</span><strong>OpenStreetMap contributors</strong>
-            <p>Reference context for roads, rail, place names and the lake edge.</p>
+            <p>Live basemap for roads, rail, settlements, boundaries and the lake edge.</p>
           </a>
           <a href="https://www.reddit.com/r/geneva/comments/1vxy0q9/an_animated_map_of_all_commuters_to_geneva/" target="_blank" rel="noreferrer">
             <span>06 · Inspiration</span><strong>Habibi Code / Reddit</strong>
@@ -508,8 +490,8 @@ export default function Home() {
           <strong>Read this visualization as a pattern, not a headcount.</strong>
           <p>
             Corridor volumes and the 2021 French cross-border reference are aggregated. Animated marks
-            are representative journeys, never people or devices. The view is intentionally simplified
-            and should not be used for route planning.
+            are representative journeys, never people or devices. The basemap is geographic; flow paths
+            and timing remain schematic and should not be used for route planning.
           </p>
         </div>
       </section>

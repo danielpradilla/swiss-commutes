@@ -32,6 +32,14 @@ export function borderCrossings(minute: number) {
   );
 }
 
+export function flowAt(minute: number, inbound: number, outbound: number, duration: number) {
+  const inboundProgress = (minute - inbound) / duration;
+  if (inboundProgress >= 0 && inboundProgress <= 1) return { direction: 'inbound' as const, progress: inboundProgress };
+  const outboundProgress = (minute - outbound) / duration;
+  if (outboundProgress >= 0 && outboundProgress <= 1) return { direction: 'outbound' as const, progress: outboundProgress };
+  return null;
+}
+
 export function formatTime(minute: number) {
   const value = Math.max(0, Math.min(MINUTES_PER_DAY, Math.round(minute)));
   if (value === MINUTES_PER_DAY) return '24:00';
