@@ -13,19 +13,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://danielpradilla.info'),
   title: 'Genève / 24h — A commuter portrait',
   description: 'An interactive portrait of commuter movement into and out of Geneva over one weekday.',
+  alternates: { canonical: '/geneva-commutes/' },
   openGraph: {
     title: 'Genève / 24h — How Geneva breathes',
     description: 'Follow the daily commuter pulse across Geneva, France and Vaud.',
     type: 'website',
-    images: [{ url: '/og.png', width: 1732, height: 910, alt: 'Genève / 24h — How Geneva breathes' }],
+    images: [{ url: '/geneva-commutes/og.png', width: 1732, height: 910, alt: 'Genève / 24h — How Geneva breathes' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Genève / 24h — How Geneva breathes',
     description: 'Follow the daily commuter pulse across Geneva, France and Vaud.',
-    images: ['/og.png'],
+    images: ['/geneva-commutes/og.png'],
   },
 };
 
