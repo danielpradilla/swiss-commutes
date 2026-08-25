@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Map as LeafletMap } from 'leaflet';
+import { corridors, dataSummary, type Mode, type Point } from './commutes';
 import {
   borderCrossings,
   commutersInTransit,
@@ -13,29 +14,7 @@ import {
   populationSeries,
 } from './model';
 
-type Mode = 'car' | 'transit' | 'soft';
-type Point = { name: string; lat: number; lon: number };
-type Corridor = { origin: Point; target: Point; commuters: number; mode: Mode };
-
-const GENEVA = { name: 'Genève', lat: 46.2044, lon: 6.1432 };
-const AIRPORT = { name: 'Aéroport', lat: 46.2381, lon: 6.109 };
-const MEYRIN = { name: 'Meyrin', lat: 46.2337, lon: 6.08 };
-const PLAN_LES_OUATES = { name: 'Plan-les-Ouates', lat: 46.167, lon: 6.116 };
-
-const corridors: Corridor[] = [
-  { origin: { name: 'Annemasse', lat: 46.1944, lon: 6.2377 }, target: GENEVA, commuters: 31_000, mode: 'car' },
-  { origin: { name: 'St-Julien', lat: 46.1447, lon: 6.081 }, target: PLAN_LES_OUATES, commuters: 19_000, mode: 'car' },
-  { origin: { name: 'Gex', lat: 46.3332, lon: 6.0577 }, target: AIRPORT, commuters: 16_500, mode: 'car' },
-  { origin: { name: 'Annecy', lat: 45.8992, lon: 6.1294 }, target: GENEVA, commuters: 11_000, mode: 'car' },
-  { origin: { name: 'Thonon', lat: 46.371, lon: 6.479 }, target: GENEVA, commuters: 9_500, mode: 'car' },
-  { origin: { name: 'Nyon', lat: 46.3833, lon: 6.2396 }, target: GENEVA, commuters: 22_000, mode: 'transit' },
-  { origin: { name: 'Lausanne', lat: 46.5197, lon: 6.6323 }, target: GENEVA, commuters: 13_000, mode: 'transit' },
-  { origin: { name: 'Annemasse', lat: 46.1944, lon: 6.2377 }, target: GENEVA, commuters: 18_000, mode: 'transit' },
-  { origin: { name: 'Bellegarde', lat: 46.1087, lon: 5.826 }, target: GENEVA, commuters: 7_500, mode: 'transit' },
-  { origin: { name: 'Meyrin', lat: 46.2337, lon: 6.08 }, target: GENEVA, commuters: 29_000, mode: 'transit' },
-  { origin: { name: 'Carouge', lat: 46.182, lon: 6.139 }, target: GENEVA, commuters: 17_000, mode: 'soft' },
-  { origin: { name: 'Vernier', lat: 46.217, lon: 6.084 }, target: MEYRIN, commuters: 13_000, mode: 'soft' },
-];
+const GENEVA: Point = { code: 'CH6621', name: 'Genève', lat: 46.2044, lon: 6.1432 };
 
 const modeMeta: Record<Mode, { label: string; short: string }> = {
   car: { label: 'Car', short: 'C' },
@@ -44,8 +23,8 @@ const modeMeta: Record<Mode, { label: string; short: string }> = {
 };
 
 const flowMeta = {
-  inbound: { label: 'Into Geneva', colour: '#ef553f' },
-  outbound: { label: 'Out of Geneva', colour: '#24798f' },
+  inbound: { label: 'Into canton', colour: '#ef553f' },
+  outbound: { label: 'Out of canton', colour: '#24798f' },
 };
 
 const hash = (value: number) => {
@@ -53,8 +32,19 @@ const hash = (value: number) => {
   return x - Math.floor(x);
 };
 
+const primaryCorridorByOrigin = new Map<string, number>();
+corridors.forEach((corridor, index) => {
+  const primary = primaryCorridorByOrigin.get(corridor.origin.code);
+  if (primary === undefined || corridors[primary].commuters < corridor.commuters) {
+    primaryCorridorByOrigin.set(corridor.origin.code, index);
+  }
+});
+
 const dots = corridors.flatMap((corridor, corridorIndex) =>
-  Array.from({ length: Math.max(4, Math.round(corridor.commuters / 900)) }, (_, index) => {
+  Array.from({
+    length: Math.floor(corridor.commuters / 900) +
+      (primaryCorridorByOrigin.get(corridor.origin.code) === corridorIndex ? 1 : 0),
+  }, (_, index) => {
     const seed = corridorIndex * 101 + index + 1;
     const distance = Math.hypot(
       corridor.origin.lat - corridor.target.lat,
@@ -100,17 +90,16 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
         preferCanvas: true,
         zoomControl: false,
         scrollWheelZoom: false,
-        minZoom: 8,
+        minZoom: 6,
         maxZoom: 14,
-        maxBounds: [[45.62, 5.38], [46.83, 7.04]],
+        maxBounds: [[45.4, 4.45], [47.2, 7.55]],
         maxBoundsViscosity: 0.8,
       });
       mapRef.current = map;
-      map.fitBounds([[45.84, 5.73], [46.59, 6.72]], { padding: [18, 18] });
-
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      map.fitBounds([[45.72, 4.72], [46.7, 7.12]], { padding: [18, 18] });
+      L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
       }).addTo(map);
       L.control.zoom({ position: 'topright' }).addTo(map);
       L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 110 }).addTo(map);
@@ -133,19 +122,6 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
           return [point.x, point.y];
         };
 
-        corridors.forEach((corridor) => {
-          const [ox, oy] = project(corridor.origin);
-          const [tx, ty] = project(corridor.target);
-          ctx.beginPath();
-          ctx.moveTo(ox, oy);
-          ctx.lineTo(tx, ty);
-          ctx.strokeStyle = 'rgba(21,24,19,.16)';
-          ctx.lineWidth = corridor.mode === 'transit' ? 1.8 : 1;
-          ctx.setLineDash(corridor.mode === 'transit' ? [5, 4] : corridor.mode === 'soft' ? [2, 4] : []);
-          ctx.stroke();
-        });
-        ctx.setLineDash([]);
-
         const curvePoint = (start: number[], end: number[], progress: number, bend: number) => {
           const dx = end[0] - start[0];
           const dy = end[1] - start[1];
@@ -161,10 +137,16 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
           if (!modesRef.current[dot.corridor.mode]) return;
           const origin = project(dot.corridor.origin);
           const target = project(dot.corridor.target);
-          const flow = flowAt(timeRef.current, dot.inbound, dot.outbound, dot.duration);
+          const flow = flowAt(
+            timeRef.current,
+            dot.inbound,
+            dot.outbound,
+            dot.duration,
+            dot.corridor.direction,
+          );
           if (!flow) return;
-          const start = flow.direction === 'inbound' ? origin : target;
-          const end = flow.direction === 'inbound' ? target : origin;
+          const start = flow.reverse ? target : origin;
+          const end = flow.reverse ? origin : target;
           const point = curvePoint(start, end, flow.progress, dot.bend);
           const tail = curvePoint(start, end, Math.max(0, flow.progress - 0.09), dot.bend);
           const colour = flowMeta[flow.direction].colour;
@@ -271,7 +253,8 @@ function PopulationChart({ time }: { time: number }) {
 
       ctx.beginPath();
       populationSeries.forEach((point, index) => {
-        index ? ctx.lineTo(x(point.minute), y(point.value)) : ctx.moveTo(x(point.minute), y(point.value));
+        if (index) ctx.lineTo(x(point.minute), y(point.value));
+        else ctx.moveTo(x(point.minute), y(point.value));
       });
       ctx.strokeStyle = '#151813';
       ctx.lineWidth = 1.7;
@@ -292,7 +275,7 @@ function PopulationChart({ time }: { time: number }) {
       ctx.stroke();
 
       ctx.fillStyle = '#6d7168';
-      ctx.font = '9px Arial';
+      ctx.font = '9px ui-monospace, monospace';
       [0, 4, 8, 12, 16, 20, 24].forEach((hour) => {
         const labelX = x(hour * 60);
         ctx.textAlign = hour === 0 ? 'left' : hour === 24 ? 'right' : 'center';
@@ -349,9 +332,9 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="intro">
-          <p className="eyebrow">A commuter portrait · 2021 reference data</p>
+          <p className="eyebrow">A commuter portrait · 2023–2024 official counts</p>
           <h1>How Geneva<br />breathes.</h1>
-          <p className="lede">Follow the daily pulse across the canton, neighbouring France and Vaud.</p>
+          <p className="lede">Follow the daily pulse commune by commune across Geneva, neighbouring France and Vaud.</p>
         </div>
         <div className="clockBlock">
           <span>Local time</span>
@@ -363,7 +346,7 @@ export default function Home() {
       <section className="dashboard" aria-label="Geneva commuter map and current statistics">
         <div className="mapPanel">
           <MapCanvas time={time} modes={modes} />
-          <div className="mapNote">Live OSM basemap · pan or zoom · routes modelled</div>
+          <div className="mapNote">swisstopo grey national map · {formatNumber(dataSummary.originCommunes)} origin communes</div>
           <div className="modeFilters" aria-label="Show transport modes">
             <span className="filterLabel">Transport shown</span>
             {(Object.keys(modeMeta) as Mode[]).map((mode) => (
@@ -408,7 +391,7 @@ export default function Home() {
             <strong>{formatDelta(dailyPeak.value)}</strong>
             <small>at {formatTime(dailyPeak.minute)}</small>
           </div>
-          <p className="dotKey">One moving mark ≈ 900 commuter journeys.</p>
+          <p className="dotKey">Every contributing commune gets a mark; larger flows get one more per ≈ 900 commuters.</p>
         </aside>
       </section>
 
@@ -443,7 +426,7 @@ export default function Home() {
               max={MINUTES_PER_DAY}
               step="5"
               value={time}
-              onChange={(event) => setTime(Number(event.target.value))}
+              onInput={(event) => setTime(Number(event.currentTarget.value))}
             />
           </label>
           <output>{formatTime(time)}</output>
@@ -461,44 +444,48 @@ export default function Home() {
           </p>
         </div>
         <div className="sourceGrid">
-          <a href="https://www.insee.fr/fr/statistiques/8201899" target="_blank" rel="noreferrer">
-            <span>01 · Observed flows</span><strong>INSEE RP2021</strong>
-            <p>Residence-to-work mobility flows for employed people, including cross-border destinations.</p>
+          <a href="https://www.insee.fr/fr/statistiques/9004795" target="_blank" rel="noreferrer">
+            <span>01 · French communes</span><strong>INSEE RP2023</strong>
+            <p>Weighted residence-to-work records by commune, destination commune and main transport mode.</p>
           </a>
-          <a href="https://statistique.ge.ch/domaines/apercu.asp?dom=11_02" target="_blank" rel="noreferrer">
-            <span>02 · Cantonal context</span><strong>OCSTAT Genève</strong>
-            <p>Geneva mobility, commuter and resident-worker statistics.</p>
+          <a href="https://opendata.swiss/fr/dataset/erwerbstatige-nach-wohn-und-arbeitsgemeinde-2014-2018-und-2020" target="_blank" rel="noreferrer">
+            <span>02 · Swiss communes</span><strong>OFS commune matrix</strong>
+            <p>The latest published Swiss origin–destination matrix at commune grain: 2020.</p>
           </a>
-          <a href="https://www.bfs.admin.ch/bfs/en/home/statistics/mobility-transport/passenger-transport/commuting.html" target="_blank" rel="noreferrer">
-            <span>03 · Swiss commuters</span><strong>Federal Statistical Office</strong>
-            <p>Structural survey indicators on commuting for work and education.</p>
+          <a href="https://statistique.ge.ch/statistique/tel/domaines/11/11_02/T_11_06_2_04.xlsx" target="_blank" rel="noreferrer">
+            <span>03 · Current Swiss totals</span><strong>OCSTAT 2024</strong>
+            <p>Official incoming and outgoing commuter totals for Geneva, Vaud and its districts.</p>
+          </a>
+          <a href="https://docs.geo.admin.ch/visualize-data/xyz.html" target="_blank" rel="noreferrer">
+            <span>04 · Basemap</span><strong>swisstopo grey map</strong>
+            <p>Official national-map tiles, visually softened so commuter flows remain legible.</p>
           </a>
           <a href="https://www.swisstopo.admin.ch/en/landscape-model-swissboundaries3d" target="_blank" rel="noreferrer">
-            <span>04 · Boundaries</span><strong>swisstopo</strong>
-            <p>Official Swiss national, cantonal and municipal boundary data.</p>
+            <span>05 · Swiss locations</span><strong>swissBOUNDARIES3D</strong>
+            <p>Official commune boundaries used to locate Swiss origins and workplaces.</p>
           </a>
-          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">
-            <span>05 · Network context</span><strong>OpenStreetMap contributors</strong>
-            <p>Live basemap for roads, rail, settlements, boundaries and the lake edge.</p>
+          <a href="https://geo.api.gouv.fr/decoupage-administratif/communes" target="_blank" rel="noreferrer">
+            <span>06 · French locations</span><strong>API Géo</strong>
+            <p>Official commune codes, names and representative centres for Ain and Haute-Savoie.</p>
           </a>
           <a href="https://www.reddit.com/r/geneva/comments/1vxy0q9/an_animated_map_of_all_commuters_to_geneva/" target="_blank" rel="noreferrer">
-            <span>06 · Inspiration</span><strong>Habibi Code / Reddit</strong>
+            <span>07 · Inspiration</span><strong>Habibi Code / Reddit</strong>
             <p>The original Geneva commuter animation that inspired this independent interpretation.</p>
           </a>
         </div>
         <div className="methodNote">
           <strong>Read this visualization as a pattern, not a headcount.</strong>
           <p>
-            Corridor volumes and the 2021 French cross-border reference are aggregated. Animated marks
-            are representative journeys, never people or devices. The basemap is geographic; flow paths
-            and timing remain schematic and should not be used for route planning.
+            French flows use RP2023 directly. Swiss commune shares use the latest available matrix (2020)
+            and cross-canton totals are scaled to OCSTAT 2024. Animated marks are representative journeys,
+            never people or devices; paths and timing remain schematic.
           </p>
         </div>
       </section>
 
       <footer>
         <a className="wordmark" href="#top">GENÈVE / 24H ↑</a>
-        <p>Independent data portrait · built in Geneva · reference year 2021</p>
+        <p>Independent data portrait · built in Geneva · data through 2024</p>
       </footer>
     </main>
   );

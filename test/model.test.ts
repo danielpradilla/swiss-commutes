@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { corridors, dataSummary } from '../app/commutes.ts';
 import { dailyPeak, flowAt, formatTime, populationChange } from '../app/model.ts';
 
 test('weekday model returns to baseline and has a credible daytime peak', () => {
@@ -12,7 +13,24 @@ test('weekday model returns to baseline and has a credible daytime peak', () => 
 });
 
 test('flow direction switches between the morning and evening journeys', () => {
-  assert.equal(flowAt(330, 300, 900, 60)?.direction, 'inbound');
-  assert.equal(flowAt(930, 300, 900, 60)?.direction, 'outbound');
+  assert.deepEqual(flowAt(330, 300, 900, 60), { direction: 'inbound', progress: 0.5, reverse: false });
+  assert.deepEqual(flowAt(930, 300, 900, 60), { direction: 'outbound', progress: 0.5, reverse: true });
+  assert.deepEqual(flowAt(330, 300, 900, 60, 'outbound'), { direction: 'outbound', progress: 0.5, reverse: false });
+  assert.deepEqual(flowAt(930, 300, 900, 60, 'outbound'), { direction: 'inbound', progress: 0.5, reverse: true });
   assert.equal(flowAt(700, 300, 900, 60), null);
+});
+
+test('commune data matches its published totals and contains valid routes', () => {
+  assert.equal(corridors.length, dataSummary.corridors);
+  assert.equal(new Set(corridors.map(({ origin }) => origin.code)).size, dataSummary.originCommunes);
+  assert.ok(corridors.every(({ commuters, origin, target }) =>
+    commuters > 0 && [origin.lat, origin.lon, target.lat, target.lon].every(Number.isFinite)));
+  assert.equal(
+    corridors.filter(({ direction }) => direction === 'inbound').reduce((sum, { commuters }) => sum + commuters, 0),
+    dataSummary.frenchCommuters2023 + dataSummary.vaudToGeneva2024,
+  );
+  assert.equal(
+    corridors.filter(({ direction }) => direction === 'outbound').reduce((sum, { commuters }) => sum + commuters, 0),
+    dataSummary.genevaToVaud2024,
+  );
 });
