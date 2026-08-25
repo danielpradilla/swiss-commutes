@@ -5,6 +5,7 @@ import type { Map as LeafletMap } from 'leaflet';
 import { corridors, dataSummary, type Mode, type Point } from './commutes';
 import {
   borderCrossings,
+  commutersAtHomeShare,
   commutersInTransit,
   dailyPeak,
   flowAt,
@@ -26,6 +27,22 @@ const flowMeta = {
   inbound: { label: 'Into canton', colour: '#ef553f' },
   outbound: { label: 'Out of canton', colour: '#24798f' },
 };
+
+type CommuneNode = { point: Point; total: number; byMode: Record<Mode, number> };
+
+const communeNodes = Array.from(corridors.reduce((nodes, corridor) => {
+  const node = nodes.get(corridor.origin.code) ?? {
+    point: corridor.origin,
+    total: 0,
+    byMode: { car: 0, transit: 0, soft: 0 },
+  };
+  node.total += corridor.commuters;
+  node.byMode[corridor.mode] += corridor.commuters;
+  nodes.set(corridor.origin.code, node);
+  return nodes;
+}, new Map<string, CommuneNode>()).values());
+
+const markerRadius = (commuters: number) => Math.max(1.8, Math.min(9, Math.sqrt(commuters / 160)));
 
 const hash = (value: number) => {
   const x = Math.sin(value * 12.9898) * 43758.5453;
@@ -133,6 +150,28 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
           ];
         };
 
+        const homeShare = commutersAtHomeShare(timeRef.current);
+        communeNodes.forEach((node) => {
+          const [x, y] = project(node.point);
+          const visible = (Object.keys(modeMeta) as Mode[]).reduce(
+            (sum, mode) => sum + (modesRef.current[mode] ? node.byMode[mode] : 0),
+            0,
+          );
+          const radius = markerRadius(node.total);
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(21,24,19,.11)';
+          ctx.fill();
+          if (!visible) return;
+          ctx.beginPath();
+          ctx.arc(x, y, markerRadius(visible) * (0.84 + homeShare * 0.16), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(21,24,19,${0.28 + homeShare * 0.5})`;
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(250,247,240,.72)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        });
+
         dots.forEach((dot) => {
           if (!modesRef.current[dot.corridor.mode]) return;
           const origin = project(dot.corridor.origin);
@@ -163,6 +202,18 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
         });
 
         const [genevaX, genevaY] = project(GENEVA);
+        const delta = populationChange(timeRef.current);
+        const haloRadius = 28 * Math.sqrt(Math.abs(delta) / dailyPeak.value);
+        if (haloRadius > 0.5) {
+          const haloColour = flowMeta[delta >= 0 ? 'inbound' : 'outbound'].colour;
+          ctx.beginPath();
+          ctx.arc(genevaX, genevaY, haloRadius, 0, Math.PI * 2);
+          ctx.fillStyle = haloColour + '24';
+          ctx.fill();
+          ctx.strokeStyle = haloColour + 'a6';
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+        }
         ctx.beginPath();
         ctx.arc(genevaX, genevaY, 6, 0, Math.PI * 2);
         ctx.fillStyle = '#c8df3e';
@@ -191,7 +242,7 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
   }, []);
 
   return (
-    <div className="commuterMap" role="region" aria-label={`Interactive commuter map of greater Geneva at ${formatTime(time)}`}>
+    <div className="commuterMap" role="region" aria-label={`Interactive commuter map of greater Geneva at ${formatTime(time)}; Geneva population change ${formatDelta(populationChange(time))}`}>
       <div ref={mapElement} className="mapBase" />
       <canvas ref={canvasRef} className="commuterOverlay" aria-hidden="true" />
     </div>
@@ -346,7 +397,7 @@ export default function Home() {
       <section className="dashboard" aria-label="Geneva commuter map and current statistics">
         <div className="mapPanel">
           <MapCanvas time={time} modes={modes} />
-          <div className="mapNote">swisstopo grey national map · {formatNumber(dataSummary.originCommunes)} origin communes</div>
+          <div className="mapNote">swisstopo grey national map · {formatNumber(dataSummary.originCommunes)} origins · marker area = commuter volume</div>
           <div className="modeFilters" aria-label="Show transport modes">
             <span className="filterLabel">Transport shown</span>
             {(Object.keys(modeMeta) as Mode[]).map((mode) => (
@@ -391,7 +442,7 @@ export default function Home() {
             <strong>{formatDelta(dailyPeak.value)}</strong>
             <small>at {formatTime(dailyPeak.minute)}</small>
           </div>
-          <p className="dotKey">Every contributing commune gets a mark; larger flows get one more per ≈ 900 commuters.</p>
+          <p className="dotKey">Commune markers scale with commuter volume and dim while their commuters are away. Geneva’s halo shows net population change.</p>
         </aside>
       </section>
 
@@ -478,7 +529,8 @@ export default function Home() {
           <p>
             French flows use RP2023 directly. Swiss commune shares use the latest available matrix (2020)
             and cross-canton totals are scaled to OCSTAT 2024. Animated marks are representative journeys,
-            never people or devices; paths and timing remain schematic.
+            never people or devices. Commune marker area represents commuter volume—not total population;
+            paths and timing remain schematic.
           </p>
         </div>
       </section>

@@ -35,6 +35,10 @@ export function borderCrossings(minute: number) {
   );
 }
 
+export function commutersAtHomeShare(minute: number) {
+  return Math.max(0, Math.min(1, 1 - sigmoid(minute, 450, 66) + sigmoid(minute, 1035, 76)));
+}
+
 export function flowAt(
   minute: number,
   inbound: number,
