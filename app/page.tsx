@@ -74,7 +74,7 @@ const canton = [
   [6.24, 46.31], [6.1, 46.32], [5.96, 46.25],
 ];
 
-const formatNumber = (value: number) => new Intl.NumberFormat('en-CH').format(value);
+const formatNumber = (value: number) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
 const formatDelta = (value: number) => `${value >= 0 ? '+' : '−'}${formatNumber(Math.abs(value))}`;
 
 function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean> }) {
