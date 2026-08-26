@@ -6,6 +6,7 @@ import type { CityConfig } from '../cities';
 import type { Corridor, Mode, Point } from '../data/types';
 import {
   arrivalBlip,
+  commuterMixAt,
   createDailyModel,
   flowAt,
   formatTime,
@@ -133,6 +134,34 @@ function prepareMapData(corridors: Corridor[]) {
 const formatNumber = (value: number) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
 const formatDelta = (value: number) => `${value >= 0 ? '+' : '−'}${formatNumber(Math.abs(value))}`;
 type ClockMode = 'realtime' | 'fast' | 'paused';
+
+function CommuterMix({ mix }: { mix: ReturnType<typeof commuterMixAt> }) {
+  const percentage = mix.internationalShare === null ? null : Math.round(mix.internationalShare * 100);
+  return (
+    <div className="mixStat">
+      <span>International share</span>
+      <div className="mixRow">
+        <div
+          className="mixPie"
+          style={{ background: percentage === null
+            ? 'var(--line)'
+            : `conic-gradient(var(--red) 0 ${percentage}%, #d4d1c7 ${percentage}% 100%)` }}
+          role="img"
+          aria-label={percentage === null
+            ? 'No commuters are currently in transit'
+            : `${percentage}% of commuters currently in transit are international`}
+        >
+          <strong>{percentage === null ? '—' : `${percentage}%`}</strong>
+        </div>
+        <div className="mixLegend">
+          <small><i className="international" />International {formatNumber(mix.international)}</small>
+          <small><i className="domestic" />Within Switzerland {formatNumber(mix.domestic)}</small>
+        </div>
+      </div>
+      <small>estimated commuters travelling now</small>
+    </div>
+  );
+}
 
 function genevaTime() {
   const values = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
@@ -508,7 +537,7 @@ function CityTitle({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
           className="citySelect"
           aria-label="City"
           value={city.slug}
-          onChange={(event) => window.location.assign(`/swiss-border-commutes/${event.currentTarget.value}/`)}
+          onChange={(event) => window.location.assign(`/swiss-commutes/${event.currentTarget.value}/`)}
         >
           {cityOptions.map((option) => (
             <option key={option.slug} value={option.slug}>{option.displayName}</option>
@@ -525,7 +554,7 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
   return (
     <main>
       <header className="masthead">
-        <a className="wordmark" href="#top">SWISS BORDER / 24H</a>
+        <a className="wordmark" href="#top">SWISS COMMUTES / 24H</a>
         <p>One weekday, in motion</p>
         <a href="../geneva/">View live city →</a>
       </header>
@@ -543,7 +572,7 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
         <a href="../geneva/">View the completed Geneva portrait →</a>
       </section>
       <footer>
-        <a className="wordmark" href="#top">SWISS BORDER / 24H ↑</a>
+        <a className="wordmark" href="#top">SWISS COMMUTES / 24H ↑</a>
         <p>Independent data portrait · built in Geneva</p>
       </footer>
     </main>
@@ -579,12 +608,13 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
     transit: model.commutersInTransit(time),
     population: model.populationChange(time),
     crossings: model.borderCrossings(time),
-  }), [model, time]);
+    mix: commuterMixAt(city.data!.corridors, time),
+  }), [city.data, model, time]);
 
   return (
     <main>
       <header className="masthead">
-        <a className="wordmark" href="#top">SWISS BORDER / 24H</a>
+        <a className="wordmark" href="#top">SWISS COMMUTES / 24H</a>
         <p>One weekday, in motion</p>
         <a href="#sources">Sources & method ↓</a>
       </header>
@@ -598,7 +628,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
         <div className="clockBlock">
           <span>Local time</span>
           <strong>{formatTime(time)}</strong>
-          <small>{clockMode === 'realtime' ? 'GENEVA TIME' : clockMode === 'fast' ? 'FAST-FORWARD' : 'PAUSED'}</small>
+          <small>{clockMode === 'realtime' ? 'REAL TIME' : clockMode === 'fast' ? 'FAST-FORWARD' : 'PAUSED'}</small>
         </div>
       </section>
 
@@ -652,10 +682,11 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
             <small>vs. midnight baseline</small>
           </div>
           <div>
-            <span>Border journeys</span>
+            <span>International journeys</span>
             <strong>{formatNumber(stats.crossings)}</strong>
             <small>cumulative today</small>
           </div>
+          <CommuterMix mix={stats.mix} />
           <div className="peakStat">
             <span>Maximum</span>
             <strong>{formatDelta(model.dailyPeak.value)}</strong>
@@ -746,13 +777,15 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
           <strong>What the dots mean</strong>
           <p>
             {city.methodNote} Each moving dot stands for a bundle of trips, not one person.
-            Circle size follows commuter count. Routes are simplified and timing is approximate.
+            Circle size follows commuter count. The donut compares international and Swiss commuters
+            estimated to be travelling at the selected time; it disappears when too few people are moving
+            for a useful percentage. Routes are simplified and timing is approximate.
           </p>
         </div>
       </section>
 
       <footer>
-        <a className="wordmark" href="#top">SWISS BORDER / 24H ↑</a>
+        <a className="wordmark" href="#top">SWISS COMMUTES / 24H ↑</a>
         <p>Independent data portrait · built in Geneva · {city.dataYears}</p>
       </footer>
     </main>

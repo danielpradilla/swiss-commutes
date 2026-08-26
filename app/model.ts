@@ -107,6 +107,35 @@ export function flowAt(
   return null;
 }
 
+export function commuterMixAt(corridors: import('./data/types.ts').Corridor[], minute: number) {
+  let domestic = 0;
+  let international = 0;
+  for (const corridor of corridors) {
+    const remote = corridor.direction === 'inbound' ? corridor.origin : corridor.target;
+    const city = corridor.direction === 'inbound' ? corridor.target : corridor.origin;
+    const meanLatitude = (remote.lat + city.lat) / 2 * Math.PI / 180;
+    const distance = Math.hypot(
+      (remote.lat - city.lat) * 111,
+      (remote.lon - city.lon) * 111 * Math.cos(meanLatitude),
+    );
+    const isInternational = !remote.code.startsWith('CH');
+    const reach = Math.min(42, distance * 0.16) + (isInternational ? 10 : 0);
+    const spread = 48 + Math.min(44, distance * 0.28) + (isInternational ? 8 : 0);
+    const intensity = gaussian(minute, 465 - reach, spread) + gaussian(minute, 1035 + reach, spread + 10);
+    if (isInternational) international += corridor.commuters * intensity;
+    else domestic += corridor.commuters * intensity;
+  }
+  const roundedDomestic = Math.round(domestic);
+  const roundedInternational = Math.round(international);
+  const total = roundedDomestic + roundedInternational;
+  return {
+    domestic: roundedDomestic,
+    international: roundedInternational,
+    total,
+    internationalShare: total >= 50 ? roundedInternational / total : null,
+  };
+}
+
 export function formatTime(minute: number) {
   const value = Math.max(0, Math.min(MINUTES_PER_DAY, Math.floor(minute)));
   if (value === MINUTES_PER_DAY) return '24:00';

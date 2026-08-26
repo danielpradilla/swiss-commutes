@@ -4,5 +4,5 @@ import { cities, cityBySlug } from './cities';
 const cityOptions = cities.map(({ slug, displayName }) => ({ slug, displayName }));
 
 export default function Home() {
-  return <CommuteDashboard city={cityBySlug.geneva} cityOptions={cityOptions} />;
+  return <CommuteDashboard city={cityBySlug.zurich} cityOptions={cityOptions} />;
 }

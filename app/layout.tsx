@@ -15,20 +15,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://danielpradilla.info'),
-  title: 'Swiss Border Commutes | One weekday, in motion',
-  description: 'Interactive portraits of commuter movement across Switzerland’s border labour markets.',
-  alternates: { canonical: '/swiss-border-commutes/' },
+  title: 'Swiss Commutes | One weekday, in motion',
+  description: 'Interactive portraits of commuter movement across Switzerland’s largest cities.',
+  alternates: { canonical: '/swiss-commutes/' },
   openGraph: {
-    title: 'Swiss Border Commutes',
-    description: '24-hour maps of commuting in Switzerland’s border cities.',
+    title: 'Swiss Commutes',
+    description: '24-hour maps of commuting in Switzerland’s largest cities.',
     type: 'website',
-    images: [{ url: '/swiss-border-commutes/og.png', width: 1732, height: 910, alt: 'Swiss Border Commutes' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Swiss Border Commutes',
-    description: '24-hour maps of commuting in Switzerland’s border cities.',
-    images: ['/swiss-border-commutes/og.png'],
+    title: 'Swiss Commutes',
+    description: '24-hour maps of commuting in Switzerland’s largest cities.',
   },
 };
 

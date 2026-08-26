@@ -12,12 +12,12 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const city = cityBySlug[(await params).city];
   if (!city) return {};
-  const title = `${city.displayName} / 24h | Swiss Border Commutes`;
-  const description = `A 24-hour map of commuting in ${city.displayName} and the surrounding border region.`;
+  const title = `${city.displayName} / 24h | Swiss Commutes`;
+  const description = `A 24-hour map of commuting in ${city.displayName} and the surrounding region.`;
   return {
     title,
     description,
-    alternates: { canonical: `/swiss-border-commutes/${city.slug}/` },
+    alternates: { canonical: `/swiss-commutes/${city.slug}/` },
     openGraph: { title, description, type: 'website' },
     twitter: { card: 'summary_large_image', title, description },
   };

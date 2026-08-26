@@ -3,6 +3,13 @@ import { corridors as baselCorridors, dataSummary as baselSummary } from './data
 import { corridors as luganoCorridors, dataSummary as luganoSummary } from './data/lugano.ts';
 import { corridors as schaffhausenCorridors, dataSummary as schaffhausenSummary } from './data/schaffhausen.ts';
 import { corridors as chauxCorridors, dataSummary as chauxSummary } from './data/la-chaux-de-fonds.ts';
+import { corridors as zurichCorridors, dataSummary as zurichSummary } from './data/zurich.ts';
+import { corridors as lausanneCorridors, dataSummary as lausanneSummary } from './data/lausanne.ts';
+import { corridors as bernCorridors, dataSummary as bernSummary } from './data/bern.ts';
+import { corridors as winterthurCorridors, dataSummary as winterthurSummary } from './data/winterthur.ts';
+import { corridors as lucerneCorridors, dataSummary as lucerneSummary } from './data/lucerne.ts';
+import { corridors as stGallenCorridors, dataSummary as stGallenSummary } from './data/st-gallen.ts';
+import { corridors as bielCorridors, dataSummary as bielSummary } from './data/biel-bienne.ts';
 import type { CommuteData, Point } from './data/types.ts';
 import type { DailyModelConfig } from './model.ts';
 
@@ -26,10 +33,10 @@ export type CityConfig = {
 
 const sharedSources: CitySource[] = [
   {
-    label: 'Basemap',
-    name: 'swisstopo grey map',
-    description: 'The grey national map behind the commuter dots.',
-    href: 'https://docs.geo.admin.ch/visualize-data/xyz.html',
+    label: 'Default basemap',
+    name: 'Stadia Outdoors',
+    description: 'The map shown behind the commuter dots when the page opens.',
+    href: 'https://docs.stadiamaps.com/map-styles/outdoors/',
   },
   {
     label: 'Swiss locations',
@@ -38,18 +45,18 @@ const sharedSources: CitySource[] = [
     href: 'https://www.swisstopo.admin.ch/en/landscape-model-swissboundaries3d',
   },
   {
-    label: 'Optional basemaps',
-    name: 'Stadia Maps styles',
-    description: 'Toner and Outdoors tiles in the map-style menu.',
-    href: 'https://docs.stadiamaps.com/map-styles/',
+    label: 'Other basemaps',
+    name: 'Map style menu',
+    description: 'Stadia Toner, swisstopo grey and Carto Positron are available in the selector.',
+    href: 'https://docs.geo.admin.ch/visualize-data/xyz.html',
   },
 ];
 
 const currentCitySources: CitySource[] = [
   {
-    label: 'Border count',
+    label: 'International count',
     name: 'FSO, Q4 2025',
-    description: 'Foreign border workers counted by their Swiss commune of work.',
+    description: 'Cross-border workers counted by their Swiss commune of work.',
     href: 'https://www.pxweb-admin-a.bfs.admin.ch/pxweb/en/px-x-0302010000_101/-/px-x-0302010000_101.px/',
   },
   {
@@ -66,6 +73,13 @@ const currentCitySources: CitySource[] = [
   },
 ];
 
+const cityListSource: CitySource = {
+  label: 'City list',
+  name: 'FSO City Statistics 2026',
+  description: 'The ten largest Swiss cities used for the main set.',
+  href: 'https://www.bfs.admin.ch/asset/en/DF_SSV_MOB_COM',
+};
+
 const apiGeoSource: CitySource = {
   label: 'French communes',
   name: 'API Géo',
@@ -76,9 +90,38 @@ const apiGeoSource: CitySource = {
 const osmSource: CitySource = {
   label: 'Foreign communes',
   name: 'OpenStreetMap',
-  description: 'Names and centre points for German and Italian communes near the border.',
+  description: 'Names and centre points for communes outside Switzerland.',
   href: 'https://www.openstreetmap.org/copyright',
 };
+
+function standardModel(data: CommuteData, minuteShift = 0): DailyModelConfig {
+  const summary = data.summary;
+  const international = Number(summary.borderWorkers2025);
+  const swissInbound = Number(summary.swissInbound2020);
+  const swissOutbound = Number(summary.swissOutbound2020);
+  const mappedJourneys = Number(summary.mappedSwissInbound2020) +
+    Number(summary.mappedSwissOutbound2020) + international;
+  const morningPeak = Math.round(mappedJourneys * 0.45);
+  return {
+    populationGroups: [
+      { people: international, arrival: 440 + minuteShift, departure: 1030 + minuteShift, arrivalSpread: 42, departureSpread: 52 },
+      { people: swissInbound, arrival: 455 + minuteShift, departure: 1035 + minuteShift, arrivalSpread: 48, departureSpread: 56 },
+      { people: -swissOutbound, arrival: 445 + minuteShift, departure: 1020 + minuteShift, arrivalSpread: 44, departureSpread: 54 },
+    ],
+    transitPeaks: [
+      { people: morningPeak, centre: 465 + minuteShift, spread: 76 },
+      { people: Math.round(morningPeak * 0.9), centre: 1035 + minuteShift, spread: 88 },
+    ],
+    borderGroups: international ? [
+      { people: international, morning: 450 + minuteShift, evening: 1035 + minuteShift, morningSpread: 66, eveningSpread: 76 },
+    ] : [],
+    home: { departure: 450 + minuteShift, return: 1035 + minuteShift, departureSpread: 66, returnSpread: 76 },
+  };
+}
+
+function standardMethod(city: string, countries: string) {
+  return `Swiss commune pairs are observed in 2020. The international total is from Q4 2025, but the FSO workplace table does not say where those commuters live abroad. Their dots are distributed among nearby ${countries} communes using town size and distance. Modes follow ${city}’s 2023 split.`;
+}
 
 const geneva: CityConfig = {
   slug: 'geneva',
@@ -143,7 +186,7 @@ const geneva: CityConfig = {
   methodNote: 'French flows come straight from RP2023. Swiss commune shares come from the 2020 matrix, then the Geneva–Vaud totals are updated to 2024.',
 };
 
-export const cities: CityConfig[] = [
+const existingCities: CityConfig[] = [
   geneva,
   {
     slug: 'basel',
@@ -242,5 +285,145 @@ export const cities: CityConfig[] = [
     methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby French communes using population and distance. Modes follow La Chaux-de-Fonds’ 2023 split.',
   },
 ];
+
+const zurichData: CommuteData = { corridors: zurichCorridors, summary: zurichSummary };
+const lausanneData: CommuteData = { corridors: lausanneCorridors, summary: lausanneSummary };
+const bernData: CommuteData = { corridors: bernCorridors, summary: bernSummary };
+const winterthurData: CommuteData = { corridors: winterthurCorridors, summary: winterthurSummary };
+const lucerneData: CommuteData = { corridors: lucerneCorridors, summary: lucerneSummary };
+const stGallenData: CommuteData = { corridors: stGallenCorridors, summary: stGallenSummary };
+const bielData: CommuteData = { corridors: bielCorridors, summary: bielSummary };
+
+const topCityAdditions: CityConfig[] = [
+  {
+    slug: 'zurich',
+    name: 'Zürich',
+    displayName: 'Zürich',
+    neighbours: 'Aargau, Zug, Schaffhausen and eastern Switzerland',
+    centre: { code: 'CH261', name: 'Zürich', lat: 47.3769, lon: 8.5417 },
+    fitBounds: [[46.82, 7.7], [47.95, 9.35]],
+    maxBounds: [[46.45, 7.25], [48.25, 9.85]],
+    cityRadiusLongitude: 0.11,
+    dataYears: '2020–2025',
+    data: zurichData,
+    model: standardModel(zurichData),
+    sources: [...currentCitySources, osmSource, cityListSource, ...sharedSources],
+    methodNote: standardMethod('Zürich', 'German'),
+  },
+  {
+    slug: 'lausanne',
+    name: 'Lausanne',
+    displayName: 'Lausanne',
+    neighbours: 'Vaud, Fribourg and France',
+    centre: { code: 'CH5586', name: 'Lausanne', lat: 46.5197, lon: 6.6323 },
+    fitBounds: [[46.05, 5.65], [47.05, 7.25]],
+    maxBounds: [[45.7, 5.2], [47.4, 7.7]],
+    cityRadiusLongitude: 0.09,
+    dataYears: '2020–2025',
+    data: lausanneData,
+    model: standardModel(lausanneData),
+    sources: [...currentCitySources, apiGeoSource, cityListSource, ...sharedSources],
+    methodNote: standardMethod('Lausanne', 'French'),
+  },
+  {
+    slug: 'bern',
+    name: 'Bern',
+    displayName: 'Bern',
+    neighbours: 'the Bern region and neighbouring cantons',
+    centre: { code: 'CH351', name: 'Bern', lat: 46.948, lon: 7.4474 },
+    fitBounds: [[46.45, 6.35], [47.5, 8.25]],
+    maxBounds: [[46.05, 5.9], [47.85, 8.7]],
+    cityRadiusLongitude: 0.1,
+    dataYears: '2020–2025',
+    data: bernData,
+    model: standardModel(bernData),
+    sources: [...currentCitySources, apiGeoSource, cityListSource, ...sharedSources],
+    methodNote: standardMethod('Bern', 'French'),
+  },
+  {
+    slug: 'winterthur',
+    name: 'Winterthur',
+    displayName: 'Winterthur',
+    neighbours: 'Zürich, Thurgau, Schaffhausen and Germany',
+    centre: { code: 'CH230', name: 'Winterthur', lat: 47.4988, lon: 8.7241 },
+    fitBounds: [[47.1, 7.95], [48.05, 9.45]],
+    maxBounds: [[46.8, 7.55], [48.35, 9.85]],
+    cityRadiusLongitude: 0.09,
+    dataYears: '2020–2025',
+    data: winterthurData,
+    model: standardModel(winterthurData),
+    sources: [...currentCitySources, osmSource, cityListSource, ...sharedSources],
+    methodNote: standardMethod('Winterthur', 'German'),
+  },
+  {
+    slug: 'lucerne',
+    name: 'Lucerne',
+    displayName: 'Lucerne',
+    neighbours: 'Central Switzerland and neighbouring cantons',
+    centre: { code: 'CH1061', name: 'Luzern', lat: 47.0502, lon: 8.3093 },
+    fitBounds: [[46.4, 7.45], [47.65, 9.2]],
+    maxBounds: [[46, 7], [48, 9.65]],
+    cityRadiusLongitude: 0.09,
+    dataYears: '2020–2025',
+    data: lucerneData,
+    model: standardModel(lucerneData),
+    sources: [...currentCitySources, osmSource, cityListSource, ...sharedSources],
+    methodNote: standardMethod('Lucerne', 'German, Austrian and Liechtenstein'),
+  },
+  {
+    slug: 'st-gallen',
+    name: 'St. Gallen',
+    displayName: 'St. Gallen',
+    neighbours: 'eastern Switzerland, Austria, Germany and Liechtenstein',
+    centre: { code: 'CH3203', name: 'St. Gallen', lat: 47.4245, lon: 9.3767 },
+    fitBounds: [[46.75, 8.4], [48.05, 10.25]],
+    maxBounds: [[46.4, 8], [48.4, 10.65]],
+    cityRadiusLongitude: 0.09,
+    dataYears: '2020–2025',
+    data: stGallenData,
+    model: standardModel(stGallenData),
+    sources: [...currentCitySources, osmSource, cityListSource, ...sharedSources],
+    methodNote: standardMethod('St. Gallen', 'Austrian, German and Liechtenstein'),
+  },
+  {
+    slug: 'biel-bienne',
+    name: 'Biel/Bienne',
+    displayName: 'Biel/Bienne',
+    neighbours: 'Bern, Jura, Neuchâtel and France',
+    centre: { code: 'CH371', name: 'Biel/Bienne', lat: 47.1368, lon: 7.2468 },
+    fitBounds: [[46.55, 5.9], [47.6, 8.2]],
+    maxBounds: [[46.2, 5.45], [47.95, 8.65]],
+    cityRadiusLongitude: 0.09,
+    dataYears: '2020–2025',
+    data: bielData,
+    model: standardModel(bielData, -5),
+    sources: [...currentCitySources, apiGeoSource, cityListSource, ...sharedSources],
+    methodNote: standardMethod('Biel/Bienne', 'French'),
+  },
+];
+
+const cityOrder = [
+  'zurich',
+  'geneva',
+  'basel',
+  'lausanne',
+  'bern',
+  'winterthur',
+  'lucerne',
+  'st-gallen',
+  'lugano',
+  'biel-bienne',
+  'schaffhausen',
+  'la-chaux-de-fonds',
+];
+
+const unorderedCities = [...existingCities, ...topCityAdditions].map((city) => ({
+  ...city,
+  sources: city.sources
+    ? [...city.sources.filter((source) => source.href !== cityListSource.href), cityListSource]
+    : [cityListSource],
+}));
+const unorderedCityBySlug = Object.fromEntries(unorderedCities.map((city) => [city.slug, city])) as Record<string, CityConfig>;
+export const cities = cityOrder.map((slug) => unorderedCityBySlug[slug]);
 
 export const cityBySlug = Object.fromEntries(cities.map((city) => [city.slug, city]));

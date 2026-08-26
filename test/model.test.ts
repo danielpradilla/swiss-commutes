@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { cities, cityBySlug } from '../app/cities.ts';
 import { corridors, dataSummary } from '../app/data/geneva.ts';
-import { arrivalBlip, createDailyModel, flowAt, formatTime } from '../app/model.ts';
+import { arrivalBlip, commuterMixAt, createDailyModel, flowAt, formatTime } from '../app/model.ts';
 
 const model = createDailyModel(cityBySlug.geneva.model!);
 
@@ -48,11 +48,18 @@ test('commune data matches its published totals and contains valid routes', () =
   );
 });
 
-test('border city routes are unique and all publish checked data', () => {
+test('city routes are unique and all publish checked data', () => {
   assert.deepEqual(cities.map(({ slug }) => slug), [
+    'zurich',
     'geneva',
     'basel',
+    'lausanne',
+    'bern',
+    'winterthur',
+    'lucerne',
+    'st-gallen',
     'lugano',
+    'biel-bienne',
     'schaffhausen',
     'la-chaux-de-fonds',
   ]);
@@ -63,5 +70,22 @@ test('border city routes are unique and all publish checked data', () => {
     assert.equal(city.data!.corridors.length, city.data!.summary.corridors);
     assert.ok(city.data!.corridors.every(({ commuters, origin, target }) =>
       commuters > 0 && [origin.lat, origin.lon, target.lat, target.lon].every(Number.isFinite)));
+    if (city.data!.summary.borderWorkers2025 !== undefined) {
+      const international = city.data!.corridors
+        .filter((corridor) => !(corridor.direction === 'inbound' ? corridor.origin : corridor.target).code.startsWith('CH'))
+        .reduce((sum, corridor) => sum + corridor.commuters, 0);
+      assert.equal(international, city.data!.summary.borderWorkers2025);
+    }
   }
+});
+
+test('international commuter share responds to the time of day', () => {
+  const zurich = cityBySlug.zurich.data!.corridors;
+  const early = commuterMixAt(zurich, 360);
+  const rush = commuterMixAt(zurich, 480);
+  assert.ok(early.internationalShare !== null && rush.internationalShare !== null);
+  assert.ok(early.internationalShare > 0 && early.internationalShare < 1);
+  assert.notEqual(Math.round(early.internationalShare * 1000), Math.round(rush.internationalShare * 1000));
+  assert.equal(rush.domestic + rush.international, rush.total);
+  assert.equal(commuterMixAt(zurich, 720).internationalShare, null);
 });
