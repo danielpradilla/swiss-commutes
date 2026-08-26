@@ -69,8 +69,8 @@ function ModeIcon({ mode }: { mode: Mode }) {
 }
 
 const flowMeta = {
-  inbound: { colour: '#ef553f' },
-  outbound: { colour: '#24798f' },
+  inbound: { colour: '#c2413f' },
+  outbound: { colour: '#2f5f7f' },
 };
 
 type CommuneNode = { point: Point; total: number; byMode: Record<Mode, number> };
@@ -172,7 +172,7 @@ function MapCanvas({
   const timeRef = useRef(time);
   const modesRef = useRef(modes);
   const basemapRef = useRef(basemap);
-  const [hoveredCommune, setHoveredCommune] = useState<{ name: string; x: number; y: number } | null>(null);
+  const [hoveredMapItem, setHoveredMapItem] = useState<{ name: string; x: number; y: number } | null>(null);
 
   useEffect(() => {
     timeRef.current = time;
@@ -266,12 +266,10 @@ function MapCanvas({
           ctx.arc(x, y, markerRadius(visible) * (0.84 + homeShare * 0.16), 0, Math.PI * 2);
           ctx.fillStyle = `rgba(88,92,88,${0.24 + homeShare * 0.38})`;
           ctx.fill();
-          ctx.strokeStyle = 'rgba(250,247,240,.72)';
+          ctx.strokeStyle = 'rgba(255,253,249,.72)';
           ctx.lineWidth = 0.8;
           ctx.stroke();
         });
-        hoverPointsRef.current = hoverPoints;
-
         let incomingArrivals = 0;
         mapData.dots.forEach((dot) => {
           if (!modesRef.current[dot.corridor.mode]) return;
@@ -312,7 +310,16 @@ function MapCanvas({
           ctx.arc(point[0], point[1], dot.corridor.mode === 'soft' ? 2.2 : 2.7, 0, Math.PI * 2);
           ctx.fillStyle = colour;
           ctx.fill();
+          const journeyStart = flow.reverse ? dot.corridor.target : dot.corridor.origin;
+          const journeyEnd = flow.reverse ? dot.corridor.origin : dot.corridor.target;
+          hoverPoints.push({
+            name: `${journeyStart.name} → ${journeyEnd.name}`,
+            x: point[0],
+            y: point[1],
+            radius: 9,
+          });
         });
+        hoverPointsRef.current = hoverPoints;
 
         const [cityX, cityY] = project(city.centre);
         const delta = model.populationChange(timeRef.current);
@@ -332,9 +339,9 @@ function MapCanvas({
           const cityEdge = map.latLngToContainerPoint([city.centre.lat, city.centre.lon + city.cityRadiusLongitude]);
           const cityRadius = Math.max(24, Math.abs(cityEdge.x - cityX));
           const glow = ctx.createRadialGradient(cityX, cityY, 0, cityX, cityY, cityRadius);
-          glow.addColorStop(0, `rgba(239,85,63,${0.12 + reception * 0.12})`);
-          glow.addColorStop(0.65, `rgba(239,85,63,${0.06 + reception * 0.08})`);
-          glow.addColorStop(1, 'rgba(239,85,63,0)');
+          glow.addColorStop(0, `rgba(194,65,63,${0.12 + reception * 0.12})`);
+          glow.addColorStop(0.65, `rgba(194,65,63,${0.06 + reception * 0.08})`);
+          glow.addColorStop(1, 'rgba(194,65,63,0)');
           ctx.beginPath();
           ctx.arc(cityX, cityY, cityRadius, 0, Math.PI * 2);
           ctx.fillStyle = glow;
@@ -374,7 +381,7 @@ function MapCanvas({
         nearest = distance;
       }
     });
-    setHoveredCommune(match ? { name: match.name, x, y } : null);
+    setHoveredMapItem(match ? { name: match.name, x, y } : null);
   };
 
   return (
@@ -383,20 +390,30 @@ function MapCanvas({
       role="region"
       aria-label={`Interactive commuter map of greater ${city.name} at ${formatTime(time)}; ${city.name} population change ${formatDelta(model.populationChange(time))}`}
       onPointerMove={handlePointerMove}
-      onPointerLeave={() => setHoveredCommune(null)}
+      onPointerLeave={() => setHoveredMapItem(null)}
     >
       <div ref={mapElement} className="mapBase" />
       <canvas ref={canvasRef} className="commuterOverlay" aria-hidden="true" />
-      {hoveredCommune && (
-        <div className="communeTooltip" style={{ left: hoveredCommune.x, top: hoveredCommune.y }}>
-          {hoveredCommune.name}
+      {hoveredMapItem && (
+        <div className="mapTooltip" style={{ left: hoveredMapItem.x, top: hoveredMapItem.y }}>
+          {hoveredMapItem.name}
         </div>
       )}
     </div>
   );
 }
 
-function PopulationChart({ time, city, model }: { time: number; city: CityConfig; model: DailyModel }) {
+function PopulationChart({
+  time,
+  city,
+  model,
+  onTimeChange,
+}: {
+  time: number;
+  city: CityConfig;
+  model: DailyModel;
+  onTimeChange: (minute: number) => void;
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -413,66 +430,90 @@ function PopulationChart({ time, city, model }: { time: number; city: CityConfig
       const width = box.width;
       const height = box.height;
       const pad = { top: 22, right: 8, bottom: 22, left: 8 };
-      const min = Math.min(...model.populationSeries.map((point) => point.value), -7_000);
-      const max = model.dailyPeak.value * 1.12;
+      const deviations = model.populationSeries.map((point) => ({
+        minute: point.minute,
+        value: point.value - model.dailyAverage,
+      }));
+      const rawMin = Math.min(...deviations.map((point) => point.value));
+      const rawMax = Math.max(...deviations.map((point) => point.value));
+      const range = Math.max(1, rawMax - rawMin);
+      const min = rawMin - range * 0.1;
+      const max = rawMax + range * 0.12;
       const x = (minute: number) => pad.left + minute / MINUTES_PER_DAY * (width - pad.left - pad.right);
       const y = (value: number) => pad.top + (max - value) / (max - min) * (height - pad.top - pad.bottom);
-      const zeroY = y(0);
+      const averageY = y(0);
 
       ctx.clearRect(0, 0, width, height);
-      ctx.strokeStyle = 'rgba(21,24,19,.22)';
+      ctx.strokeStyle = 'rgba(0,0,0,.22)';
       ctx.lineWidth = 1;
+      ctx.setLineDash([2, 4]);
       ctx.beginPath();
-      ctx.moveTo(pad.left, zeroY);
-      ctx.lineTo(width - pad.right, zeroY);
+      ctx.moveTo(pad.left, averageY);
+      ctx.lineTo(width - pad.right, averageY);
       ctx.stroke();
+      ctx.setLineDash([]);
 
-      const peakY = y(model.dailyPeak.value);
+      const peakY = y(model.dailyPeak.value - model.dailyAverage);
       ctx.setLineDash([4, 5]);
-      ctx.strokeStyle = '#ef553f';
+      ctx.strokeStyle = '#c2413f';
       ctx.beginPath();
       ctx.moveTo(pad.left, peakY);
       ctx.lineTo(width - pad.right, peakY);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      model.populationSeries.forEach((point, index) => {
-        if (!index) return;
-        const previous = model.populationSeries[index - 1];
+      const areaPath = () => {
         ctx.beginPath();
-        ctx.moveTo(x(previous.minute), zeroY);
-        ctx.lineTo(x(previous.minute), y(previous.value));
-        ctx.lineTo(x(point.minute), y(point.value));
-        ctx.lineTo(x(point.minute), zeroY);
+        ctx.moveTo(x(deviations[0].minute), averageY);
+        deviations.forEach((point) => ctx.lineTo(x(point.minute), y(point.value)));
+        ctx.lineTo(x(deviations.at(-1)!.minute), averageY);
         ctx.closePath();
-        ctx.fillStyle = point.value >= 0 ? 'rgba(239,85,63,.18)' : 'rgba(36,121,143,.24)';
-        ctx.fill();
-      });
+      };
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(pad.left, pad.top, width - pad.left - pad.right, averageY - pad.top);
+      ctx.clip();
+      areaPath();
+      ctx.fillStyle = 'rgba(194,65,63,.18)';
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(pad.left, averageY, width - pad.left - pad.right, height - pad.bottom - averageY);
+      ctx.clip();
+      areaPath();
+      ctx.fillStyle = 'rgba(47,95,127,.24)';
+      ctx.fill();
+      ctx.restore();
 
       ctx.beginPath();
-      model.populationSeries.forEach((point, index) => {
+      deviations.forEach((point, index) => {
         if (index) ctx.lineTo(x(point.minute), y(point.value));
         else ctx.moveTo(x(point.minute), y(point.value));
       });
-      ctx.strokeStyle = '#151813';
+      ctx.strokeStyle = '#000000';
       ctx.lineWidth = 1.7;
       ctx.stroke();
 
       const currentX = x(time);
-      const currentY = y(model.populationChange(time));
-      ctx.strokeStyle = '#151813';
+      const currentDeviation = model.populationChange(time) - model.dailyAverage;
+      const currentY = y(currentDeviation);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(currentX, pad.top);
       ctx.lineTo(currentX, height - pad.bottom);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(currentX, currentY, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#c8df3e';
+      ctx.arc(currentX, currentY, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#d1dfe4';
       ctx.fill();
-      ctx.strokeStyle = '#151813';
+      ctx.strokeStyle = '#000000';
       ctx.stroke();
 
-      ctx.fillStyle = '#6d7168';
+      ctx.fillStyle = '#6d6d6d';
       ctx.font = '9px ui-monospace, monospace';
       [0, 4, 8, 12, 16, 20, 24].forEach((hour) => {
         const labelX = x(hour * 60);
@@ -487,13 +528,26 @@ function PopulationChart({ time, city, model }: { time: number; city: CityConfig
     return () => observer.disconnect();
   }, [model, time]);
 
+  const currentDeviation = model.populationChange(time) - model.dailyAverage;
   return (
-    <canvas
-      ref={ref}
-      className="populationChart"
-      role="img"
-      aria-label={`Modelled ${city.name} population change across a weekday. Current value ${formatDelta(model.populationChange(time))}; maximum ${formatDelta(model.dailyPeak.value)}.`}
-    />
+    <div className="populationChartWrap">
+      <canvas
+        ref={ref}
+        className="populationChart"
+        role="img"
+        aria-label={`Modelled ${city.name} commuter population relative to its daily average. Current value ${formatDelta(currentDeviation)}; maximum ${formatDelta(model.dailyPeak.value - model.dailyAverage)}.`}
+      />
+      <input
+        className="populationChartScrubber"
+        aria-label="Time of day"
+        type="range"
+        min="0"
+        max={MINUTES_PER_DAY}
+        step="1"
+        value={time}
+        onInput={(event) => onTimeChange(Number(event.currentTarget.value))}
+      />
+    </div>
   );
 }
 
@@ -578,6 +632,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
   const stats = useMemo(() => ({
     transit: model.commutersInTransit(time),
     population: model.populationChange(time),
+    populationVsAverage: model.populationChange(time) - model.dailyAverage,
   }), [model, time]);
 
   return (
@@ -633,42 +688,51 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
             <small>estimated people</small>
           </div>
           <div>
-            <span>Population change</span>
-            <strong className={stats.population >= 0 ? 'positive' : 'negative'}>
-              {formatDelta(stats.population)}
+            <span>Population vs average</span>
+            <strong className={stats.populationVsAverage >= 0 ? 'positive' : 'negative'}>
+              {formatDelta(stats.populationVsAverage)}
             </strong>
-            <small>vs. midnight baseline</small>
+            <small>estimated people</small>
           </div>
           <div className="peakStat">
             <span>Maximum</span>
-            <strong>{formatDelta(model.dailyPeak.value)}</strong>
-            <small>at {formatTime(model.dailyPeak.minute)}</small>
+            <strong>{formatDelta(model.dailyPeak.value - model.dailyAverage)}</strong>
+            <small>above average at {formatTime(model.dailyPeak.minute)}</small>
           </div>
           <p className="dotKey">Circles shrink while commuters are away and flash when a journey arrives. Trips into {city.name} light the city as a whole because the data stops at the commune boundary.</p>
         </aside>
       </section>
 
-      <section className="timeline" aria-label="Population change through the day">
+      <section className="timeline" aria-label="Commuter population relative to the daily average">
         <div className="chartHeader">
           <div>
-            <p className="eyebrow">{city.name} population change</p>
-            <strong>{formatDelta(stats.population)}</strong>
+            <p className="eyebrow">{city.name} vs daily average</p>
+            <strong>{formatDelta(stats.populationVsAverage)}</strong>
           </div>
           <div className="chartLegend">
-            <span><i className="up" /> Above baseline</span>
-            <span><i className="down" /> Below baseline</span>
+            <span><i className="up" /> Above average</span>
+            <span><i className="down" /> Below average</span>
+            <span><i className="average" /> Daily average</span>
             <span><i className="maximum" /> Maximum</span>
           </div>
         </div>
-        <PopulationChart time={time} city={city} model={model} />
+        <PopulationChart
+          time={time}
+          city={city}
+          model={model}
+          onTimeChange={(minute) => {
+            setClockMode('paused');
+            setTime(minute);
+          }}
+        />
         <div className="controls">
           <div className="clockControls" aria-label="Clock speed">
             <button
               className="playButton"
               type="button"
-              aria-label="Follow real Geneva time"
+              aria-label="Follow Swiss local time estimate"
               aria-pressed={clockMode === 'realtime'}
-              data-tooltip="Real time"
+              data-tooltip="Real-time estimate"
               onClick={() => setClockMode((current) => current === 'realtime' ? 'paused' : 'realtime')}
             >▶</button>
             <button
@@ -688,21 +752,6 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
               onClick={() => setClockMode('paused')}
             >Ⅱ</button>
           </div>
-          <label>
-            <span className="srOnly">Time of day</span>
-            <input
-              aria-label="Time of day"
-              type="range"
-              min="0"
-              max={MINUTES_PER_DAY}
-              step="1"
-              value={time}
-              onInput={(event) => {
-                setClockMode('paused');
-                setTime(Number(event.currentTarget.value));
-              }}
-            />
-          </label>
           <output>{formatTime(time)}</output>
         </div>
       </section>

@@ -11,6 +11,13 @@ test('weekday model returns to baseline and has a credible daytime peak', () => 
   assert.ok(model.populationChange(480) > 65_000);
   assert.ok(model.dailyPeak.value > 90_000);
   assert.ok(model.dailyPeak.minute >= 540 && model.dailyPeak.minute <= 900);
+  assert.equal(
+    model.dailyAverage,
+    Math.round(model.populationSeries.slice(0, -1).reduce((sum, point) => sum + point.value, 0) /
+      (model.populationSeries.length - 1)),
+  );
+  assert.ok(model.populationChange(0) - model.dailyAverage < 0);
+  assert.ok(model.dailyPeak.value - model.dailyAverage > 0);
   assert.equal(formatTime(465), '07:45');
   assert.equal(formatTime(465.9), '07:45');
   assert.equal(formatTime(1440), '24:00');

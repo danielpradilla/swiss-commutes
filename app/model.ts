@@ -54,6 +54,11 @@ export function createDailyModel(config: DailyModelConfig) {
     value: populationChange(index * 10),
   }));
 
+  const dailyAverage = Math.round(populationSeries.slice(0, -1).reduce(
+    (total, point) => total + point.value,
+    0,
+  ) / (populationSeries.length - 1));
+
   const dailyPeak = populationSeries.reduce((peak, point) =>
     point.value > peak.value ? point : peak,
   );
@@ -61,6 +66,7 @@ export function createDailyModel(config: DailyModelConfig) {
   return {
     commutersAtHomeShare,
     commutersInTransit,
+    dailyAverage,
     dailyPeak,
     populationChange,
     populationSeries,
