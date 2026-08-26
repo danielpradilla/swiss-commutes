@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://danielpradilla.info'),
   title: 'Swiss Commutes | One weekday, in motion',
-  description: 'Interactive portraits of commuter movement across Switzerland’s largest cities.',
+  description: 'Animated maps of weekday commuting in Switzerland’s largest cities.',
   alternates: { canonical: '/swiss-commutes/' },
   openGraph: {
     title: 'Swiss Commutes',

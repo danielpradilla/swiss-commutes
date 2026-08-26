@@ -533,7 +533,7 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
         <div className="intro">
           <p className="eyebrow">A commuter portrait · {city.dataYears}</p>
           <CityTitle city={city} cityOptions={cityOptions} />
-          <p className="lede">A day of commuting in {city.displayName}, traced commune by commune across {city.neighbours}.</p>
+          <p className="lede">Follow a weekday of commuting in {city.displayName}, commune by commune, across {city.neighbours}.</p>
         </div>
       </section>
       <section className="plannedCity">
@@ -558,7 +558,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
     transit: true,
     soft: true,
   });
-  const [basemap, setBasemap] = useState<Basemap>('stadiaOutdoors');
+  const basemap: Basemap = 'stadiaOutdoors';
   const model = useMemo(() => createDailyModel(city.model!), [city.model]);
   const mapData = useMemo(() => prepareMapData(city.data!.corridors), [city.data]);
 
@@ -590,14 +590,14 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
 
       <section className="hero" id="top">
         <div className="intro">
-          <p className="eyebrow">A commuter portrait · {city.dataYears} official counts</p>
+          <p className="eyebrow">A commuter portrait · {city.dataYears} source data</p>
           <CityTitle city={city} cityOptions={cityOptions} />
-          <p className="lede">A day of commuting in {city.displayName}, traced commune by commune across {city.neighbours}.</p>
+          <p className="lede">Follow a weekday of commuting in {city.displayName}, commune by commune, across {city.neighbours}.</p>
         </div>
         <div className="clockBlock">
           <span>Local time</span>
           <strong>{formatTime(time)}</strong>
-          <small>{clockMode === 'realtime' ? 'REAL TIME' : clockMode === 'fast' ? 'FAST-FORWARD' : 'PAUSED'}</small>
+          <small>{clockMode === 'realtime' ? 'REAL TIME ESTIMATE' : clockMode === 'fast' ? 'FAST-FORWARD' : 'PAUSED'}</small>
         </div>
       </section>
 
@@ -619,17 +619,6 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
               </button>
             ))}
           </div>
-          <select
-            className="mapStyleSelect"
-            aria-label="Map style"
-            value={basemap}
-            onChange={(event) => setBasemap(event.currentTarget.value as Basemap)}
-            title="Temporary map style selector"
-          >
-            {(Object.keys(basemapMeta) as Basemap[]).map((style) => (
-              <option key={style} value={style}>{basemapMeta[style].label}</option>
-            ))}
-          </select>
           <div className="flowLegend" aria-label="Flow direction colors">
             <span><i className="inbound" />Into {city.name}</span>
             <span><i className="outbound" />Out of {city.name}</span>
@@ -721,7 +710,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
       <section className="method" id="sources">
         <div className="methodIntro">
           <p className="eyebrow">Sources & method</p>
-          <h2>The counts are real.<br /><em>The clock isn’t.</em></h2>
+          <h2>The data is published.<br /><em>The timing is modelled.</em></h2>
           <p>
             The source tables tell us where commuters live and work. Some also record their usual
             way of travelling. None says when anyone left home, which road they took or how long the

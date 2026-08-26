@@ -33,9 +33,9 @@ export type CityConfig = {
 
 const sharedSources: CitySource[] = [
   {
-    label: 'Default basemap',
+    label: 'Basemap',
     name: 'Stadia Outdoors',
-    description: 'The map shown behind the commuter dots when the page opens.',
+    description: 'The map behind the commuter dots.',
     href: 'https://docs.stadiamaps.com/map-styles/outdoors/',
   },
   {
@@ -44,19 +44,13 @@ const sharedSources: CitySource[] = [
     description: 'Commune boundaries and centre points for the Swiss side of the map.',
     href: 'https://www.swisstopo.admin.ch/en/landscape-model-swissboundaries3d',
   },
-  {
-    label: 'Other basemaps',
-    name: 'Map style menu',
-    description: 'Stadia Toner, swisstopo grey and Carto Positron are available in the selector.',
-    href: 'https://docs.geo.admin.ch/visualize-data/xyz.html',
-  },
 ];
 
 const currentCitySources: CitySource[] = [
   {
     label: 'Cross-border workers',
     name: 'FSO, Q4 2025',
-    description: 'Cross-border workers counted by their Swiss commune of work.',
+    description: 'Counts of cross-border workers by Swiss workplace commune.',
     href: 'https://www.pxweb-admin-a.bfs.admin.ch/pxweb/en/px-x-0302010000_101/-/px-x-0302010000_101.px/',
   },
   {
@@ -76,7 +70,7 @@ const currentCitySources: CitySource[] = [
 const cityListSource: CitySource = {
   label: 'City list',
   name: 'FSO City Statistics 2026',
-  description: 'The ten largest Swiss cities used for the main set.',
+  description: 'Population figures used to select the ten largest Swiss cities.',
   href: 'https://www.bfs.admin.ch/asset/en/DF_SSV_MOB_COM',
 };
 
@@ -117,7 +111,7 @@ function standardModel(data: CommuteData, minuteShift = 0): DailyModelConfig {
 }
 
 function standardMethod(city: string, countries: string) {
-  return `Swiss commune pairs are observed in 2020. The cross-border worker total is from Q4 2025, but the FSO workplace table does not say where those commuters live abroad. Their dots are distributed among nearby ${countries} communes using town size and distance. Modes follow ${city}’s 2023 split.`;
+  return `Swiss commune pairs come from the 2020 matrix. The Q4 2025 cross-border count tells us where people work, but not where they live abroad. The map places those workers in nearby communes in ${countries}, weighted by population and distance. The transport mix uses ${city}’s 2023 figures.`;
 }
 
 const geneva: CityConfig = {
@@ -175,7 +169,6 @@ const geneva: CityConfig = {
       description: 'The Geneva commuter animation that started this project.',
       href: 'https://www.reddit.com/r/geneva/comments/1vxy0q9/an_animated_map_of_all_commuters_to_geneva/',
     },
-    sharedSources[2],
   ],
   methodNote: 'French flows come straight from RP2023. Swiss commune shares come from the 2020 matrix, then the Geneva–Vaud totals are updated to 2024.',
 };
@@ -203,7 +196,7 @@ const existingCities: CityConfig[] = [
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, apiGeoSource, osmSource, ...sharedSources],
-    methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby French and German communes using population and distance. Modes follow Basel’s 2023 split.',
+    methodNote: standardMethod('Basel', 'France and Germany'),
   },
   {
     slug: 'lugano',
@@ -226,7 +219,7 @@ const existingCities: CityConfig[] = [
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, osmSource, ...sharedSources],
-    methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby Italian communes using population and distance. Modes follow Lugano’s 2023 split.',
+    methodNote: standardMethod('Lugano', 'Italy'),
   },
   {
     slug: 'schaffhausen',
@@ -249,7 +242,7 @@ const existingCities: CityConfig[] = [
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, osmSource, ...sharedSources],
-    methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby German communes using population and distance. Modes follow Schaffhausen’s 2023 split.',
+    methodNote: standardMethod('Schaffhausen', 'Germany'),
   },
   {
     slug: 'la-chaux-de-fonds',
@@ -272,7 +265,7 @@ const existingCities: CityConfig[] = [
       home: { departure: 445, return: 1025, departureSpread: 64, returnSpread: 74 },
     },
     sources: [...currentCitySources, apiGeoSource, ...sharedSources],
-    methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby French communes using population and distance. Modes follow La Chaux-de-Fonds’ 2023 split.',
+    methodNote: standardMethod('La Chaux-de-Fonds', 'France'),
   },
 ];
 
@@ -298,7 +291,7 @@ const topCityAdditions: CityConfig[] = [
     data: zurichData,
     model: standardModel(zurichData),
     sources: [...currentCitySources, osmSource, cityListSource, ...sharedSources],
-    methodNote: standardMethod('Zürich', 'German'),
+    methodNote: standardMethod('Zürich', 'Germany'),
   },
   {
     slug: 'lausanne',
@@ -313,7 +306,7 @@ const topCityAdditions: CityConfig[] = [
     data: lausanneData,
     model: standardModel(lausanneData),
     sources: [...currentCitySources, apiGeoSource, cityListSource, ...sharedSources],
-    methodNote: standardMethod('Lausanne', 'French'),
+    methodNote: standardMethod('Lausanne', 'France'),
   },
   {
     slug: 'bern',
@@ -328,7 +321,7 @@ const topCityAdditions: CityConfig[] = [
     data: bernData,
     model: standardModel(bernData),
     sources: [...currentCitySources, apiGeoSource, cityListSource, ...sharedSources],
-    methodNote: standardMethod('Bern', 'French'),
+    methodNote: standardMethod('Bern', 'France'),
   },
   {
     slug: 'winterthur',
@@ -343,7 +336,7 @@ const topCityAdditions: CityConfig[] = [
     data: winterthurData,
     model: standardModel(winterthurData),
     sources: [...currentCitySources, osmSource, cityListSource, ...sharedSources],
-    methodNote: standardMethod('Winterthur', 'German'),
+    methodNote: standardMethod('Winterthur', 'Germany'),
   },
   {
     slug: 'lucerne',
@@ -358,7 +351,7 @@ const topCityAdditions: CityConfig[] = [
     data: lucerneData,
     model: standardModel(lucerneData),
     sources: [...currentCitySources, osmSource, cityListSource, ...sharedSources],
-    methodNote: standardMethod('Lucerne', 'German, Austrian and Liechtenstein'),
+    methodNote: standardMethod('Lucerne', 'Germany, Austria and Liechtenstein'),
   },
   {
     slug: 'st-gallen',
@@ -373,7 +366,7 @@ const topCityAdditions: CityConfig[] = [
     data: stGallenData,
     model: standardModel(stGallenData),
     sources: [...currentCitySources, osmSource, cityListSource, ...sharedSources],
-    methodNote: standardMethod('St. Gallen', 'Austrian, German and Liechtenstein'),
+    methodNote: standardMethod('St. Gallen', 'Austria, Germany and Liechtenstein'),
   },
   {
     slug: 'biel-bienne',
@@ -388,7 +381,7 @@ const topCityAdditions: CityConfig[] = [
     data: bielData,
     model: standardModel(bielData, -5),
     sources: [...currentCitySources, apiGeoSource, cityListSource, ...sharedSources],
-    methodNote: standardMethod('Biel/Bienne', 'French'),
+    methodNote: standardMethod('Biel/Bienne', 'France'),
   },
 ];
 
