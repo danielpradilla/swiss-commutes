@@ -20,53 +20,26 @@ const GENEVA: Point = { code: 'CH6621', name: 'Genève', lat: 46.2044, lon: 6.14
 type Basemap =
   | 'swisstopo'
   | 'positron'
-  | 'positronNoLabels'
-  | 'stadiaAlidadeSmooth'
-  | 'stadiaAlidadeSmoothDark'
-  | 'stadiaAlidadeSatellite'
-  | 'stadiaOSMBright'
   | 'stadiaOutdoors'
   | 'stadiaStamenToner'
-  | 'stadiaStamenTonerLite'
-  | 'stadiaStamenTonerDark'
-  | 'stadiaStamenTonerBlacklite'
-  | 'stadiaStamenTerrain'
-  | 'stadiaStamenWatercolor'
-  | 'backdrop';
-
-const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? '';
+  | 'stadiaStamenTonerLite';
 
 type BasemapMeta = {
   label: string;
-  available: boolean;
   stadiaVariant?: string;
-  extension?: 'jpg';
-  maxZoom?: number;
-  retina?: false;
 };
 
 const basemapMeta: Record<Basemap, BasemapMeta> = {
-  swisstopo: { label: 'SwissFederalGeoportal.NationalMapGrey', available: true },
-  positron: { label: 'CartoDB.Positron', available: true },
-  positronNoLabels: { label: 'CartoDB.PositronNoLabels', available: true },
-  stadiaAlidadeSmooth: { label: 'Stadia.AlidadeSmooth', available: true, stadiaVariant: 'alidade_smooth' },
-  stadiaAlidadeSmoothDark: { label: 'Stadia.AlidadeSmoothDark', available: true, stadiaVariant: 'alidade_smooth_dark' },
-  stadiaAlidadeSatellite: { label: 'Stadia.AlidadeSatellite', available: true, stadiaVariant: 'alidade_satellite', extension: 'jpg' },
-  stadiaOSMBright: { label: 'Stadia.OSMBright', available: true, stadiaVariant: 'osm_bright' },
-  stadiaOutdoors: { label: 'Stadia.Outdoors', available: true, stadiaVariant: 'outdoors' },
-  stadiaStamenToner: { label: 'Stadia.StamenToner', available: true, stadiaVariant: 'stamen_toner' },
-  stadiaStamenTonerLite: { label: 'Stadia.StamenTonerLite', available: true, stadiaVariant: 'stamen_toner_lite' },
-  stadiaStamenTonerDark: { label: 'Stadia.StamenTonerDark', available: true, stadiaVariant: 'stamen_toner_dark' },
-  stadiaStamenTonerBlacklite: { label: 'Stadia.StamenTonerBlacklite', available: true, stadiaVariant: 'stamen_toner_blacklite' },
-  stadiaStamenTerrain: { label: 'Stadia.StamenTerrain', available: true, stadiaVariant: 'stamen_terrain', maxZoom: 18 },
-  stadiaStamenWatercolor: { label: 'Stadia.StamenWatercolor', available: true, stadiaVariant: 'stamen_watercolor', extension: 'jpg', maxZoom: 16, retina: false },
-  backdrop: { label: 'MapTiler.Backdrop', available: Boolean(MAPTILER_KEY) },
+  swisstopo: { label: 'SwissFederalGeoportal.NationalMapGrey' },
+  positron: { label: 'CartoDB.Positron' },
+  stadiaOutdoors: { label: 'Stadia.Outdoors', stadiaVariant: 'outdoors' },
+  stadiaStamenToner: { label: 'Stadia.StamenToner', stadiaVariant: 'stamen_toner' },
+  stadiaStamenTonerLite: { label: 'Stadia.StamenTonerLite', stadiaVariant: 'stamen_toner_lite' },
 };
 
 function createBasemapLayer(L: typeof import('leaflet'), basemap: Basemap) {
-  if (basemap === 'positron' || basemap === 'positronNoLabels') {
-    const style = basemap === 'positron' ? 'light_all' : 'light_nolabels';
-    return L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`, {
+  if (basemap === 'positron') {
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
       maxZoom: 20,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -74,22 +47,9 @@ function createBasemapLayer(L: typeof import('leaflet'), basemap: Basemap) {
   }
   const stadia = basemapMeta[basemap];
   if (stadia.stadiaVariant) {
-    const retina = stadia.retina === false ? '' : '{r}';
-    const extension = stadia.extension ?? 'png';
-    const attribution = stadia.stadiaVariant === 'alidade_satellite'
-      ? '&copy; CNES, Distribution Airbus DS, Airbus DS, PlanetObserver (Contains Copernicus Data) | &copy; Stadia Maps &copy; OpenMapTiles &copy; OpenStreetMap'
-      : `&copy; Stadia Maps${stadia.stadiaVariant.startsWith('stamen_') ? ' &copy; Stamen Design' : ''} &copy; OpenMapTiles &copy; OpenStreetMap`;
-    return L.tileLayer(`https://tiles.stadiamaps.com/tiles/${stadia.stadiaVariant}/{z}/{x}/{y}${retina}.${extension}`, {
-      maxZoom: stadia.maxZoom ?? 20,
-      attribution,
-    });
-  }
-  if (basemap === 'backdrop') {
-    return L.tileLayer(`https://api.maptiler.com/maps/backdrop/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(MAPTILER_KEY)}`, {
-      maxZoom: 21,
-      tileSize: 512,
-      zoomOffset: -1,
-      attribution: '&copy; MapTiler &copy; OpenStreetMap contributors',
+    return L.tileLayer(`https://tiles.stadiamaps.com/tiles/${stadia.stadiaVariant}/{z}/{x}/{y}{r}.png`, {
+      maxZoom: 20,
+      attribution: `&copy; Stadia Maps${stadia.stadiaVariant.startsWith('stamen_') ? ' &copy; Stamen Design' : ''} &copy; OpenMapTiles &copy; OpenStreetMap`,
     });
   }
   return L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
@@ -546,9 +506,7 @@ export default function Home() {
             title="Temporary map style selector"
           >
             {(Object.keys(basemapMeta) as Basemap[]).map((style) => (
-              <option key={style} value={style} disabled={!basemapMeta[style].available}>
-                {basemapMeta[style].label}{basemapMeta[style].available ? '' : ' — key needed'}
-              </option>
+              <option key={style} value={style}>{basemapMeta[style].label}</option>
             ))}
           </select>
           <div className="flowLegend" aria-label="Flow direction colors">
