@@ -17,18 +17,28 @@ import {
 } from './model';
 
 const GENEVA: Point = { code: 'CH6621', name: 'Genève', lat: 46.2044, lon: 6.1432 };
-type Basemap = 'swisstopo' | 'toner' | 'backdrop';
+type Basemap = 'swisstopo' | 'positron' | 'positronNoLabels' | 'toner' | 'backdrop';
 
 const STADIA_MAPS_KEY = process.env.NEXT_PUBLIC_STADIA_MAPS_KEY ?? '';
 const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? '';
 
 const basemapMeta: Record<Basemap, { label: string; available: boolean }> = {
   swisstopo: { label: 'SwissFederalGeoportal.NationalMapGrey', available: true },
+  positron: { label: 'CartoDB.Positron', available: true },
+  positronNoLabels: { label: 'CartoDB.PositronNoLabels', available: true },
   toner: { label: 'Stadia.StamenTonerLite', available: Boolean(STADIA_MAPS_KEY) },
   backdrop: { label: 'MapTiler.Backdrop', available: Boolean(MAPTILER_KEY) },
 };
 
 function createBasemapLayer(L: typeof import('leaflet'), basemap: Basemap) {
+  if (basemap === 'positron' || basemap === 'positronNoLabels') {
+    const style = basemap === 'positron' ? 'light_all' : 'light_nolabels';
+    return L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`, {
+      subdomains: 'abcd',
+      maxZoom: 20,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    });
+  }
   if (basemap === 'toner') {
     return L.tileLayer(`https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`, {
       maxZoom: 20,
