@@ -44,6 +44,18 @@ const sharedSources: CitySource[] = [
     description: 'Commune boundaries and centre points for the Swiss side of the map.',
     href: 'https://www.swisstopo.admin.ch/en/landscape-model-swissboundaries3d',
   },
+  {
+    label: 'Route preview',
+    name: 'Valhalla / OpenStreetMap',
+    description: 'Precomputed road, cycling and walking geometry for the largest visible flows.',
+    href: 'https://valhalla.github.io/valhalla/',
+  },
+  {
+    label: 'Transit preview',
+    name: 'Transitous',
+    description: 'Precomputed public-transport itineraries; underlying feed sources vary by operator.',
+    href: 'https://transitous.org/sources/',
+  },
 ];
 
 const currentCitySources: CitySource[] = [
@@ -156,7 +168,7 @@ const geneva: CityConfig = {
       description: '2024 totals used to bring the Geneva–Vaud flows up to date.',
       href: 'https://statistique.ge.ch/statistique/tel/domaines/11/11_02/T_11_06_2_04.xlsx',
     },
-    ...sharedSources.slice(0, 2),
+    ...sharedSources,
     {
       label: 'French locations',
       name: 'API Géo',

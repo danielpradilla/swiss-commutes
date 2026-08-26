@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Map as LeafletMap, TileLayer } from 'leaflet';
 import type { CityConfig } from '../cities';
+import { routeGeometries } from '../data/route-geometries';
 import type { Corridor, Mode, Point } from '../data/types';
 import {
   arrivalBlip,
@@ -11,6 +12,9 @@ import {
   formatTime,
   MINUTES_PER_DAY,
 } from '../model';
+import { decodePolyline, pointAlongPolyline, routeKey, type RouteCoordinate, type ScreenCoordinate } from '../route-geometry';
+
+const ROUTED_GEOMETRY_ENABLED = true;
 type Basemap =
   | 'swisstopo'
   | 'positron'
@@ -82,7 +86,11 @@ const hash = (value: number) => {
   return x - Math.floor(x);
 };
 
-function prepareMapData(corridors: Corridor[]) {
+function prepareMapData(corridors: Corridor[], citySlug: string) {
+  const routes = corridors.map((corridor) => {
+    const encoded = ROUTED_GEOMETRY_ENABLED ? routeGeometries[routeKey(citySlug, corridor)] : undefined;
+    return encoded ? decodePolyline(encoded) : undefined;
+  });
   const communeNodes = Array.from(corridors.reduce((nodes, corridor) => {
     const remote = corridor.direction === 'inbound' ? corridor.origin : corridor.target;
     const node = nodes.get(remote.code) ?? {
@@ -119,6 +127,7 @@ function prepareMapData(corridors: Corridor[]) {
       );
       return {
         corridor,
+        route: routes[corridorIndex],
         bend: (hash(seed * 5) - 0.5) * 0.18,
         inbound: 285 + Math.pow(hash(seed), 1.25) * 285,
         outbound: 895 + Math.pow(hash(seed * 3), 0.9) * 260,
@@ -127,7 +136,9 @@ function prepareMapData(corridors: Corridor[]) {
     }),
   );
 
-  return { communeNodes, dots };
+  const routedCorridors = corridors.flatMap((corridor, index) =>
+    routes[index] ? [{ corridor, route: routes[index] }] : []);
+  return { communeNodes, dots, routedCorridors };
 }
 
 const formatNumber = (value: number) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
@@ -231,9 +242,18 @@ function MapCanvas({
         if (!ctx) return;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, box.width, box.height);
-        const project = (place: Point) => {
-          const point = map.latLngToContainerPoint([place.lat, place.lon]);
+        const projectCoordinate = ([latitude, longitude]: RouteCoordinate): ScreenCoordinate => {
+          const point = map.latLngToContainerPoint([latitude, longitude]);
           return [point.x, point.y];
+        };
+        const project = (place: Point) => projectCoordinate([place.lat, place.lon]);
+        const projectedRoutes = new Map<RouteCoordinate[], ScreenCoordinate[]>();
+        const projectRoute = (route: RouteCoordinate[]) => {
+          const cached = projectedRoutes.get(route);
+          if (cached) return cached;
+          const projected = route.map(projectCoordinate);
+          projectedRoutes.set(route, projected);
+          return projected;
         };
 
         const curvePoint = (start: number[], end: number[], progress: number, bend: number) => {
@@ -249,6 +269,19 @@ function MapCanvas({
 
         const homeShare = model.commutersAtHomeShare(timeRef.current);
         const hoverPoints: typeof hoverPointsRef.current = [];
+        mapData.routedCorridors.forEach(({ corridor, route }) => {
+          if (!modesRef.current[corridor.mode]) return;
+          const points = projectRoute(route);
+          if (points.length < 2) return;
+          ctx.beginPath();
+          ctx.moveTo(points[0][0], points[0][1]);
+          points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+          ctx.setLineDash([3, 3]);
+          ctx.strokeStyle = 'rgba(35, 38, 37, .52)';
+          ctx.lineWidth = 1.25;
+          ctx.stroke();
+          ctx.setLineDash([]);
+        });
         mapData.communeNodes.forEach((node) => {
           const [x, y] = project(node.point);
           const visible = (Object.keys(modeMeta) as Mode[]).reduce(
@@ -285,8 +318,14 @@ function MapCanvas({
           if (!flow) return;
           const start = flow.reverse ? target : origin;
           const end = flow.reverse ? origin : target;
-          const point = curvePoint(start, end, flow.progress, dot.bend);
-          const tail = curvePoint(start, end, Math.max(0, flow.progress - 0.09), dot.bend);
+          const tailProgress = Math.max(0, flow.progress - 0.09);
+          const route = dot.route ? projectRoute(dot.route) : undefined;
+          const point = route
+            ? pointAlongPolyline(route, flow.reverse ? 1 - flow.progress : flow.progress)
+            : curvePoint(start, end, flow.progress, dot.bend);
+          const tail = route
+            ? pointAlongPolyline(route, flow.reverse ? 1 - tailProgress : tailProgress)
+            : curvePoint(start, end, tailProgress, dot.bend);
           const colour = flowMeta[flow.direction].colour;
           const blip = arrivalBlip(flow.progress);
           if (flow.direction === 'inbound') incomingArrivals += blip;
@@ -614,7 +653,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
   });
   const basemap: Basemap = 'stadiaOutdoors';
   const model = useMemo(() => createDailyModel(city.model!), [city.model]);
-  const mapData = useMemo(() => prepareMapData(city.data!.corridors), [city.data]);
+  const mapData = useMemo(() => prepareMapData(city.data!.corridors, city.slug), [city.data, city.slug]);
 
   useEffect(() => {
     if (clockMode === 'paused') return;
@@ -659,7 +698,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
       <section className="dashboard" aria-label={`${city.name} commuter map and current statistics`}>
         <div className="mapPanel">
           <MapCanvas time={time} modes={modes} basemap={basemap} city={city} model={model} mapData={mapData} />
-          <div className="mapNote">{basemapMeta[basemap].label} · {formatNumber(city.data!.summary.originCommunes)} communes · circle size = commuter count</div>
+          <div className="mapNote">{basemapMeta[basemap].label} · {formatNumber(city.data!.summary.originCommunes)} communes · dashed = routed preview</div>
           <div className="modeFilters" aria-label="Show transport modes">
             {(Object.keys(modeMeta) as Mode[]).map((mode) => (
               <button

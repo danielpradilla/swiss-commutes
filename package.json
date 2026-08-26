@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "test": "node --experimental-strip-types --test test/model.test.ts"
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "routes:preview": "node --experimental-strip-types scripts/generate-route-geometries.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
