@@ -213,8 +213,7 @@ function MapCanvas({
         maxBoundsViscosity: 0.8,
       });
       mapRef.current = map;
-      map.fitBounds(city.fitBounds, { padding: [18, 18] });
-      map.zoomIn();
+      map.setView([city.centre.lat, city.centre.lon], 10);
       tileLayerRef.current = createBasemapLayer(L, basemapRef.current).addTo(map);
       L.control.zoom({ position: 'topright' }).addTo(map);
       L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 110 }).addTo(map);
@@ -559,7 +558,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
     transit: true,
     soft: true,
   });
-  const [basemap, setBasemap] = useState<Basemap>('swisstopo');
+  const [basemap, setBasemap] = useState<Basemap>('stadiaOutdoors');
   const model = useMemo(() => createDailyModel(city.model!), [city.model]);
   const mapData = useMemo(() => prepareMapData(city.data!.corridors), [city.data]);
 
