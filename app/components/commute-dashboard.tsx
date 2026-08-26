@@ -15,6 +15,7 @@ import {
 import { decodePolyline, pointAlongPolyline, routeKey, type RouteCoordinate, type ScreenCoordinate } from '../route-geometry';
 
 const ROUTED_GEOMETRY_ENABLED = true;
+const COMMUTERS_PER_DOT = ROUTED_GEOMETRY_ENABLED ? 200 : 900;
 type Basemap =
   | 'swisstopo'
   | 'positron'
@@ -117,7 +118,7 @@ function prepareMapData(corridors: Corridor[], citySlug: string) {
     const route = routes[corridorIndex];
     if (ROUTED_GEOMETRY_ENABLED && !route) return [];
     return Array.from({
-      length: Math.floor(corridor.commuters / 900) +
+      length: Math.floor(corridor.commuters / COMMUTERS_PER_DOT) +
         (primaryCorridorByCommune.get(
           corridor.direction === 'inbound' ? corridor.origin.code : corridor.target.code,
         ) === corridorIndex ? 1 : 0),
