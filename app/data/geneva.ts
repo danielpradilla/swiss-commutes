@@ -2,10 +2,7 @@
 // France: INSEE RP2023 MOBPRO. Switzerland: FSO 2020 commune matrix,
 // scaled to OCSTAT 2024 cross-canton totals. Coordinates: api.gouv.fr and swisstopo.
 
-export type Mode = 'car' | 'transit' | 'soft';
-export type FlowDirection = 'inbound' | 'outbound';
-export type Point = { code: string; name: string; lat: number; lon: number };
-export type Corridor = { origin: Point; target: Point; commuters: number; mode: Mode; direction: FlowDirection; source: string };
+import type { Corridor } from './types.ts';
 
 export const dataSummary = {"frenchCommuters2023":119003,"vaudToGeneva2024":23398,"genevaToVaud2024":6881,"originCommunes":656,"corridors":1443} as const;
 

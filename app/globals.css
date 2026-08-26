@@ -14,7 +14,7 @@
 html { scroll-behavior:smooth; }
 body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-geist-sans), Arial, Helvetica, sans-serif; }
 a { color:inherit; }
-button, input { font:inherit; }
+button, input, select { font:inherit; }
 .srOnly { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
 .masthead {
@@ -58,6 +58,26 @@ h1 {
   line-height:.78;
   letter-spacing:-.065em;
 }
+.cityChoice { position:relative; display:inline-flex; align-items:center; }
+.citySelect {
+  width:auto;
+  field-sizing:content;
+  appearance:none;
+  margin:0;
+  padding:0 .34em 0 0;
+  border:0;
+  border-bottom:.035em solid currentColor;
+  border-radius:0;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  line-height:.8;
+  letter-spacing:inherit;
+  cursor:pointer;
+}
+.citySelect option { font-size:16px; letter-spacing:normal; }
+.cityChoice > span { position:absolute; right:0; bottom:.18em; font-size:.25em; line-height:1; pointer-events:none; }
+.citySelect:focus-visible { outline:2px solid var(--ink); outline-offset:4px; }
 .lede { max-width:440px; margin:25px 0 0; color:var(--muted); font-size:16px; line-height:1.4; }
 .clockBlock { display:flex; flex-direction:column; align-items:flex-end; padding-bottom:2px; }
 .clockBlock span,.clockBlock small { font-size:9px; letter-spacing:.14em; }
@@ -75,6 +95,20 @@ h1 {
 .mapBase,.commuterOverlay { position:absolute; inset:0; width:100%; height:100%; }
 .mapBase { z-index:0; }
 .commuterOverlay { z-index:500; pointer-events:none; }
+.communeTooltip {
+  position:absolute;
+  z-index:1100;
+  padding:6px 8px;
+  border:1px solid rgba(21,24,19,.35);
+  background:rgba(242,239,231,.96);
+  color:var(--ink);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.06em;
+  white-space:nowrap;
+  transform:translate(-50%,calc(-100% - 12px));
+  pointer-events:none;
+}
 .mapBase .leaflet-tile-pane { filter:contrast(.58) brightness(1.28); opacity:.66; }
 .mapBase .leaflet-control-attribution,.mapBase .leaflet-control-scale-line { color:var(--ink); font:8px var(--font-geist-sans),sans-serif; }
 .mapBase .leaflet-control-attribution a { color:var(--ink); }
@@ -234,6 +268,10 @@ h2 em { color:var(--red); }
 .methodNote { display:grid; grid-template-columns:1fr 2fr; gap:30px; margin-top:28px; padding:24px 0; border-top:1px solid var(--line); }
 .methodNote strong { font-size:18px; font-weight:650; line-height:1.25; letter-spacing:-.02em; }
 .methodNote p { max-width:700px; margin:0; color:var(--muted); font-size:12px; line-height:1.5; }
+.plannedCity { min-height:430px; padding:72px 28px; border-bottom:1px solid var(--ink); }
+.plannedCity h2 { max-width:780px; }
+.plannedCity > p:not(.eyebrow) { max-width:620px; margin:28px 0; color:var(--muted); font-size:16px; line-height:1.55; }
+.plannedCity > a { font-size:12px; font-weight:700; text-underline-offset:4px; }
 
 footer {
   min-height:120px;
@@ -257,6 +295,7 @@ footer p { margin:0; color:var(--muted); font-size:9px; letter-spacing:.1em; tex
   .masthead p { display:none; }
   .hero { min-height:380px; grid-template-columns:1fr; gap:35px; padding:38px 18px 28px; }
   h1 { font-size:clamp(58px,18vw,86px); }
+  .cityChoice.longCity { font-size:.55em; }
   .clockBlock { align-items:flex-start; }
   .dashboard { grid-template-columns:1fr; }
   .mapPanel { min-height:480px; border-right:0; border-bottom:1px solid var(--ink); }

@@ -1,7 +1,23 @@
 export const MINUTES_PER_DAY = 1440;
-export const FRENCH_COMMUTERS_2023 = 119_003;
-export const VAUD_TO_GENEVA_2024 = 23_398;
-export const GENEVA_RESIDENTS_AWAY_2024 = 8_703;
+
+export type DailyModelConfig = {
+  populationGroups: Array<{
+    people: number;
+    arrival: number;
+    departure: number;
+    arrivalSpread: number;
+    departureSpread: number;
+  }>;
+  transitPeaks: Array<{ people: number; centre: number; spread: number }>;
+  borderGroups: Array<{
+    people: number;
+    morning: number;
+    evening: number;
+    morningSpread: number;
+    eveningSpread: number;
+  }>;
+  home: { departure: number; return: number; departureSpread: number; returnSpread: number };
+};
 
 const sigmoid = (minute: number, centre: number, spread: number) =>
   1 / (1 + Math.exp(-(minute - centre) / spread));
@@ -14,29 +30,55 @@ const presence = (
   departureSpread: number,
 ) => sigmoid(minute, arrival, arrivalSpread) - sigmoid(minute, departure, departureSpread);
 
-export function populationChange(minute: number) {
-  const france = FRENCH_COMMUTERS_2023 * presence(minute, 435, 1040, 42, 48);
-  const vaud = VAUD_TO_GENEVA_2024 * presence(minute, 410, 1010, 38, 44);
-  const genevaResidentsAway = GENEVA_RESIDENTS_AWAY_2024 * presence(minute, 340, 980, 34, 48);
-  return Math.round(france + vaud - genevaResidentsAway);
-}
-
 const gaussian = (minute: number, centre: number, spread: number) =>
   Math.exp(-0.5 * ((minute - centre) / spread) ** 2);
 
-export function commutersInTransit(minute: number) {
-  return Math.round(50_000 * gaussian(minute, 465, 74) + 46_000 * gaussian(minute, 1035, 88));
-}
+export function createDailyModel(config: DailyModelConfig) {
+  const populationChange = (minute: number) => Math.round(config.populationGroups.reduce(
+    (total, group) => total + group.people * presence(
+      minute,
+      group.arrival,
+      group.departure,
+      group.arrivalSpread,
+      group.departureSpread,
+    ),
+    0,
+  ));
 
-export function borderCrossings(minute: number) {
-  return Math.round(
-    FRENCH_COMMUTERS_2023 * sigmoid(minute, 450, 66) +
-    FRENCH_COMMUTERS_2023 * sigmoid(minute, 1035, 76),
+  const commutersInTransit = (minute: number) => Math.round(config.transitPeaks.reduce(
+    (total, peak) => total + peak.people * gaussian(minute, peak.centre, peak.spread),
+    0,
+  ));
+
+  const borderCrossings = (minute: number) => Math.round(config.borderGroups.reduce(
+    (total, group) => total + group.people * sigmoid(minute, group.morning, group.morningSpread) +
+      group.people * sigmoid(minute, group.evening, group.eveningSpread),
+    0,
+  ));
+
+  const commutersAtHomeShare = (minute: number) => Math.max(0, Math.min(
+    1,
+    1 - sigmoid(minute, config.home.departure, config.home.departureSpread) +
+      sigmoid(minute, config.home.return, config.home.returnSpread),
+  ));
+
+  const populationSeries = Array.from({ length: 145 }, (_, index) => ({
+    minute: index * 10,
+    value: populationChange(index * 10),
+  }));
+
+  const dailyPeak = populationSeries.reduce((peak, point) =>
+    point.value > peak.value ? point : peak,
   );
-}
 
-export function commutersAtHomeShare(minute: number) {
-  return Math.max(0, Math.min(1, 1 - sigmoid(minute, 450, 66) + sigmoid(minute, 1035, 76)));
+  return {
+    borderCrossings,
+    commutersAtHomeShare,
+    commutersInTransit,
+    dailyPeak,
+    populationChange,
+    populationSeries,
+  };
 }
 
 export function arrivalBlip(progress: number) {
@@ -70,12 +112,3 @@ export function formatTime(minute: number) {
   if (value === MINUTES_PER_DAY) return '24:00';
   return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
 }
-
-export const populationSeries = Array.from({ length: 145 }, (_, index) => ({
-  minute: index * 10,
-  value: populationChange(index * 10),
-}));
-
-export const dailyPeak = populationSeries.reduce((peak, point) =>
-  point.value > peak.value ? point : peak,
-);

@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   output: 'export',
-  basePath: '/geneva-commutes',
+  basePath: '/swiss-border-commutes',
   trailingSlash: true,
 };
 

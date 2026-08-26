@@ -1,13 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { corridors, dataSummary } from '../app/commutes.ts';
-import { arrivalBlip, commutersAtHomeShare, dailyPeak, flowAt, formatTime, populationChange } from '../app/model.ts';
+import { cities, cityBySlug } from '../app/cities.ts';
+import { corridors, dataSummary } from '../app/data/geneva.ts';
+import { arrivalBlip, createDailyModel, flowAt, formatTime } from '../app/model.ts';
+
+const model = createDailyModel(cityBySlug.geneva.model!);
 
 test('weekday model returns to baseline and has a credible daytime peak', () => {
-  assert.ok(Math.abs(populationChange(0)) < 100);
-  assert.ok(populationChange(480) > 65_000);
-  assert.ok(dailyPeak.value > 90_000);
-  assert.ok(dailyPeak.minute >= 540 && dailyPeak.minute <= 900);
+  assert.ok(Math.abs(model.populationChange(0)) < 100);
+  assert.ok(model.populationChange(480) > 65_000);
+  assert.ok(model.dailyPeak.value > 90_000);
+  assert.ok(model.dailyPeak.minute >= 540 && model.dailyPeak.minute <= 900);
   assert.equal(formatTime(465), '07:45');
   assert.equal(formatTime(1440), '24:00');
 });
@@ -24,9 +27,9 @@ test('flow direction switches between the morning and evening journeys', () => {
 });
 
 test('commune markers dim while commuters are away and recover in the evening', () => {
-  assert.ok(commutersAtHomeShare(0) > 0.99);
-  assert.ok(commutersAtHomeShare(720) < 0.05);
-  assert.ok(commutersAtHomeShare(1430) > 0.99);
+  assert.ok(model.commutersAtHomeShare(0) > 0.99);
+  assert.ok(model.commutersAtHomeShare(720) < 0.05);
+  assert.ok(model.commutersAtHomeShare(1430) > 0.99);
 });
 
 test('commune data matches its published totals and contains valid routes', () => {
@@ -42,4 +45,16 @@ test('commune data matches its published totals and contains valid routes', () =
     corridors.filter(({ direction }) => direction === 'outbound').reduce((sum, { commuters }) => sum + commuters, 0),
     dataSummary.genevaToVaud2024,
   );
+});
+
+test('border city routes are unique and only publish checked data', () => {
+  assert.deepEqual(cities.map(({ slug }) => slug), [
+    'geneva',
+    'basel',
+    'lugano',
+    'schaffhausen',
+    'la-chaux-de-fonds',
+  ]);
+  assert.equal(new Set(cities.map(({ slug }) => slug)).size, cities.length);
+  assert.deepEqual(cities.filter(({ data, model }) => data && model).map(({ slug }) => slug), ['geneva']);
 });

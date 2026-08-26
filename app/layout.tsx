@@ -15,20 +15,20 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://danielpradilla.info'),
-  title: 'Genève / 24h — A commuter portrait',
-  description: 'An interactive portrait of commuter movement into and out of Geneva over one weekday.',
-  alternates: { canonical: '/geneva-commutes/' },
+  title: 'Swiss Border Commutes — One weekday, in motion',
+  description: 'Interactive portraits of commuter movement across Switzerland’s border labour markets.',
+  alternates: { canonical: '/swiss-border-commutes/' },
   openGraph: {
-    title: 'Genève / 24h — How Geneva breathes',
-    description: 'Follow the daily commuter pulse across Geneva, France and Vaud.',
+    title: 'Swiss Border Commutes',
+    description: 'Follow the daily commuter pulse across Switzerland’s border cities.',
     type: 'website',
-    images: [{ url: '/geneva-commutes/og.png', width: 1732, height: 910, alt: 'Genève / 24h — How Geneva breathes' }],
+    images: [{ url: '/swiss-border-commutes/og.png', width: 1732, height: 910, alt: 'Swiss Border Commutes' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Genève / 24h — How Geneva breathes',
-    description: 'Follow the daily commuter pulse across Geneva, France and Vaud.',
-    images: ['/geneva-commutes/og.png'],
+    title: 'Swiss Border Commutes',
+    description: 'Follow the daily commuter pulse across Switzerland’s border cities.',
+    images: ['/swiss-border-commutes/og.png'],
   },
 };
 
