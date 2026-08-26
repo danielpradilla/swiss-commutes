@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { cities, cityBySlug } from '../app/cities.ts';
 import { corridors, dataSummary } from '../app/data/geneva.ts';
-import { arrivalBlip, commuterMix, createDailyModel, flowAt, formatTime } from '../app/model.ts';
+import { arrivalBlip, createDailyModel, flowAt, formatTime } from '../app/model.ts';
 
 const model = createDailyModel(cityBySlug.geneva.model!);
 
@@ -71,32 +71,10 @@ test('city routes are unique and all publish checked data', () => {
     assert.ok(city.data!.corridors.every(({ commuters, origin, target }) =>
       commuters > 0 && [origin.lat, origin.lon, target.lat, target.lon].every(Number.isFinite)));
     if (city.data!.summary.borderWorkers2025 !== undefined) {
-      const international = city.data!.corridors
+      const crossBorderWorkers = city.data!.corridors
         .filter((corridor) => !(corridor.direction === 'inbound' ? corridor.origin : corridor.target).code.startsWith('CH'))
         .reduce((sum, corridor) => sum + corridor.commuters, 0);
-      assert.equal(international, city.data!.summary.borderWorkers2025);
+      assert.equal(crossBorderWorkers, city.data!.summary.borderWorkers2025);
     }
   }
-});
-
-test('international share counts each mapped commuter flow once', () => {
-  for (const city of cities) {
-    const corridors = city.data!.corridors;
-    const mix = commuterMix(corridors);
-    const international = corridors
-      .filter(({ origin, target }) => !origin.code.startsWith('CH') || !target.code.startsWith('CH'))
-      .reduce((sum, corridor) => sum + corridor.commuters, 0);
-    const total = corridors.reduce((sum, corridor) => sum + corridor.commuters, 0);
-    assert.equal(mix.international, international, city.slug);
-    assert.equal(mix.total, total, city.slug);
-    assert.equal(mix.domestic + mix.international, mix.total, city.slug);
-    assert.equal(mix.internationalShare, international / total, city.slug);
-  }
-});
-
-test('international share is shown only for the border-city portraits', () => {
-  assert.deepEqual(
-    cities.filter(({ showInternationalShare }) => showInternationalShare).map(({ slug }) => slug),
-    ['geneva', 'basel', 'lugano', 'schaffhausen', 'la-chaux-de-fonds'],
-  );
 });

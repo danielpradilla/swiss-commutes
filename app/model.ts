@@ -9,13 +9,6 @@ export type DailyModelConfig = {
     departureSpread: number;
   }>;
   transitPeaks: Array<{ people: number; centre: number; spread: number }>;
-  borderGroups: Array<{
-    people: number;
-    morning: number;
-    evening: number;
-    morningSpread: number;
-    eveningSpread: number;
-  }>;
   home: { departure: number; return: number; departureSpread: number; returnSpread: number };
 };
 
@@ -50,12 +43,6 @@ export function createDailyModel(config: DailyModelConfig) {
     0,
   ));
 
-  const borderCrossings = (minute: number) => Math.round(config.borderGroups.reduce(
-    (total, group) => total + group.people * sigmoid(minute, group.morning, group.morningSpread) +
-      group.people * sigmoid(minute, group.evening, group.eveningSpread),
-    0,
-  ));
-
   const commutersAtHomeShare = (minute: number) => Math.max(0, Math.min(
     1,
     1 - sigmoid(minute, config.home.departure, config.home.departureSpread) +
@@ -72,7 +59,6 @@ export function createDailyModel(config: DailyModelConfig) {
   );
 
   return {
-    borderCrossings,
     commutersAtHomeShare,
     commutersInTransit,
     dailyPeak,
@@ -105,24 +91,6 @@ export function flowAt(
     };
   }
   return null;
-}
-
-export function commuterMix(corridors: import('./data/types.ts').Corridor[]) {
-  let domestic = 0;
-  let international = 0;
-  for (const corridor of corridors) {
-    const isInternational = !corridor.origin.code.startsWith('CH') ||
-      !corridor.target.code.startsWith('CH');
-    if (isInternational) international += corridor.commuters;
-    else domestic += corridor.commuters;
-  }
-  const total = domestic + international;
-  return {
-    domestic,
-    international,
-    total,
-    internationalShare: total > 0 ? international / total : null,
-  };
 }
 
 export function formatTime(minute: number) {

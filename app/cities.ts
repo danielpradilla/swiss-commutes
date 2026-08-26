@@ -25,7 +25,6 @@ export type CityConfig = {
   maxBounds: [[number, number], [number, number]];
   cityRadiusLongitude: number;
   dataYears: string;
-  showInternationalShare?: boolean;
   data?: CommuteData;
   model?: DailyModelConfig;
   sources?: CitySource[];
@@ -55,7 +54,7 @@ const sharedSources: CitySource[] = [
 
 const currentCitySources: CitySource[] = [
   {
-    label: 'International count',
+    label: 'Cross-border workers',
     name: 'FSO, Q4 2025',
     description: 'Cross-border workers counted by their Swiss commune of work.',
     href: 'https://www.pxweb-admin-a.bfs.admin.ch/pxweb/en/px-x-0302010000_101/-/px-x-0302010000_101.px/',
@@ -97,15 +96,15 @@ const osmSource: CitySource = {
 
 function standardModel(data: CommuteData, minuteShift = 0): DailyModelConfig {
   const summary = data.summary;
-  const international = Number(summary.borderWorkers2025);
+  const crossBorderWorkers = Number(summary.borderWorkers2025);
   const swissInbound = Number(summary.swissInbound2020);
   const swissOutbound = Number(summary.swissOutbound2020);
   const mappedJourneys = Number(summary.mappedSwissInbound2020) +
-    Number(summary.mappedSwissOutbound2020) + international;
+    Number(summary.mappedSwissOutbound2020) + crossBorderWorkers;
   const morningPeak = Math.round(mappedJourneys * 0.45);
   return {
     populationGroups: [
-      { people: international, arrival: 440 + minuteShift, departure: 1030 + minuteShift, arrivalSpread: 42, departureSpread: 52 },
+      { people: crossBorderWorkers, arrival: 440 + minuteShift, departure: 1030 + minuteShift, arrivalSpread: 42, departureSpread: 52 },
       { people: swissInbound, arrival: 455 + minuteShift, departure: 1035 + minuteShift, arrivalSpread: 48, departureSpread: 56 },
       { people: -swissOutbound, arrival: 445 + minuteShift, departure: 1020 + minuteShift, arrivalSpread: 44, departureSpread: 54 },
     ],
@@ -113,15 +112,12 @@ function standardModel(data: CommuteData, minuteShift = 0): DailyModelConfig {
       { people: morningPeak, centre: 465 + minuteShift, spread: 76 },
       { people: Math.round(morningPeak * 0.9), centre: 1035 + minuteShift, spread: 88 },
     ],
-    borderGroups: international ? [
-      { people: international, morning: 450 + minuteShift, evening: 1035 + minuteShift, morningSpread: 66, eveningSpread: 76 },
-    ] : [],
     home: { departure: 450 + minuteShift, return: 1035 + minuteShift, departureSpread: 66, returnSpread: 76 },
   };
 }
 
 function standardMethod(city: string, countries: string) {
-  return `Swiss commune pairs are observed in 2020. The international total is from Q4 2025, but the FSO workplace table does not say where those commuters live abroad. Their dots are distributed among nearby ${countries} communes using town size and distance. Modes follow ${city}’s 2023 split.`;
+  return `Swiss commune pairs are observed in 2020. The cross-border worker total is from Q4 2025, but the FSO workplace table does not say where those commuters live abroad. Their dots are distributed among nearby ${countries} communes using town size and distance. Modes follow ${city}’s 2023 split.`;
 }
 
 const geneva: CityConfig = {
@@ -134,7 +130,6 @@ const geneva: CityConfig = {
   maxBounds: [[45.4, 4.45], [47.2, 7.55]],
   cityRadiusLongitude: 0.12,
   dataYears: '2023–2024',
-  showInternationalShare: true,
   data: { corridors, summary: dataSummary },
   model: {
     populationGroups: [
@@ -145,9 +140,6 @@ const geneva: CityConfig = {
     transitPeaks: [
       { people: 50_000, centre: 465, spread: 74 },
       { people: 46_000, centre: 1035, spread: 88 },
-    ],
-    borderGroups: [
-      { people: 119_003, morning: 450, evening: 1035, morningSpread: 66, eveningSpread: 76 },
     ],
     home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
   },
@@ -200,7 +192,6 @@ const existingCities: CityConfig[] = [
     maxBounds: [[46.9, 6.5], [48.4, 8.7]],
     cityRadiusLongitude: 0.1,
     dataYears: '2020–2025',
-    showInternationalShare: true,
     data: { corridors: baselCorridors, summary: baselSummary },
     model: {
       populationGroups: [
@@ -209,7 +200,6 @@ const existingCities: CityConfig[] = [
         { people: -24_985, arrival: 445, departure: 1020, arrivalSpread: 44, departureSpread: 54 },
       ],
       transitPeaks: [{ people: 55_000, centre: 465, spread: 76 }, { people: 49_000, centre: 1035, spread: 88 }],
-      borderGroups: [{ people: 35_367, morning: 450, evening: 1035, morningSpread: 66, eveningSpread: 76 }],
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, apiGeoSource, osmSource, ...sharedSources],
@@ -225,7 +215,6 @@ const existingCities: CityConfig[] = [
     maxBounds: [[45.2, 7.7], [46.9, 10]],
     cityRadiusLongitude: 0.1,
     dataYears: '2020–2025',
-    showInternationalShare: true,
     data: { corridors: luganoCorridors, summary: luganoSummary },
     model: {
       populationGroups: [
@@ -234,7 +223,6 @@ const existingCities: CityConfig[] = [
         { people: -7_197, arrival: 450, departure: 1020, arrivalSpread: 44, departureSpread: 54 },
       ],
       transitPeaks: [{ people: 17_300, centre: 465, spread: 76 }, { people: 15_600, centre: 1035, spread: 88 }],
-      borderGroups: [{ people: 15_663, morning: 450, evening: 1035, morningSpread: 66, eveningSpread: 76 }],
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, osmSource, ...sharedSources],
@@ -250,7 +238,6 @@ const existingCities: CityConfig[] = [
     maxBounds: [[47.1, 7.4], [48.4, 9.5]],
     cityRadiusLongitude: 0.08,
     dataYears: '2020–2025',
-    showInternationalShare: true,
     data: { corridors: schaffhausenCorridors, summary: schaffhausenSummary },
     model: {
       populationGroups: [
@@ -259,7 +246,6 @@ const existingCities: CityConfig[] = [
         { people: -7_764, arrival: 445, departure: 1020, arrivalSpread: 42, departureSpread: 52 },
       ],
       transitPeaks: [{ people: 9_800, centre: 465, spread: 74 }, { people: 8_900, centre: 1035, spread: 86 }],
-      borderGroups: [{ people: 3_218, morning: 450, evening: 1035, morningSpread: 66, eveningSpread: 76 }],
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, osmSource, ...sharedSources],
@@ -275,7 +261,6 @@ const existingCities: CityConfig[] = [
     maxBounds: [[46.4, 5.5], [47.8, 7.9]],
     cityRadiusLongitude: 0.08,
     dataYears: '2020–2025',
-    showInternationalShare: true,
     data: { corridors: chauxCorridors, summary: chauxSummary },
     model: {
       populationGroups: [
@@ -284,7 +269,6 @@ const existingCities: CityConfig[] = [
         { people: -5_158, arrival: 440, departure: 1010, arrivalSpread: 42, departureSpread: 52 },
       ],
       transitPeaks: [{ people: 7_700, centre: 455, spread: 72 }, { people: 6_900, centre: 1025, spread: 84 }],
-      borderGroups: [{ people: 5_580, morning: 445, evening: 1025, morningSpread: 64, eveningSpread: 74 }],
       home: { departure: 445, return: 1025, departureSpread: 64, returnSpread: 74 },
     },
     sources: [...currentCitySources, apiGeoSource, ...sharedSources],

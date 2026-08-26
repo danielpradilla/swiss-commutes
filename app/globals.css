@@ -213,23 +213,6 @@ h1 {
 .statRail .positive { color:var(--red); }
 .statRail .negative { color:var(--blue); }
 .statRail .peakStat { padding-top:21px; border-top:1px solid var(--line); }
-.statRail .mixStat { gap:8px; }
-.mixRow { display:grid; grid-template-columns:72px 1fr; align-items:center; gap:12px; }
-.mixPie {
-  width:72px;
-  height:72px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  position:relative;
-}
-.mixPie::after { content:''; position:absolute; inset:13px; border-radius:50%; background:var(--paper); }
-.statRail .mixPie strong { position:relative; z-index:1; font-size:17px; letter-spacing:-.04em; }
-.mixLegend { display:flex; flex-direction:column; gap:7px; }
-.mixLegend small { display:flex; align-items:center; gap:6px; line-height:1.25; }
-.mixLegend i { flex:0 0 8px; width:8px; height:8px; border-radius:50%; }
-.mixLegend .international { background:var(--red); }
-.mixLegend .domestic { background:#d4d1c7; border:1px solid rgba(21,24,19,.2); }
 .dotKey { margin:0; padding-top:2px; color:var(--muted); font-size:12px; line-height:1.35; }
 
 .timeline { padding:25px 28px 28px; border-bottom:1px solid var(--ink); }
@@ -351,7 +334,6 @@ footer p { margin:0; color:var(--muted); font-size:9px; letter-spacing:.1em; tex
   .flowLegend { right:12px; bottom:47px; left:12px; justify-content:center; flex-wrap:wrap; }
   .statRail { display:grid; grid-template-columns:repeat(2,1fr); gap:22px 14px; padding:24px 18px; }
   .statRail > .eyebrow,.dotKey { grid-column:1/-1; }
-  .statRail .mixStat { grid-column:1/-1; }
   .statRail .peakStat { padding-top:0; border-top:0; }
   .statRail strong { font-size:23px; }
   .timeline { padding:23px 18px 25px; }

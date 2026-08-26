@@ -4,7 +4,7 @@ import path from 'node:path';
 // Inputs:
 // - FSO 2020 commune matrix: https://dam-api.bfs.admin.ch/hub/api/dam/assets/27885394/master
 // - swissBOUNDARIES3D 2020-10 commune centres: https://ogd.swisstopo.admin.ch/ch.swisstopo.swissboundaries3d
-// - FSO Q4 2025 international totals: https://www.pxweb-admin-a.bfs.admin.ch/pxweb/en/px-x-0302010000_101/-/px-x-0302010000_101.px/
+// - FSO Q4 2025 cross-border worker totals: https://www.pxweb-admin-a.bfs.admin.ch/pxweb/en/px-x-0302010000_101/-/px-x-0302010000_101.px/
 // - FSO Swiss Cities 2026 mode split: https://www.bfs.admin.ch/asset/en/DF_SSV_MOB_COM
 
 const args = Object.fromEntries(process.argv.slice(2).map((arg) => arg.split('=', 2)));
