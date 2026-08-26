@@ -17,16 +17,49 @@ import {
 } from './model';
 
 const GENEVA: Point = { code: 'CH6621', name: 'Genève', lat: 46.2044, lon: 6.1432 };
-type Basemap = 'swisstopo' | 'positron' | 'positronNoLabels' | 'toner' | 'backdrop';
+type Basemap =
+  | 'swisstopo'
+  | 'positron'
+  | 'positronNoLabels'
+  | 'stadiaAlidadeSmooth'
+  | 'stadiaAlidadeSmoothDark'
+  | 'stadiaAlidadeSatellite'
+  | 'stadiaOSMBright'
+  | 'stadiaOutdoors'
+  | 'stadiaStamenToner'
+  | 'stadiaStamenTonerLite'
+  | 'stadiaStamenTonerDark'
+  | 'stadiaStamenTonerBlacklite'
+  | 'stadiaStamenTerrain'
+  | 'stadiaStamenWatercolor'
+  | 'backdrop';
 
-const STADIA_MAPS_KEY = process.env.NEXT_PUBLIC_STADIA_MAPS_KEY ?? '';
 const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? '';
 
-const basemapMeta: Record<Basemap, { label: string; available: boolean }> = {
+type BasemapMeta = {
+  label: string;
+  available: boolean;
+  stadiaVariant?: string;
+  extension?: 'jpg';
+  maxZoom?: number;
+  retina?: false;
+};
+
+const basemapMeta: Record<Basemap, BasemapMeta> = {
   swisstopo: { label: 'SwissFederalGeoportal.NationalMapGrey', available: true },
   positron: { label: 'CartoDB.Positron', available: true },
   positronNoLabels: { label: 'CartoDB.PositronNoLabels', available: true },
-  toner: { label: 'Stadia.StamenTonerLite', available: Boolean(STADIA_MAPS_KEY) },
+  stadiaAlidadeSmooth: { label: 'Stadia.AlidadeSmooth', available: true, stadiaVariant: 'alidade_smooth' },
+  stadiaAlidadeSmoothDark: { label: 'Stadia.AlidadeSmoothDark', available: true, stadiaVariant: 'alidade_smooth_dark' },
+  stadiaAlidadeSatellite: { label: 'Stadia.AlidadeSatellite', available: true, stadiaVariant: 'alidade_satellite', extension: 'jpg' },
+  stadiaOSMBright: { label: 'Stadia.OSMBright', available: true, stadiaVariant: 'osm_bright' },
+  stadiaOutdoors: { label: 'Stadia.Outdoors', available: true, stadiaVariant: 'outdoors' },
+  stadiaStamenToner: { label: 'Stadia.StamenToner', available: true, stadiaVariant: 'stamen_toner' },
+  stadiaStamenTonerLite: { label: 'Stadia.StamenTonerLite', available: true, stadiaVariant: 'stamen_toner_lite' },
+  stadiaStamenTonerDark: { label: 'Stadia.StamenTonerDark', available: true, stadiaVariant: 'stamen_toner_dark' },
+  stadiaStamenTonerBlacklite: { label: 'Stadia.StamenTonerBlacklite', available: true, stadiaVariant: 'stamen_toner_blacklite' },
+  stadiaStamenTerrain: { label: 'Stadia.StamenTerrain', available: true, stadiaVariant: 'stamen_terrain', maxZoom: 18 },
+  stadiaStamenWatercolor: { label: 'Stadia.StamenWatercolor', available: true, stadiaVariant: 'stamen_watercolor', extension: 'jpg', maxZoom: 16, retina: false },
   backdrop: { label: 'MapTiler.Backdrop', available: Boolean(MAPTILER_KEY) },
 };
 
@@ -39,10 +72,16 @@ function createBasemapLayer(L: typeof import('leaflet'), basemap: Basemap) {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
     });
   }
-  if (basemap === 'toner') {
-    return L.tileLayer(`https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`, {
-      maxZoom: 20,
-      attribution: '&copy; Stadia Maps &copy; Stamen Design &copy; OpenMapTiles &copy; OpenStreetMap',
+  const stadia = basemapMeta[basemap];
+  if (stadia.stadiaVariant) {
+    const retina = stadia.retina === false ? '' : '{r}';
+    const extension = stadia.extension ?? 'png';
+    const attribution = stadia.stadiaVariant === 'alidade_satellite'
+      ? '&copy; CNES, Distribution Airbus DS, Airbus DS, PlanetObserver (Contains Copernicus Data) | &copy; Stadia Maps &copy; OpenMapTiles &copy; OpenStreetMap'
+      : `&copy; Stadia Maps${stadia.stadiaVariant.startsWith('stamen_') ? ' &copy; Stamen Design' : ''} &copy; OpenMapTiles &copy; OpenStreetMap`;
+    return L.tileLayer(`https://tiles.stadiamaps.com/tiles/${stadia.stadiaVariant}/{z}/{x}/{y}${retina}.${extension}`, {
+      maxZoom: stadia.maxZoom ?? 20,
+      attribution,
     });
   }
   if (basemap === 'backdrop') {
@@ -622,6 +661,10 @@ export default function Home() {
           <a href="https://www.reddit.com/r/geneva/comments/1vxy0q9/an_animated_map_of_all_commuters_to_geneva/" target="_blank" rel="noreferrer">
             <span>07 · Inspiration</span><strong>Habibi Code / Reddit</strong>
             <p>The original Geneva commuter animation that inspired this independent interpretation.</p>
+          </a>
+          <a href="https://docs.stadiamaps.com/map-styles/" target="_blank" rel="noreferrer">
+            <span>08 · Optional basemaps</span><strong>Stadia Maps styles</strong>
+            <p>Authenticated raster tiles used by the temporary map-style selector.</p>
           </a>
         </div>
         <div className="methodNote">
