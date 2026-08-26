@@ -108,7 +108,7 @@ export function flowAt(
 }
 
 export function formatTime(minute: number) {
-  const value = Math.max(0, Math.min(MINUTES_PER_DAY, Math.round(minute)));
+  const value = Math.max(0, Math.min(MINUTES_PER_DAY, Math.floor(minute)));
   if (value === MINUTES_PER_DAY) return '24:00';
   return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
 }

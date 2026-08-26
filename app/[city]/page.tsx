@@ -12,8 +12,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const city = cityBySlug[(await params).city];
   if (!city) return {};
-  const title = `${city.displayName} / 24h — Swiss Border Commutes`;
-  const description = `Follow the daily commuter pulse across ${city.displayName} and its neighbouring countries and cantons.`;
+  const title = `${city.displayName} / 24h | Swiss Border Commutes`;
+  const description = `A 24-hour map of commuting in ${city.displayName} and the surrounding border region.`;
   return {
     title,
     description,

@@ -12,6 +12,7 @@ test('weekday model returns to baseline and has a credible daytime peak', () => 
   assert.ok(model.dailyPeak.value > 90_000);
   assert.ok(model.dailyPeak.minute >= 540 && model.dailyPeak.minute <= 900);
   assert.equal(formatTime(465), '07:45');
+  assert.equal(formatTime(465.9), '07:45');
   assert.equal(formatTime(1440), '24:00');
 });
 
@@ -47,7 +48,7 @@ test('commune data matches its published totals and contains valid routes', () =
   );
 });
 
-test('border city routes are unique and only publish checked data', () => {
+test('border city routes are unique and all publish checked data', () => {
   assert.deepEqual(cities.map(({ slug }) => slug), [
     'geneva',
     'basel',
@@ -56,5 +57,11 @@ test('border city routes are unique and only publish checked data', () => {
     'la-chaux-de-fonds',
   ]);
   assert.equal(new Set(cities.map(({ slug }) => slug)).size, cities.length);
-  assert.deepEqual(cities.filter(({ data, model }) => data && model).map(({ slug }) => slug), ['geneva']);
+  assert.deepEqual(cities.filter(({ data, model }) => data && model).map(({ slug }) => slug), cities.map(({ slug }) => slug));
+  for (const city of cities) {
+    assert.ok(city.data!.corridors.length > 0);
+    assert.equal(city.data!.corridors.length, city.data!.summary.corridors);
+    assert.ok(city.data!.corridors.every(({ commuters, origin, target }) =>
+      commuters > 0 && [origin.lat, origin.lon, target.lat, target.lon].every(Number.isFinite)));
+  }
 });

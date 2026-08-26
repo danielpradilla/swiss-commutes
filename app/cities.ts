@@ -1,4 +1,8 @@
 import { corridors, dataSummary } from './data/geneva.ts';
+import { corridors as baselCorridors, dataSummary as baselSummary } from './data/basel.ts';
+import { corridors as luganoCorridors, dataSummary as luganoSummary } from './data/lugano.ts';
+import { corridors as schaffhausenCorridors, dataSummary as schaffhausenSummary } from './data/schaffhausen.ts';
+import { corridors as chauxCorridors, dataSummary as chauxSummary } from './data/la-chaux-de-fonds.ts';
 import type { CommuteData, Point } from './data/types.ts';
 import type { DailyModelConfig } from './model.ts';
 
@@ -24,22 +28,57 @@ const sharedSources: CitySource[] = [
   {
     label: 'Basemap',
     name: 'swisstopo grey map',
-    description: 'Official national-map tiles, visually softened so commuter flows remain legible.',
+    description: 'The grey national map behind the commuter dots.',
     href: 'https://docs.geo.admin.ch/visualize-data/xyz.html',
   },
   {
     label: 'Swiss locations',
     name: 'swissBOUNDARIES3D',
-    description: 'Official commune boundaries used to locate Swiss origins and workplaces.',
+    description: 'Commune boundaries and centre points for the Swiss side of the map.',
     href: 'https://www.swisstopo.admin.ch/en/landscape-model-swissboundaries3d',
   },
   {
     label: 'Optional basemaps',
     name: 'Stadia Maps styles',
-    description: 'Authenticated raster tiles used by the map-style selector.',
+    description: 'Toner and Outdoors tiles in the map-style menu.',
     href: 'https://docs.stadiamaps.com/map-styles/',
   },
 ];
+
+const currentCitySources: CitySource[] = [
+  {
+    label: 'Border count',
+    name: 'FSO, Q4 2025',
+    description: 'Foreign border workers counted by their Swiss commune of work.',
+    href: 'https://www.pxweb-admin-a.bfs.admin.ch/pxweb/en/px-x-0302010000_101/-/px-x-0302010000_101.px/',
+  },
+  {
+    label: 'Swiss flows',
+    name: 'FSO commune matrix',
+    description: 'Home-to-work pairs inside Switzerland. 2020 is still the latest commune release.',
+    href: 'https://opendata.swiss/en/dataset/erwerbstatige-nach-wohn-und-arbeitsgemeinde-2014-2018-und-2020',
+  },
+  {
+    label: 'Transport split',
+    name: 'Swiss Cities 2026',
+    description: 'Each city’s 2023 split between car, public transport, walking and cycling.',
+    href: 'https://www.bfs.admin.ch/asset/en/DF_SSV_MOB_COM',
+  },
+];
+
+const apiGeoSource: CitySource = {
+  label: 'French communes',
+  name: 'API Géo',
+  description: 'Official French commune names, populations and centre points.',
+  href: 'https://geo.api.gouv.fr/decoupage-administratif/communes',
+};
+
+const osmSource: CitySource = {
+  label: 'Foreign communes',
+  name: 'OpenStreetMap',
+  description: 'Names and centre points for German and Italian communes near the border.',
+  href: 'https://www.openstreetmap.org/copyright',
+};
 
 const geneva: CityConfig = {
   slug: 'geneva',
@@ -71,37 +110,37 @@ const geneva: CityConfig = {
     {
       label: 'French communes',
       name: 'INSEE RP2023',
-      description: 'Weighted residence-to-work records by commune, destination commune and main transport mode.',
+      description: 'French home-to-work records, including the usual mode of travel.',
       href: 'https://www.insee.fr/fr/statistiques/9004795',
     },
     {
       label: 'Swiss communes',
       name: 'OFS commune matrix',
-      description: 'The latest published Swiss origin–destination matrix at commune grain: 2020.',
+      description: 'Swiss home-to-work pairs by commune. 2020 is still the latest release.',
       href: 'https://opendata.swiss/fr/dataset/erwerbstatige-nach-wohn-und-arbeitsgemeinde-2014-2018-und-2020',
     },
     {
       label: 'Current Swiss totals',
       name: 'OCSTAT 2024',
-      description: 'Official incoming and outgoing commuter totals for Geneva, Vaud and its districts.',
+      description: '2024 totals used to bring the Geneva–Vaud flows up to date.',
       href: 'https://statistique.ge.ch/statistique/tel/domaines/11/11_02/T_11_06_2_04.xlsx',
     },
     ...sharedSources.slice(0, 2),
     {
       label: 'French locations',
       name: 'API Géo',
-      description: 'Official commune codes, names and representative centres for Ain and Haute-Savoie.',
+      description: 'Official names and centre points for communes in Ain and Haute-Savoie.',
       href: 'https://geo.api.gouv.fr/decoupage-administratif/communes',
     },
     {
       label: 'Inspiration',
       name: 'Habibi Code / Reddit',
-      description: 'The original Geneva commuter animation that inspired this independent interpretation.',
+      description: 'The Geneva commuter animation that started this project.',
       href: 'https://www.reddit.com/r/geneva/comments/1vxy0q9/an_animated_map_of_all_commuters_to_geneva/',
     },
     sharedSources[2],
   ],
-  methodNote: 'French flows use RP2023 directly. Swiss commune shares use the latest available matrix (2020) and cross-canton totals are scaled to OCSTAT 2024.',
+  methodNote: 'French flows come straight from RP2023. Swiss commune shares come from the 2020 matrix, then the Geneva–Vaud totals are updated to 2024.',
 };
 
 export const cities: CityConfig[] = [
@@ -115,7 +154,20 @@ export const cities: CityConfig[] = [
     fitBounds: [[47.25, 6.9], [48.05, 8.25]],
     maxBounds: [[46.9, 6.5], [48.4, 8.7]],
     cityRadiusLongitude: 0.1,
-    dataYears: 'data in preparation',
+    dataYears: '2020–2025',
+    data: { corridors: baselCorridors, summary: baselSummary },
+    model: {
+      populationGroups: [
+        { people: 35_367, arrival: 440, departure: 1030, arrivalSpread: 42, departureSpread: 52 },
+        { people: 69_635, arrival: 455, departure: 1035, arrivalSpread: 48, departureSpread: 56 },
+        { people: -24_985, arrival: 445, departure: 1020, arrivalSpread: 44, departureSpread: 54 },
+      ],
+      transitPeaks: [{ people: 55_000, centre: 465, spread: 76 }, { people: 49_000, centre: 1035, spread: 88 }],
+      borderGroups: [{ people: 35_367, morning: 450, evening: 1035, morningSpread: 66, eveningSpread: 76 }],
+      home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
+    },
+    sources: [...currentCitySources, apiGeoSource, osmSource, ...sharedSources],
+    methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby French and German communes using population and distance. Modes follow Basel’s 2023 split.',
   },
   {
     slug: 'lugano',
@@ -126,7 +178,20 @@ export const cities: CityConfig[] = [
     fitBounds: [[45.55, 8.1], [46.55, 9.6]],
     maxBounds: [[45.2, 7.7], [46.9, 10]],
     cityRadiusLongitude: 0.1,
-    dataYears: 'data in preparation',
+    dataYears: '2020–2025',
+    data: { corridors: luganoCorridors, summary: luganoSummary },
+    model: {
+      populationGroups: [
+        { people: 15_663, arrival: 445, departure: 1025, arrivalSpread: 42, departureSpread: 52 },
+        { people: 18_248, arrival: 460, departure: 1035, arrivalSpread: 48, departureSpread: 56 },
+        { people: -7_197, arrival: 450, departure: 1020, arrivalSpread: 44, departureSpread: 54 },
+      ],
+      transitPeaks: [{ people: 17_300, centre: 465, spread: 76 }, { people: 15_600, centre: 1035, spread: 88 }],
+      borderGroups: [{ people: 15_663, morning: 450, evening: 1035, morningSpread: 66, eveningSpread: 76 }],
+      home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
+    },
+    sources: [...currentCitySources, osmSource, ...sharedSources],
+    methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby Italian communes using population and distance. Modes follow Lugano’s 2023 split.',
   },
   {
     slug: 'schaffhausen',
@@ -137,7 +202,20 @@ export const cities: CityConfig[] = [
     fitBounds: [[47.4, 7.8], [48.1, 9.1]],
     maxBounds: [[47.1, 7.4], [48.4, 9.5]],
     cityRadiusLongitude: 0.08,
-    dataYears: 'data in preparation',
+    dataYears: '2020–2025',
+    data: { corridors: schaffhausenCorridors, summary: schaffhausenSummary },
+    model: {
+      populationGroups: [
+        { people: 3_218, arrival: 440, departure: 1025, arrivalSpread: 40, departureSpread: 50 },
+        { people: 12_322, arrival: 455, departure: 1035, arrivalSpread: 46, departureSpread: 54 },
+        { people: -7_764, arrival: 445, departure: 1020, arrivalSpread: 42, departureSpread: 52 },
+      ],
+      transitPeaks: [{ people: 9_800, centre: 465, spread: 74 }, { people: 8_900, centre: 1035, spread: 86 }],
+      borderGroups: [{ people: 3_218, morning: 450, evening: 1035, morningSpread: 66, eveningSpread: 76 }],
+      home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
+    },
+    sources: [...currentCitySources, osmSource, ...sharedSources],
+    methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby German communes using population and distance. Modes follow Schaffhausen’s 2023 split.',
   },
   {
     slug: 'la-chaux-de-fonds',
@@ -148,7 +226,20 @@ export const cities: CityConfig[] = [
     fitBounds: [[46.7, 5.9], [47.5, 7.5]],
     maxBounds: [[46.4, 5.5], [47.8, 7.9]],
     cityRadiusLongitude: 0.08,
-    dataYears: 'data in preparation',
+    dataYears: '2020–2025',
+    data: { corridors: chauxCorridors, summary: chauxSummary },
+    model: {
+      populationGroups: [
+        { people: 5_580, arrival: 435, departure: 1015, arrivalSpread: 40, departureSpread: 50 },
+        { people: 7_469, arrival: 450, departure: 1025, arrivalSpread: 46, departureSpread: 54 },
+        { people: -5_158, arrival: 440, departure: 1010, arrivalSpread: 42, departureSpread: 52 },
+      ],
+      transitPeaks: [{ people: 7_700, centre: 455, spread: 72 }, { people: 6_900, centre: 1025, spread: 84 }],
+      borderGroups: [{ people: 5_580, morning: 445, evening: 1025, morningSpread: 64, eveningSpread: 74 }],
+      home: { departure: 445, return: 1025, departureSpread: 64, returnSpread: 74 },
+    },
+    sources: [...currentCitySources, apiGeoSource, ...sharedSources],
+    methodNote: 'Swiss commune pairs are observed in 2020. The foreign total is from Q4 2025, but the FSO table does not publish the home commune abroad. Those workers are spread across nearby French communes using population and distance. Modes follow La Chaux-de-Fonds’ 2023 split.',
   },
 ];
 

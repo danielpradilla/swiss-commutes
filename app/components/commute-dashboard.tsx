@@ -84,29 +84,33 @@ const hash = (value: number) => {
 
 function prepareMapData(corridors: Corridor[]) {
   const communeNodes = Array.from(corridors.reduce((nodes, corridor) => {
-    const node = nodes.get(corridor.origin.code) ?? {
-      point: corridor.origin,
+    const remote = corridor.direction === 'inbound' ? corridor.origin : corridor.target;
+    const node = nodes.get(remote.code) ?? {
+      point: remote,
       total: 0,
       byMode: { car: 0, transit: 0, soft: 0 },
     };
     node.total += corridor.commuters;
     node.byMode[corridor.mode] += corridor.commuters;
-    nodes.set(corridor.origin.code, node);
+    nodes.set(remote.code, node);
     return nodes;
   }, new Map<string, CommuneNode>()).values());
 
-  const primaryCorridorByOrigin = new Map<string, number>();
+  const primaryCorridorByCommune = new Map<string, number>();
   corridors.forEach((corridor, index) => {
-    const primary = primaryCorridorByOrigin.get(corridor.origin.code);
+    const code = corridor.direction === 'inbound' ? corridor.origin.code : corridor.target.code;
+    const primary = primaryCorridorByCommune.get(code);
     if (primary === undefined || corridors[primary].commuters < corridor.commuters) {
-      primaryCorridorByOrigin.set(corridor.origin.code, index);
+      primaryCorridorByCommune.set(code, index);
     }
   });
 
   const dots = corridors.flatMap((corridor, corridorIndex) =>
     Array.from({
       length: Math.floor(corridor.commuters / 900) +
-        (primaryCorridorByOrigin.get(corridor.origin.code) === corridorIndex ? 1 : 0),
+        (primaryCorridorByCommune.get(
+          corridor.direction === 'inbound' ? corridor.origin.code : corridor.target.code,
+        ) === corridorIndex ? 1 : 0),
     }, (_, index) => {
       const seed = corridorIndex * 101 + index + 1;
       const distance = Math.hypot(
@@ -128,6 +132,18 @@ function prepareMapData(corridors: Corridor[]) {
 
 const formatNumber = (value: number) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
 const formatDelta = (value: number) => `${value >= 0 ? '+' : '−'}${formatNumber(Math.abs(value))}`;
+type ClockMode = 'realtime' | 'fast' | 'paused';
+
+function genevaTime() {
+  const values = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Zurich',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts().map((part) => [part.type, Number(part.value)]));
+  return values.hour * 60 + values.minute + values.second / 60;
+}
 
 type DailyModel = ReturnType<typeof createDailyModel>;
 type MapData = ReturnType<typeof prepareMapData>;
@@ -518,13 +534,13 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
         <div className="intro">
           <p className="eyebrow">A commuter portrait · {city.dataYears}</p>
           <CityTitle city={city} cityOptions={cityOptions} />
-          <p className="lede">Follow the daily pulse commune by commune across {city.displayName} and its neighbouring countries and cantons.</p>
+          <p className="lede">A day of commuting in {city.displayName}, traced commune by commune across {city.neighbours}.</p>
         </div>
       </section>
       <section className="plannedCity">
         <p className="eyebrow">City route ready</p>
         <h2>{city.displayName} data is next.</h2>
-        <p>The shared map, chart, animation, filters and sources template is in place. This page will activate when its official commune-level commuter dataset has been prepared and checked.</p>
+        <p>The map is ready. This page will go live once its commuter counts have been checked.</p>
         <a href="../geneva/">View the completed Geneva portrait →</a>
       </section>
       <footer>
@@ -537,7 +553,7 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
 
 function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityOption[] }) {
   const [time, setTime] = useState(465);
-  const [playing, setPlaying] = useState(false);
+  const [clockMode, setClockMode] = useState<ClockMode>('realtime');
   const [modes, setModes] = useState<Record<Mode, boolean>>({
     car: true,
     transit: true,
@@ -548,12 +564,17 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
   const mapData = useMemo(() => prepareMapData(city.data!.corridors), [city.data]);
 
   useEffect(() => {
-    if (!playing) return;
-    const timer = window.setInterval(() => {
-      setTime((current) => current >= MINUTES_PER_DAY ? 0 : current + 5);
-    }, 70);
+    if (clockMode === 'paused') return;
+    if (clockMode === 'realtime') {
+      const sync = () => setTime(genevaTime());
+      sync();
+      const timer = window.setInterval(sync, 1_000);
+      return () => window.clearInterval(timer);
+    }
+    const timer = window.setInterval(() => setTime((current) =>
+      (current + 5) % MINUTES_PER_DAY), 70);
     return () => window.clearInterval(timer);
-  }, [playing]);
+  }, [clockMode]);
 
   const stats = useMemo(() => ({
     transit: model.commutersInTransit(time),
@@ -573,19 +594,19 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
         <div className="intro">
           <p className="eyebrow">A commuter portrait · {city.dataYears} official counts</p>
           <CityTitle city={city} cityOptions={cityOptions} />
-          <p className="lede">Follow the daily pulse commune by commune across {city.displayName} and its neighbouring countries and cantons.</p>
+          <p className="lede">A day of commuting in {city.displayName}, traced commune by commune across {city.neighbours}.</p>
         </div>
         <div className="clockBlock">
           <span>Local time</span>
           <strong>{formatTime(time)}</strong>
-          <small>MODELLED WEEKDAY</small>
+          <small>{clockMode === 'realtime' ? 'GENEVA TIME' : clockMode === 'fast' ? 'FAST-FORWARD' : 'PAUSED'}</small>
         </div>
       </section>
 
       <section className="dashboard" aria-label={`${city.name} commuter map and current statistics`}>
         <div className="mapPanel">
           <MapCanvas time={time} modes={modes} basemap={basemap} city={city} model={model} mapData={mapData} />
-          <div className="mapNote">{basemapMeta[basemap].label} · {formatNumber(city.data!.summary.originCommunes)} origins · marker area = commuter volume</div>
+          <div className="mapNote">{basemapMeta[basemap].label} · {formatNumber(city.data!.summary.originCommunes)} communes · circle size = commuter count</div>
           <div className="modeFilters" aria-label="Show transport modes">
             {(Object.keys(modeMeta) as Mode[]).map((mode) => (
               <button
@@ -641,7 +662,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
             <strong>{formatDelta(model.dailyPeak.value)}</strong>
             <small>at {formatTime(model.dailyPeak.minute)}</small>
           </div>
-          <p className="dotKey">Commune markers scale with commuter volume and dim while their commuters are away. Known arrivals blip; incoming {city.name} flows wash across the city because their exact endpoint is not shown.</p>
+          <p className="dotKey">Circles shrink while commuters are away and flash when a journey arrives. Trips into {city.name} light the city as a whole because the data stops at the commune boundary.</p>
         </aside>
       </section>
 
@@ -659,14 +680,32 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
         </div>
         <PopulationChart time={time} city={city} model={model} />
         <div className="controls">
-          <button
-            className="playButton"
-            type="button"
-            aria-label={playing ? 'Pause animation' : 'Play animation'}
-            onClick={() => setPlaying((current) => !current)}
-          >
-            {playing ? 'Ⅱ' : '▶'}
-          </button>
+          <div className="clockControls" aria-label="Clock speed">
+            <button
+              className="playButton"
+              type="button"
+              aria-label="Follow real Geneva time"
+              aria-pressed={clockMode === 'realtime'}
+              data-tooltip="Real time"
+              onClick={() => setClockMode((current) => current === 'realtime' ? 'paused' : 'realtime')}
+            >▶</button>
+            <button
+              className="playButton"
+              type="button"
+              aria-label="Fast-forward through the day"
+              aria-pressed={clockMode === 'fast'}
+              data-tooltip="Fast-forward"
+              onClick={() => setClockMode((current) => current === 'fast' ? 'paused' : 'fast')}
+            >▶▶</button>
+            <button
+              className="playButton"
+              type="button"
+              aria-label="Pause the clock"
+              aria-pressed={clockMode === 'paused'}
+              data-tooltip="Pause"
+              onClick={() => setClockMode('paused')}
+            >Ⅱ</button>
+          </div>
           <label>
             <span className="srOnly">Time of day</span>
             <input
@@ -674,9 +713,12 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
               type="range"
               min="0"
               max={MINUTES_PER_DAY}
-              step="5"
+              step="1"
               value={time}
-              onInput={(event) => setTime(Number(event.currentTarget.value))}
+              onInput={(event) => {
+                setClockMode('paused');
+                setTime(Number(event.currentTarget.value));
+              }}
             />
           </label>
           <output>{formatTime(time)}</output>
@@ -686,11 +728,11 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
       <section className="method" id="sources">
         <div className="methodIntro">
           <p className="eyebrow">Sources & method</p>
-          <h2>Counts are observed.<br /><em>Timing is a model.</em></h2>
+          <h2>The counts are real.<br /><em>The clock isn’t.</em></h2>
           <p>
-            The public datasets describe where people live, where they work and—where available—
-            their travel mode. They do not contain a minute-by-minute trace. Departure times,
-            durations, routes and the population curve are therefore an explanatory simulation.
+            The source tables tell us where commuters live and work. Some also record their usual
+            way of travelling. None says when anyone left home, which road they took or how long the
+            trip lasted. Those parts are modelled so the map can move.
           </p>
         </div>
         <div className="sourceGrid">
@@ -702,17 +744,17 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
           ))}
         </div>
         <div className="methodNote">
-          <strong>Read this visualization as a pattern, not a headcount.</strong>
+          <strong>What the dots mean</strong>
           <p>
-            {city.methodNote} Animated marks are representative journeys, never people or devices.
-            Commune marker area represents commuter volume—not total population; paths and timing remain schematic.
+            {city.methodNote} Each moving dot stands for a bundle of trips, not one person.
+            Circle size follows commuter count. Routes are simplified and timing is approximate.
           </p>
         </div>
       </section>
 
       <footer>
         <a className="wordmark" href="#top">SWISS BORDER / 24H ↑</a>
-        <p>Independent data portrait · built in Geneva · data through 2024</p>
+        <p>Independent data portrait · built in Geneva · {city.dataYears}</p>
       </footer>
     </main>
   );
