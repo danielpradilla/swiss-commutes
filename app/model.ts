@@ -107,32 +107,21 @@ export function flowAt(
   return null;
 }
 
-export function commuterMixAt(corridors: import('./data/types.ts').Corridor[], minute: number) {
+export function commuterMix(corridors: import('./data/types.ts').Corridor[]) {
   let domestic = 0;
   let international = 0;
   for (const corridor of corridors) {
-    const remote = corridor.direction === 'inbound' ? corridor.origin : corridor.target;
-    const city = corridor.direction === 'inbound' ? corridor.target : corridor.origin;
-    const meanLatitude = (remote.lat + city.lat) / 2 * Math.PI / 180;
-    const distance = Math.hypot(
-      (remote.lat - city.lat) * 111,
-      (remote.lon - city.lon) * 111 * Math.cos(meanLatitude),
-    );
-    const isInternational = !remote.code.startsWith('CH');
-    const reach = Math.min(42, distance * 0.16) + (isInternational ? 10 : 0);
-    const spread = 48 + Math.min(44, distance * 0.28) + (isInternational ? 8 : 0);
-    const intensity = gaussian(minute, 465 - reach, spread) + gaussian(minute, 1035 + reach, spread + 10);
-    if (isInternational) international += corridor.commuters * intensity;
-    else domestic += corridor.commuters * intensity;
+    const isInternational = !corridor.origin.code.startsWith('CH') ||
+      !corridor.target.code.startsWith('CH');
+    if (isInternational) international += corridor.commuters;
+    else domestic += corridor.commuters;
   }
-  const roundedDomestic = Math.round(domestic);
-  const roundedInternational = Math.round(international);
-  const total = roundedDomestic + roundedInternational;
+  const total = domestic + international;
   return {
-    domestic: roundedDomestic,
-    international: roundedInternational,
+    domestic,
+    international,
     total,
-    internationalShare: total >= 50 ? roundedInternational / total : null,
+    internationalShare: total > 0 ? international / total : null,
   };
 }
 

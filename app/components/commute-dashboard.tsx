@@ -6,7 +6,7 @@ import type { CityConfig } from '../cities';
 import type { Corridor, Mode, Point } from '../data/types';
 import {
   arrivalBlip,
-  commuterMixAt,
+  commuterMix,
   createDailyModel,
   flowAt,
   formatTime,
@@ -135,11 +135,12 @@ const formatNumber = (value: number) => String(Math.round(value)).replace(/\B(?=
 const formatDelta = (value: number) => `${value >= 0 ? '+' : '−'}${formatNumber(Math.abs(value))}`;
 type ClockMode = 'realtime' | 'fast' | 'paused';
 
-function CommuterMix({ mix }: { mix: ReturnType<typeof commuterMixAt> }) {
-  const percentage = mix.internationalShare === null ? null : Math.round(mix.internationalShare * 100);
+function CommuterMix({ mix }: { mix: ReturnType<typeof commuterMix> }) {
+  const percentage = mix.internationalShare === null ? null : Math.round(mix.internationalShare * 1_000) / 10;
+  const percentageLabel = percentage === null ? '—' : `${percentage.toFixed(1)}%`;
   return (
     <div className="mixStat">
-      <span>International share</span>
+      <span>International flows</span>
       <div className="mixRow">
         <div
           className="mixPie"
@@ -148,17 +149,17 @@ function CommuterMix({ mix }: { mix: ReturnType<typeof commuterMixAt> }) {
             : `conic-gradient(var(--red) 0 ${percentage}%, #d4d1c7 ${percentage}% 100%)` }}
           role="img"
           aria-label={percentage === null
-            ? 'No commuters are currently in transit'
-            : `${percentage}% of commuters currently in transit are international`}
+            ? 'No mapped commuter flows'
+            : `${percentage}% of mapped commuters have an international origin or destination`}
         >
-          <strong>{percentage === null ? '—' : `${percentage}%`}</strong>
+          <strong>{percentageLabel}</strong>
         </div>
         <div className="mixLegend">
           <small><i className="international" />International {formatNumber(mix.international)}</small>
           <small><i className="domestic" />Within Switzerland {formatNumber(mix.domestic)}</small>
         </div>
       </div>
-      <small>estimated commuters travelling now</small>
+      <small>share of all mapped commuter flows</small>
     </div>
   );
 }
@@ -608,7 +609,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
     transit: model.commutersInTransit(time),
     population: model.populationChange(time),
     crossings: model.borderCrossings(time),
-    mix: commuterMixAt(city.data!.corridors, time),
+    mix: commuterMix(city.data!.corridors),
   }), [city.data, model, time]);
 
   return (
@@ -686,7 +687,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
             <strong>{formatNumber(stats.crossings)}</strong>
             <small>cumulative today</small>
           </div>
-          <CommuterMix mix={stats.mix} />
+          {city.showInternationalShare && <CommuterMix mix={stats.mix} />}
           <div className="peakStat">
             <span>Maximum</span>
             <strong>{formatDelta(model.dailyPeak.value)}</strong>
@@ -777,9 +778,10 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
           <strong>What the dots mean</strong>
           <p>
             {city.methodNote} Each moving dot stands for a bundle of trips, not one person.
-            Circle size follows commuter count. The donut compares international and Swiss commuters
-            estimated to be travelling at the selected time; it disappears when too few people are moving
-            for a useful percentage. Routes are simplified and timing is approximate.
+            Circle size follows commuter count. {city.showInternationalShare && <>The donut counts every
+            mapped commuter once: a flow is international when its origin or destination is outside
+            Switzerland. It excludes people who live and work in the same commune. </>}Routes are simplified
+            and timing is approximate.
           </p>
         </div>
       </section>

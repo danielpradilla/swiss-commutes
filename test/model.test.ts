@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { cities, cityBySlug } from '../app/cities.ts';
 import { corridors, dataSummary } from '../app/data/geneva.ts';
-import { arrivalBlip, commuterMixAt, createDailyModel, flowAt, formatTime } from '../app/model.ts';
+import { arrivalBlip, commuterMix, createDailyModel, flowAt, formatTime } from '../app/model.ts';
 
 const model = createDailyModel(cityBySlug.geneva.model!);
 
@@ -79,13 +79,24 @@ test('city routes are unique and all publish checked data', () => {
   }
 });
 
-test('international commuter share responds to the time of day', () => {
-  const zurich = cityBySlug.zurich.data!.corridors;
-  const early = commuterMixAt(zurich, 360);
-  const rush = commuterMixAt(zurich, 480);
-  assert.ok(early.internationalShare !== null && rush.internationalShare !== null);
-  assert.ok(early.internationalShare > 0 && early.internationalShare < 1);
-  assert.notEqual(Math.round(early.internationalShare * 1000), Math.round(rush.internationalShare * 1000));
-  assert.equal(rush.domestic + rush.international, rush.total);
-  assert.equal(commuterMixAt(zurich, 720).internationalShare, null);
+test('international share counts each mapped commuter flow once', () => {
+  for (const city of cities) {
+    const corridors = city.data!.corridors;
+    const mix = commuterMix(corridors);
+    const international = corridors
+      .filter(({ origin, target }) => !origin.code.startsWith('CH') || !target.code.startsWith('CH'))
+      .reduce((sum, corridor) => sum + corridor.commuters, 0);
+    const total = corridors.reduce((sum, corridor) => sum + corridor.commuters, 0);
+    assert.equal(mix.international, international, city.slug);
+    assert.equal(mix.total, total, city.slug);
+    assert.equal(mix.domestic + mix.international, mix.total, city.slug);
+    assert.equal(mix.internationalShare, international / total, city.slug);
+  }
+});
+
+test('international share is shown only for the border-city portraits', () => {
+  assert.deepEqual(
+    cities.filter(({ showInternationalShare }) => showInternationalShare).map(({ slug }) => slug),
+    ['geneva', 'basel', 'lugano', 'schaffhausen', 'la-chaux-de-fonds'],
+  );
 });

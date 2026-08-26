@@ -25,6 +25,7 @@ export type CityConfig = {
   maxBounds: [[number, number], [number, number]];
   cityRadiusLongitude: number;
   dataYears: string;
+  showInternationalShare?: boolean;
   data?: CommuteData;
   model?: DailyModelConfig;
   sources?: CitySource[];
@@ -133,6 +134,7 @@ const geneva: CityConfig = {
   maxBounds: [[45.4, 4.45], [47.2, 7.55]],
   cityRadiusLongitude: 0.12,
   dataYears: '2023–2024',
+  showInternationalShare: true,
   data: { corridors, summary: dataSummary },
   model: {
     populationGroups: [
@@ -198,6 +200,7 @@ const existingCities: CityConfig[] = [
     maxBounds: [[46.9, 6.5], [48.4, 8.7]],
     cityRadiusLongitude: 0.1,
     dataYears: '2020–2025',
+    showInternationalShare: true,
     data: { corridors: baselCorridors, summary: baselSummary },
     model: {
       populationGroups: [
@@ -222,6 +225,7 @@ const existingCities: CityConfig[] = [
     maxBounds: [[45.2, 7.7], [46.9, 10]],
     cityRadiusLongitude: 0.1,
     dataYears: '2020–2025',
+    showInternationalShare: true,
     data: { corridors: luganoCorridors, summary: luganoSummary },
     model: {
       populationGroups: [
@@ -246,6 +250,7 @@ const existingCities: CityConfig[] = [
     maxBounds: [[47.1, 7.4], [48.4, 9.5]],
     cityRadiusLongitude: 0.08,
     dataYears: '2020–2025',
+    showInternationalShare: true,
     data: { corridors: schaffhausenCorridors, summary: schaffhausenSummary },
     model: {
       populationGroups: [
@@ -270,6 +275,7 @@ const existingCities: CityConfig[] = [
     maxBounds: [[46.4, 5.5], [47.8, 7.9]],
     cityRadiusLongitude: 0.08,
     dataYears: '2020–2025',
+    showInternationalShare: true,
     data: { corridors: chauxCorridors, summary: chauxSummary },
     model: {
       populationGroups: [
