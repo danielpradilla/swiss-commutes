@@ -113,8 +113,10 @@ function prepareMapData(corridors: Corridor[], citySlug: string) {
     }
   });
 
-  const dots = corridors.flatMap((corridor, corridorIndex) =>
-    Array.from({
+  const dots = corridors.flatMap((corridor, corridorIndex) => {
+    const route = routes[corridorIndex];
+    if (ROUTED_GEOMETRY_ENABLED && !route) return [];
+    return Array.from({
       length: Math.floor(corridor.commuters / 900) +
         (primaryCorridorByCommune.get(
           corridor.direction === 'inbound' ? corridor.origin.code : corridor.target.code,
@@ -127,14 +129,14 @@ function prepareMapData(corridors: Corridor[], citySlug: string) {
       );
       return {
         corridor,
-        route: routes[corridorIndex],
+        route,
         bend: (hash(seed * 5) - 0.5) * 0.18,
         inbound: 285 + Math.pow(hash(seed), 1.25) * 285,
         outbound: 895 + Math.pow(hash(seed * 3), 0.9) * 260,
         duration: 16 + distance * 115 + hash(seed * 7) * 15,
       };
-    }),
-  );
+    });
+  });
 
   const routedCorridors = corridors.flatMap((corridor, index) =>
     routes[index] ? [{ corridor, route: routes[index] }] : []);
@@ -698,7 +700,7 @@ function ReadyCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
       <section className="dashboard" aria-label={`${city.name} commuter map and current statistics`}>
         <div className="mapPanel">
           <MapCanvas time={time} modes={modes} basemap={basemap} city={city} model={model} mapData={mapData} />
-          <div className="mapNote">{basemapMeta[basemap].label} · {formatNumber(city.data!.summary.originCommunes)} communes · dashed = routed preview</div>
+          <div className="mapNote">{basemapMeta[basemap].label} · {formatNumber(city.data!.summary.originCommunes)} communes · {mapData.routedCorridors.length} routed preview paths</div>
           <div className="modeFilters" aria-label="Show transport modes">
             {(Object.keys(modeMeta) as Mode[]).map((mode) => (
               <button
