@@ -131,6 +131,23 @@ h1 {
 }
 .modeFilters button:hover::after,.modeFilters button:focus-visible::after { opacity:1; transform:translate(-50%,0); }
 .modeFilters button:focus-visible,.playButton:focus-visible,input:focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+.mapStyleSelect {
+  position:absolute;
+  z-index:1000;
+  top:15px;
+  right:55px;
+  width:min(340px,calc(100% - 230px));
+  height:42px;
+  padding:0 30px 0 12px;
+  border:1px solid rgba(21,24,19,.42);
+  border-radius:99px;
+  background:rgba(242,239,231,.94);
+  color:var(--ink);
+  font:700 8px var(--font-geist),sans-serif;
+  letter-spacing:.04em;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+}
 .flowLegend {
   position:absolute;
   z-index:1000;
@@ -247,6 +264,7 @@ footer p { margin:0; color:var(--muted); font-size:9px; letter-spacing:.1em; tex
   .modeFilters { right:12px; left:12px; }
   .mapBase .leaflet-top.leaflet-right { top:52px; }
   .modeFilters button { flex:0 0 42px; }
+  .mapStyleSelect { top:64px; right:62px; left:12px; width:auto; }
   .mapNote { right:12px; left:12px; text-align:center; }
   .flowLegend { right:12px; bottom:47px; }
   .statRail { display:grid; grid-template-columns:repeat(2,1fr); gap:22px 14px; padding:24px 18px; }

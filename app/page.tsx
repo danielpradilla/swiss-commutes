@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Map as LeafletMap } from 'leaflet';
+import type { Map as LeafletMap, TileLayer } from 'leaflet';
 import { corridors, dataSummary, type Mode, type Point } from './commutes';
 import {
   arrivalBlip,
@@ -17,6 +17,37 @@ import {
 } from './model';
 
 const GENEVA: Point = { code: 'CH6621', name: 'Genève', lat: 46.2044, lon: 6.1432 };
+type Basemap = 'swisstopo' | 'toner' | 'backdrop';
+
+const STADIA_MAPS_KEY = process.env.NEXT_PUBLIC_STADIA_MAPS_KEY ?? '';
+const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? '';
+
+const basemapMeta: Record<Basemap, { label: string; available: boolean }> = {
+  swisstopo: { label: 'SwissFederalGeoportal.NationalMapGrey', available: true },
+  toner: { label: 'Stadia.StamenTonerLite', available: Boolean(STADIA_MAPS_KEY) },
+  backdrop: { label: 'MapTiler.Backdrop', available: Boolean(MAPTILER_KEY) },
+};
+
+function createBasemapLayer(L: typeof import('leaflet'), basemap: Basemap) {
+  if (basemap === 'toner') {
+    return L.tileLayer(`https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`, {
+      maxZoom: 20,
+      attribution: '&copy; Stadia Maps &copy; Stamen Design &copy; OpenMapTiles &copy; OpenStreetMap',
+    });
+  }
+  if (basemap === 'backdrop') {
+    return L.tileLayer(`https://api.maptiler.com/maps/backdrop/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(MAPTILER_KEY)}`, {
+      maxZoom: 21,
+      tileSize: 512,
+      zoomOffset: -1,
+      attribution: '&copy; MapTiler &copy; OpenStreetMap contributors',
+    });
+  }
+  return L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
+  });
+}
 
 const modeMeta: Record<Mode, { label: string }> = {
   car: { label: 'Car' },
@@ -91,19 +122,35 @@ const dots = corridors.flatMap((corridor, corridorIndex) =>
 const formatNumber = (value: number) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
 const formatDelta = (value: number) => `${value >= 0 ? '+' : '−'}${formatNumber(Math.abs(value))}`;
 
-function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean> }) {
+function MapCanvas({ time, modes, basemap }: { time: number; modes: Record<Mode, boolean>; basemap: Basemap }) {
   const mapElement = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
+  const tileLayerRef = useRef<TileLayer | null>(null);
   const drawRef = useRef<() => void>(() => undefined);
   const timeRef = useRef(time);
   const modesRef = useRef(modes);
+  const basemapRef = useRef(basemap);
 
   useEffect(() => {
     timeRef.current = time;
     modesRef.current = modes;
+    basemapRef.current = basemap;
     drawRef.current();
-  }, [time, modes]);
+  }, [time, modes, basemap]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    let disposed = false;
+    void import('leaflet').then((L) => {
+      if (disposed || !mapRef.current) return;
+      const layer = createBasemapLayer(L, basemap);
+      tileLayerRef.current?.remove();
+      tileLayerRef.current = layer.addTo(map);
+    });
+    return () => { disposed = true; };
+  }, [basemap]);
 
   useEffect(() => {
     let disposed = false;
@@ -125,10 +172,8 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
       });
       mapRef.current = map;
       map.fitBounds([[45.72, 4.72], [46.7, 7.12]], { padding: [18, 18] });
-      L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
-      }).addTo(map);
+      map.zoomIn();
+      tileLayerRef.current = createBasemapLayer(L, basemapRef.current).addTo(map);
       L.control.zoom({ position: 'topright' }).addTo(map);
       L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 110 }).addTo(map);
 
@@ -268,6 +313,7 @@ function MapCanvas({ time, modes }: { time: number; modes: Record<Mode, boolean>
       observer?.disconnect();
       mapRef.current?.remove();
       mapRef.current = null;
+      tileLayerRef.current = null;
     };
   }, []);
 
@@ -388,6 +434,7 @@ export default function Home() {
     transit: true,
     soft: true,
   });
+  const [basemap, setBasemap] = useState<Basemap>('swisstopo');
 
   useEffect(() => {
     if (!playing) return;
@@ -426,8 +473,8 @@ export default function Home() {
 
       <section className="dashboard" aria-label="Geneva commuter map and current statistics">
         <div className="mapPanel">
-          <MapCanvas time={time} modes={modes} />
-          <div className="mapNote">swisstopo grey national map · {formatNumber(dataSummary.originCommunes)} origins · marker area = commuter volume</div>
+          <MapCanvas time={time} modes={modes} basemap={basemap} />
+          <div className="mapNote">{basemapMeta[basemap].label} · {formatNumber(dataSummary.originCommunes)} origins · marker area = commuter volume</div>
           <div className="modeFilters" aria-label="Show transport modes">
             {(Object.keys(modeMeta) as Mode[]).map((mode) => (
               <button
@@ -442,6 +489,19 @@ export default function Home() {
               </button>
             ))}
           </div>
+          <select
+            className="mapStyleSelect"
+            aria-label="Map style"
+            value={basemap}
+            onChange={(event) => setBasemap(event.currentTarget.value as Basemap)}
+            title="Temporary map style selector"
+          >
+            {(Object.keys(basemapMeta) as Basemap[]).map((style) => (
+              <option key={style} value={style} disabled={!basemapMeta[style].available}>
+                {basemapMeta[style].label}{basemapMeta[style].available ? '' : ' — key needed'}
+              </option>
+            ))}
+          </select>
           <div className="flowLegend" aria-label="Flow direction colors">
             <span><i className="inbound" />{flowMeta.inbound.label}</span>
             <span><i className="outbound" />{flowMeta.outbound.label}</span>
