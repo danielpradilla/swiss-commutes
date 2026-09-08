@@ -1,0 +1,98 @@
+[
+  {
+    "id": "F01",
+    "status": "Partly corrected",
+    "title": "Direction-specific mode shares",
+    "evidence": "Six cities now use domestic incoming-worker shares. Other pairs use home-city outgoing shares where available, otherwise resident shares as an explicit proxy. Aggregate and historical shares do not establish actual OD modes."
+  },
+  {
+    "id": "F02",
+    "status": "Corrected",
+    "title": "Shared journeys agree across pages",
+    "evidence": "One destination-first rule allocates each Swiss OD pair. All three mode counts are reconciled across city pages."
+  },
+  {
+    "id": "F03",
+    "status": "Corrected",
+    "title": "Motorcycles are disclosed",
+    "evidence": "The button is labelled Car / motorcycle. All counts are people, not vehicles."
+  },
+  {
+    "id": "F04",
+    "status": "Corrected",
+    "title": "No-journey records excluded",
+    "evidence": "157.64 weighted INSEE no-transport people are excluded from travel. Rounding once per origin, workplace and category also changes the rounded total."
+  },
+  {
+    "id": "F05",
+    "status": "Open limitation",
+    "title": "Active-mode residual",
+    "evidence": "French records and the six-city study identify active travel. The resident-table fallback still treats the residual as a walking/cycling estimate; it may contain other modes."
+  },
+  {
+    "id": "F06",
+    "status": "Corrected",
+    "title": "Geneva uses a consistent Swiss scope",
+    "evidence": "Vaud-only totals in both directions: 23,398 inbound and 6,881 outbound. Other cantons and foreign/unknown outbound groups are disclosed as outside the model."
+  },
+  {
+    "id": "F07",
+    "status": "Corrected",
+    "title": "Geneva workplaces retained",
+    "evidence": "The page is named Geneva canton. French records retain all 45 reported workplace communes; Swiss routes use known commune pairs. Other pages represent municipalities."
+  },
+  {
+    "id": "F08",
+    "status": "Partly corrected",
+    "title": "Coverage disclosed",
+    "evidence": "Map, counter and chart now use the same routed cohort. The page shows source-to-mapped totals and mapped-to-routed coverage by mode. Missing rail, bus and foreign itineraries remain a substantial limitation."
+  },
+  {
+    "id": "F09",
+    "status": "Partly corrected",
+    "title": "Unrouted active estimates removed from chart",
+    "evidence": "Only local, accepted active routes contribute to the chart. Implausible long-distance residual allocations are retained in the audit as uncertainty, not silently reassigned to cars."
+  },
+  {
+    "id": "F10",
+    "status": "Corrected",
+    "title": "One journey clock",
+    "evidence": "All modes share departure waves, arrival accounting and continuous counters. Population reflects arrival at a workplace endpoint and departure for home, not measured municipal-boundary crossings."
+  },
+  {
+    "id": "F11",
+    "status": "Open limitation",
+    "title": "Illustrative working day",
+    "evidence": "The full cohort travels daily in the model. Attendance, remote work, holidays, shift work and observed departure distributions are not calibrated."
+  },
+  {
+    "id": "F12",
+    "status": "Open limitation",
+    "title": "Rail paths are possible geometry",
+    "evidence": "Rail paths do not prove a valid itinerary, actual train service, station choice or passenger load. Travel time remains a distance heuristic."
+  },
+  {
+    "id": "F13",
+    "status": "Open limitation",
+    "title": "Foreign origins outside Geneva",
+    "evidence": "Workplace totals match FSO, but foreign homes and modes are allocated. Chiasso and Mendrisio reuse Lugano’s foreign-origin proportions; that is a regional proxy."
+  },
+  {
+    "id": "F14",
+    "status": "Partly corrected",
+    "title": "Vintages and exclusions exposed",
+    "evidence": "Source files and hashes are preserved; coverage denominators are explicit. Counts still combine 2020 OD, 2019–2021 or 2023 modes, 2023 French records, 2024 Geneva totals and Q4 2025 border totals."
+  },
+  {
+    "id": "F15",
+    "status": "Corrected",
+    "title": "Road endpoint review",
+    "evidence": "Glarus Süd now uses the official Linthal station settlement point instead of a remote centroid. Every cache is checked for endpoint displacement; any remaining flags appear below."
+  },
+  {
+    "id": "F16",
+    "status": "Partly corrected",
+    "title": "Reproducible inputs and checks",
+    "evidence": "Added Geneva and resident-mode imports, four city modules, merger handling and source reconciliations. Earlier raw transforms for four cities and older point lookups remain incomplete. Survey uncertainty is preserved in source files but is not propagated into chart intervals."
+  }
+]

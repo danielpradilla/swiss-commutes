@@ -1,0 +1,194 @@
+{
+  "checkedAt": "2026-09-06T20:53:57.596625+00:00",
+  "checked": 17,
+  "passed": 0,
+  "pages": [
+    {
+      "path": "index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 851688,
+      "sha256": "ef979a11bc25d4cb6173605ba5e4df21936857545bd0b9181a30a0fce555a352",
+      "expectedSha256": "8f54dba82e1ec11376eab6a1d46fd1645c74933aa9999f845099d3ff6054cfc1",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "zurich/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/zurich/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 4844155,
+      "sha256": "8aae58ae2c7794e1cad301655f51ba7910d0d084e76c64462f9ddfa76592b3f6",
+      "expectedSha256": "bacb2c4face77d64adbf4ae23bf4abdd1eb5bc0349755f41a3daa6a41298cc52",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "geneva/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/geneva/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 13638292,
+      "sha256": "434df37b66f49da11141d4fff60a57f1261d44dc582bad1db834dcbda3633d6b",
+      "expectedSha256": "8c752e639e6f22efae90a59d4c875c379f70582a04ca3d7424e42690bbdb9827",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "basel/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/basel/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 1493579,
+      "sha256": "2984b5aaf70fd87150de4c1f2d1c78aa2dbd3644f185aa015a4f8807f52361d4",
+      "expectedSha256": "6d920ef51b5c6611ee3b5ce47f9e504ba9b524730ce3f3c7d7c75df4dea97981",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "lausanne/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/lausanne/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 3541581,
+      "sha256": "302fbda3c0c8b08c48e75fb027ba3fb7d23c6d4526fa5e6e2cae786bcdd1b606",
+      "expectedSha256": "30b4daec30982170688c07b6a8c73482673dea1dbe480249a5ad39cd8c57f5e0",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "bern/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/bern/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 4691582,
+      "sha256": "d3ebe8c2543020b189b9646964a3b2b67c9589e24bfee5f63356ec748e938039",
+      "expectedSha256": "f8a974a226c315044b6883335bce21d1aad7756b56d02f339cf67c48d0ee39b7",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "winterthur/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/winterthur/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 3275301,
+      "sha256": "f1d6896334bcd0ea2373657cdaf6416ce43dd185cae4a579c8e5cac33325a73d",
+      "expectedSha256": "bf1adae19ac6776ac019f1ba7ecc45135b8cf143a29869bf9adc0ef86eecd6bd",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "lucerne/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/lucerne/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 2990324,
+      "sha256": "501cdabebdeec1ceaeb86f7a7a5dedf75f078f25fa38e2e365965bf53bb60070",
+      "expectedSha256": "8d95acdee4467c3afa26e2f040b16000a39777b5cbec367df0956b80670391eb",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "st-gallen/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/st-gallen/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 2348745,
+      "sha256": "c4e18346cc33d47808524d3faaa8b3161efbab1284d09a56ab1e3a674513e95d",
+      "expectedSha256": "fb631655660fb4d9cb395994af7772da3d463d1254e6b80fd87b33fb82bf7a6d",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "lugano/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/lugano/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 1355140,
+      "sha256": "e48c855c45b4c94a0f993d8992b3e0605e6beead9497d233d47743edfc1fae24",
+      "expectedSha256": "c11d9141e9e6115c51e10e064ca92dd51bbe85112ec8cd702049bdbab45db6dc",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "biel-bienne/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/biel-bienne/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 2976000,
+      "sha256": "9b148654b83ee21a4cf76775cc9a585bc99695aae2b3168b6bc2dbb8fc100ae1",
+      "expectedSha256": "24ae0e0bc6011b6ac48e4270f6d309c6e727e47d7af61a7787063104a484fef0",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "schaffhausen/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/schaffhausen/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 1303147,
+      "sha256": "217366e85c9322773252439e319b2613f5cbf5c938c7ad52e73cc0f7a5d05c9d",
+      "expectedSha256": "6d530ebc3509f91536898b26310877a31f7fb60d958b619ff0c36a4ee83ab7d0",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "la-chaux-de-fonds/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/la-chaux-de-fonds/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 1129232,
+      "sha256": "516b523fa55a9492a5e687ecf434ac5249f58fc507edb1b011daaec4403ed0cc",
+      "expectedSha256": "d574463766d45939ee41b0c39b713f66c5636616a95633d8e5bb3027424a6fe5",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "chiasso/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/chiasso/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 651740,
+      "sha256": "bf589b4943e429d38e3dddc3128628d18419db8edd0c52b4758f5998d1fb5f70",
+      "expectedSha256": "a3e559f017a450e0b45e70c39c3d519ab3da27703b30f6f2033bf1b8a7362fc4",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "mendrisio/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/mendrisio/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 700544,
+      "sha256": "34e274e6954d7f3cbbceb6b5f716b895afbd82823e31df0dbcdb356c9777bc21",
+      "expectedSha256": "c472b50f3c30d3519352d2e24dcfc7c49ccdacf579179fbb6b1ac04722f1b1a0",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "zug/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/zug/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 2869606,
+      "sha256": "4b3432397f24b2d15177cd809c631b5c966f1a1768421a6eed864eb750bd9f50",
+      "expectedSha256": "f7a1809235f01f19f92ae07123ac2044733b5f007d042c806e37e5fb734df40f",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    },
+    {
+      "path": "neuchatel/index.html",
+      "url": "https://www.danielpradilla.info/swiss-commutes/neuchatel/?audit=20260906-deployed",
+      "status": 200,
+      "bytes": 1403571,
+      "sha256": "16e5034e7c21986b094f435d6480f37aaea66c27cf9c0661986426fbb21ef947",
+      "expectedSha256": "b277511a97f1bc34baf31f85d1f142d78f7ec01a8bc4cc6c0c6d8cf2bc0699e5",
+      "matches": false,
+      "contentType": "text/html",
+      "cacheControl": "max-age=600"
+    }
+  ]
+}

@@ -10,6 +10,10 @@ import { corridors as winterthurCorridors, dataSummary as winterthurSummary } fr
 import { corridors as lucerneCorridors, dataSummary as lucerneSummary } from './data/lucerne.ts';
 import { corridors as stGallenCorridors, dataSummary as stGallenSummary } from './data/st-gallen.ts';
 import { corridors as bielCorridors, dataSummary as bielSummary } from './data/biel-bienne.ts';
+import { corridors as chiassoCorridors, dataSummary as chiassoSummary } from './data/chiasso.ts';
+import { corridors as mendrisioCorridors, dataSummary as mendrisioSummary } from './data/mendrisio.ts';
+import { corridors as zugCorridors, dataSummary as zugSummary } from './data/zug.ts';
+import { corridors as neuchatelCorridors, dataSummary as neuchatelSummary } from './data/neuchatel.ts';
 import type { CommuteData, Point } from './data/types.ts';
 import type { DailyModelConfig } from './model.ts';
 
@@ -34,9 +38,9 @@ export type CityConfig = {
 const sharedSources: CitySource[] = [
   {
     label: 'Basemap',
-    name: 'Stadia Outdoors',
+    name: 'Stadia Alidade Smooth',
     description: 'The map behind the commuter dots.',
-    href: 'https://docs.stadiamaps.com/map-styles/outdoors/',
+    href: 'https://docs.stadiamaps.com/map-styles/alidade-smooth/',
   },
   {
     label: 'Swiss locations',
@@ -45,20 +49,44 @@ const sharedSources: CitySource[] = [
     href: 'https://www.swisstopo.admin.ch/en/landscape-model-swissboundaries3d',
   },
   {
-    label: 'Route preview',
+    label: 'Routes',
     name: 'Valhalla / OpenStreetMap',
-    description: 'Precomputed road, cycling and walking geometry for the largest visible flows.',
+    description: 'Car, cycling and walking routes, with journey times for car trips.',
     href: 'https://valhalla.github.io/valhalla/',
   },
   {
-    label: 'Transit preview',
+    label: 'Swiss towns and villages',
+    name: 'swisstopo place names',
+    description: 'Town and village centres used as endpoints for car journeys.',
+    href: 'https://docs.geo.admin.ch/access-data/search.html',
+  },
+  {
+    label: 'Swiss rail network',
+    name: 'ARE · NPVM 2023',
+    description: 'Rail geometry from the federal transport model. Its passenger totals are not used here.',
+    href: 'https://zenodo.org/records/18486217',
+  },
+  {
+    label: 'Rail stations',
+    name: 'DiDok · SBB / SKI',
+    description: 'Official station locations used to connect Swiss commuter communes to the rail network.',
+    href: 'https://data.sbb.ch/explore/dataset/dienststellen-gemass-opentransportdataswiss/',
+  },
+  {
+    label: 'Public transport',
     name: 'Transitous',
-    description: 'Precomputed public-transport itineraries; underlying feed sources vary by operator.',
+    description: 'A small set of additional public-transport routes based on operator timetables.',
     href: 'https://transitous.org/sources/',
   },
 ];
 
 const currentCitySources: CitySource[] = [
+  {
+    label: 'Inbound and outbound modes',
+    name: 'Städtevergleich Mobilität 2021',
+    description: 'Domestic commuter shares for six cities, pooled 2019–2021. Workplace inbound shares take precedence over home-city outbound shares.',
+    href: 'https://www.stadt-zuerich.ch/content/dam/web/de/aktuell/publikationen/2023/staedtevergleich-mobilitaet-2021/staedtevergleich-mobilitaet-2021.pdf',
+  },
   {
     label: 'Cross-border workers',
     name: 'FSO, Q4 2025',
@@ -68,13 +96,13 @@ const currentCitySources: CitySource[] = [
   {
     label: 'Swiss flows',
     name: 'FSO commune matrix',
-    description: 'Home-to-work pairs inside Switzerland. 2020 is still the latest commune release.',
+    description: 'Commuter counts between Swiss communes, from 2020.',
     href: 'https://opendata.swiss/en/dataset/erwerbstatige-nach-wohn-und-arbeitsgemeinde-2014-2018-und-2020',
   },
   {
     label: 'Transport split',
     name: 'Swiss Cities 2026',
-    description: 'Each city’s 2023 split between car, public transport, walking and cycling.',
+    description: '2023 resident commuter shares used to estimate modes by home commune. These are not measured modes for individual journeys.',
     href: 'https://www.bfs.admin.ch/asset/en/DF_SSV_MOB_COM',
   },
 ];
@@ -82,14 +110,14 @@ const currentCitySources: CitySource[] = [
 const cityListSource: CitySource = {
   label: 'City list',
   name: 'FSO City Statistics 2026',
-  description: 'Population figures used to select the ten largest Swiss cities.',
-  href: 'https://www.bfs.admin.ch/asset/en/DF_SSV_MOB_COM',
+  description: 'Population figures for the ten largest cities. Additional cities were chosen for their commuter flows.',
+  href: 'https://www.bfs.admin.ch/asset/de/DF_SSV_POP_BIL',
 };
 
 const apiGeoSource: CitySource = {
   label: 'French communes',
   name: 'API Géo',
-  description: 'Official French commune names, populations and centre points.',
+  description: 'Official French commune names, populations and town-hall locations.',
   href: 'https://geo.api.gouv.fr/decoupage-administratif/communes',
 };
 
@@ -105,25 +133,18 @@ function standardModel(data: CommuteData, minuteShift = 0): DailyModelConfig {
   const crossBorderWorkers = Number(summary.borderWorkers2025);
   const swissInbound = Number(summary.swissInbound2020);
   const swissOutbound = Number(summary.swissOutbound2020);
-  const mappedJourneys = Number(summary.mappedSwissInbound2020) +
-    Number(summary.mappedSwissOutbound2020) + crossBorderWorkers;
-  const morningPeak = Math.round(mappedJourneys * 0.45);
   return {
     populationGroups: [
-      { people: crossBorderWorkers, arrival: 440 + minuteShift, departure: 1030 + minuteShift, arrivalSpread: 42, departureSpread: 52 },
-      { people: swissInbound, arrival: 455 + minuteShift, departure: 1035 + minuteShift, arrivalSpread: 48, departureSpread: 56 },
-      { people: -swissOutbound, arrival: 445 + minuteShift, departure: 1020 + minuteShift, arrivalSpread: 44, departureSpread: 54 },
-    ],
-    transitPeaks: [
-      { people: morningPeak, centre: 465 + minuteShift, spread: 76 },
-      { people: Math.round(morningPeak * 0.9), centre: 1035 + minuteShift, spread: 88 },
+      { flow: 'foreignInbound', people: crossBorderWorkers, arrival: 440 + minuteShift, departure: 1030 + minuteShift, arrivalSpread: 42, departureSpread: 52 },
+      { flow: 'swissInbound', people: swissInbound, arrival: 455 + minuteShift, departure: 1035 + minuteShift, arrivalSpread: 48, departureSpread: 56 },
+      { flow: 'swissOutbound', people: -swissOutbound, arrival: 445 + minuteShift, departure: 1020 + minuteShift, arrivalSpread: 44, departureSpread: 54 },
     ],
     home: { departure: 450 + minuteShift, return: 1035 + minuteShift, departureSpread: 66, returnSpread: 76 },
   };
 }
 
 function standardMethod(city: string, countries: string) {
-  return `Swiss commune pairs come from the 2020 matrix. The Q4 2025 cross-border count tells us where people work, but not where they live abroad. The map places those workers in nearby communes in ${countries}, weighted by population and distance. The transport mix uses ${city}’s 2023 figures.`;
+  return `Swiss commune pairs come from the 2020 matrix. Mode estimates use domestic inbound shares for six cities (2019–2021), then home-city outbound shares where available. Vaud–Geneva pairs use the 2020 inter-cantonal commuter survey, with other modes left unclassified. Other pairs use the home commune’s 2023 resident mix, or a small-city proxy. Foreign origins in ${countries} are allocated from the Q4 2025 workplace total; their transport mix uses ${city}’s resident shares as a proxy. None of these splits measures the mode of a particular commune pair.`;
 }
 
 const geneva: CityConfig = {
@@ -135,17 +156,13 @@ const geneva: CityConfig = {
   fitBounds: [[45.72, 4.72], [46.7, 7.12]],
   maxBounds: [[45.4, 4.45], [47.2, 7.55]],
   cityRadiusLongitude: 0.12,
-  dataYears: '2023–2024',
+  dataYears: '2020–2024',
   data: { corridors, summary: dataSummary },
   model: {
     populationGroups: [
-      { people: 119_003, arrival: 435, departure: 1040, arrivalSpread: 42, departureSpread: 48 },
-      { people: 23_398, arrival: 410, departure: 1010, arrivalSpread: 38, departureSpread: 44 },
-      { people: -8_703, arrival: 340, departure: 980, arrivalSpread: 34, departureSpread: 48 },
-    ],
-    transitPeaks: [
-      { people: 50_000, centre: 465, spread: 74 },
-      { people: 46_000, centre: 1035, spread: 88 },
+      { flow: 'foreignInbound', people: dataSummary.frenchCommuters2023, arrival: 435, departure: 1040, arrivalSpread: 42, departureSpread: 48 },
+      { flow: 'swissInbound', people: 23_398, arrival: 410, departure: 1010, arrivalSpread: 38, departureSpread: 44 },
+      { flow: 'swissOutbound', people: -dataSummary.genevaToVaud2024, arrival: 340, departure: 980, arrivalSpread: 34, departureSpread: 48 },
     ],
     home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
   },
@@ -153,26 +170,38 @@ const geneva: CityConfig = {
     {
       label: 'French communes',
       name: 'INSEE RP2023',
-      description: 'French home-to-work records, including the usual mode of travel.',
+      description: 'Where commuters live and work, and how they usually travel.',
       href: 'https://www.insee.fr/fr/statistiques/9004795',
     },
     {
       label: 'Swiss communes',
       name: 'OFS commune matrix',
-      description: 'Swiss home-to-work pairs by commune. 2020 is still the latest release.',
+      description: 'Commuter counts between Swiss communes, from 2020.',
       href: 'https://opendata.swiss/fr/dataset/erwerbstatige-nach-wohn-und-arbeitsgemeinde-2014-2018-und-2020',
     },
     {
       label: 'Current Swiss totals',
       name: 'OCSTAT 2024',
-      description: '2024 totals used to bring the Geneva–Vaud flows up to date.',
+      description: '2024 commuter totals for trips between Geneva and Vaud.',
       href: 'https://statistique.ge.ch/statistique/tel/domaines/11/11_02/T_11_06_2_04.xlsx',
+    },
+    {
+      label: 'Vaud commuting modes',
+      name: 'OCT / Relevé structurel 2020',
+      description: 'Train, car and other modes for commuters between Vaud and Geneva, published in 2022 (page 40). Other modes remain unclassified.',
+      href: 'https://www.ge.ch/document/22897/telecharger',
+    },
+    {
+      label: 'Scheduled public-transport journeys',
+      name: 'SKI / Swiss timetable 2026',
+      description: 'Morning and return itineraries for 8 September 2026, including cross-border buses, trains and transfers. Journeys are calculated locally with MOTIS; they do not identify each worker’s actual service.',
+      href: 'https://data.opentransportdata.swiss/en/dataset/timetable-2026-gtfs2020',
     },
     ...sharedSources,
     {
       label: 'French locations',
       name: 'API Géo',
-      description: 'Official names and centre points for communes in Ain and Haute-Savoie.',
+      description: 'Official commune names, town-hall locations and centre points in Ain and Haute-Savoie.',
       href: 'https://geo.api.gouv.fr/decoupage-administratif/communes',
     },
     {
@@ -182,7 +211,7 @@ const geneva: CityConfig = {
       href: 'https://www.reddit.com/r/geneva/comments/1vxy0q9/an_animated_map_of_all_commuters_to_geneva/',
     },
   ],
-  methodNote: 'French flows come straight from RP2023. Swiss commune shares come from the 2020 matrix, then the Geneva–Vaud totals are updated to 2024.',
+  methodNote: 'The data covers all communes in the canton. French records from Ain and Haute-Savoie retain their reported workplace commune and transport mode; people reporting no journey are excluded. Swiss commune pairs cover Vaud in both directions, scaled to 2024 totals. Their train and car shares come from the 2020 survey of commuters between Vaud and Geneva, published by OCT in 2022. The survey’s other category stays unclassified and is excluded from the three mode filters. The survey year coincides with the pandemic. These historical aggregate shares do not establish each person’s mode. Other-canton and unknown locations remain outside the routes.',
 };
 
 const existingCities: CityConfig[] = [
@@ -200,11 +229,10 @@ const existingCities: CityConfig[] = [
     data: { corridors: baselCorridors, summary: baselSummary },
     model: {
       populationGroups: [
-        { people: 35_367, arrival: 440, departure: 1030, arrivalSpread: 42, departureSpread: 52 },
-        { people: 69_635, arrival: 455, departure: 1035, arrivalSpread: 48, departureSpread: 56 },
-        { people: -24_985, arrival: 445, departure: 1020, arrivalSpread: 44, departureSpread: 54 },
+        { flow: 'foreignInbound', people: 35_367, arrival: 440, departure: 1030, arrivalSpread: 42, departureSpread: 52 },
+        { flow: 'swissInbound', people: 69_635, arrival: 455, departure: 1035, arrivalSpread: 48, departureSpread: 56 },
+        { flow: 'swissOutbound', people: -24_985, arrival: 445, departure: 1020, arrivalSpread: 44, departureSpread: 54 },
       ],
-      transitPeaks: [{ people: 55_000, centre: 465, spread: 76 }, { people: 49_000, centre: 1035, spread: 88 }],
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, apiGeoSource, osmSource, ...sharedSources],
@@ -223,11 +251,10 @@ const existingCities: CityConfig[] = [
     data: { corridors: luganoCorridors, summary: luganoSummary },
     model: {
       populationGroups: [
-        { people: 15_663, arrival: 445, departure: 1025, arrivalSpread: 42, departureSpread: 52 },
-        { people: 18_248, arrival: 460, departure: 1035, arrivalSpread: 48, departureSpread: 56 },
-        { people: -7_197, arrival: 450, departure: 1020, arrivalSpread: 44, departureSpread: 54 },
+        { flow: 'foreignInbound', people: 15_663, arrival: 445, departure: 1025, arrivalSpread: 42, departureSpread: 52 },
+        { flow: 'swissInbound', people: 18_248, arrival: 460, departure: 1035, arrivalSpread: 48, departureSpread: 56 },
+        { flow: 'swissOutbound', people: -7_197, arrival: 450, departure: 1020, arrivalSpread: 44, departureSpread: 54 },
       ],
-      transitPeaks: [{ people: 17_300, centre: 465, spread: 76 }, { people: 15_600, centre: 1035, spread: 88 }],
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, osmSource, ...sharedSources],
@@ -246,11 +273,10 @@ const existingCities: CityConfig[] = [
     data: { corridors: schaffhausenCorridors, summary: schaffhausenSummary },
     model: {
       populationGroups: [
-        { people: 3_218, arrival: 440, departure: 1025, arrivalSpread: 40, departureSpread: 50 },
-        { people: 12_322, arrival: 455, departure: 1035, arrivalSpread: 46, departureSpread: 54 },
-        { people: -7_764, arrival: 445, departure: 1020, arrivalSpread: 42, departureSpread: 52 },
+        { flow: 'foreignInbound', people: 3_218, arrival: 440, departure: 1025, arrivalSpread: 40, departureSpread: 50 },
+        { flow: 'swissInbound', people: 12_322, arrival: 455, departure: 1035, arrivalSpread: 46, departureSpread: 54 },
+        { flow: 'swissOutbound', people: -7_764, arrival: 445, departure: 1020, arrivalSpread: 42, departureSpread: 52 },
       ],
-      transitPeaks: [{ people: 9_800, centre: 465, spread: 74 }, { people: 8_900, centre: 1035, spread: 86 }],
       home: { departure: 450, return: 1035, departureSpread: 66, returnSpread: 76 },
     },
     sources: [...currentCitySources, osmSource, ...sharedSources],
@@ -269,11 +295,10 @@ const existingCities: CityConfig[] = [
     data: { corridors: chauxCorridors, summary: chauxSummary },
     model: {
       populationGroups: [
-        { people: 5_580, arrival: 435, departure: 1015, arrivalSpread: 40, departureSpread: 50 },
-        { people: 7_469, arrival: 450, departure: 1025, arrivalSpread: 46, departureSpread: 54 },
-        { people: -5_158, arrival: 440, departure: 1010, arrivalSpread: 42, departureSpread: 52 },
+        { flow: 'foreignInbound', people: 5_580, arrival: 435, departure: 1015, arrivalSpread: 40, departureSpread: 50 },
+        { flow: 'swissInbound', people: 7_469, arrival: 450, departure: 1025, arrivalSpread: 46, departureSpread: 54 },
+        { flow: 'swissOutbound', people: -5_158, arrival: 440, departure: 1010, arrivalSpread: 42, departureSpread: 52 },
       ],
-      transitPeaks: [{ people: 7_700, centre: 455, spread: 72 }, { people: 6_900, centre: 1025, spread: 84 }],
       home: { departure: 445, return: 1025, departureSpread: 64, returnSpread: 74 },
     },
     sources: [...currentCitySources, apiGeoSource, ...sharedSources],
@@ -290,6 +315,32 @@ const stGallenData: CommuteData = { corridors: stGallenCorridors, summary: stGal
 const bielData: CommuteData = { corridors: bielCorridors, summary: bielSummary };
 
 const topCityAdditions: CityConfig[] = [
+  ...[
+    { slug: 'chiasso', name: 'Chiasso', code: '5250', lat: 45.8353, lon: 9.03,
+      neighbours: 'Italy and southern Ticino', corridors: chiassoCorridors, summary: chiassoSummary,
+      bounds: [[45.55, 8.4], [46.5, 9.55]], countries: 'Italy' },
+    { slug: 'mendrisio', name: 'Mendrisio', code: '5254', lat: 45.8702, lon: 8.9868,
+      neighbours: 'Italy and southern Ticino', corridors: mendrisioCorridors, summary: mendrisioSummary,
+      bounds: [[45.55, 8.4], [46.5, 9.55]], countries: 'Italy' },
+    { slug: 'zug', name: 'Zug', code: '1711', lat: 47.1662, lon: 8.5155,
+      neighbours: 'Zürich, Lucerne, Schwyz and Aargau', corridors: zugCorridors, summary: zugSummary,
+      bounds: [[46.6, 7.55], [47.85, 9.5]], countries: 'Germany' },
+    { slug: 'neuchatel', name: 'Neuchâtel', code: '6458', lat: 46.992, lon: 6.9311,
+      neighbours: 'the Jura Arc, Bern, Fribourg and France', corridors: neuchatelCorridors, summary: neuchatelSummary,
+      bounds: [[46.45, 5.85], [47.55, 7.9]], countries: 'France' },
+  ].map((entry): CityConfig => {
+    const data = { corridors: entry.corridors, summary: entry.summary };
+    return {
+      slug: entry.slug, name: entry.name, displayName: entry.name, neighbours: entry.neighbours,
+      centre: { code: `CH${entry.code}`, name: entry.name, lat: entry.lat, lon: entry.lon },
+      fitBounds: entry.bounds as CityConfig['fitBounds'], maxBounds: [[45.2, 4.5], [48.5, 10.7]],
+      cityRadiusLongitude: 0.08, dataYears: '2020–2025', data, model: standardModel(data),
+      sources: [...currentCitySources, ...(entry.countries === 'France' ? [apiGeoSource] : [osmSource]), ...sharedSources],
+      methodNote: standardMethod(entry.name, entry.countries) +
+        (entry.slug === 'neuchatel' ? ' Neuchâtel includes Corcelles-Cormondrèche, Peseux and Valangin, merged in 2021. Journeys between them are internal.' : '') +
+        (['chiasso', 'mendrisio'].includes(entry.slug) ? ' Italian origins reuse Lugano’s existing regional allocation, scaled to this municipality’s worker total.' : ''),
+    };
+  }),
   {
     slug: 'zurich',
     name: 'Zürich',
@@ -410,6 +461,10 @@ const cityOrder = [
   'biel-bienne',
   'schaffhausen',
   'la-chaux-de-fonds',
+  'chiasso',
+  'mendrisio',
+  'zug',
+  'neuchatel',
 ];
 
 const unorderedCities = [...existingCities, ...topCityAdditions].map((city) => ({

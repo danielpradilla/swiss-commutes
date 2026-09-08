@@ -1,0 +1,16 @@
+{
+  "title": "Geneva / 24h | Swiss Commutes",
+  "time": "07:45",
+  "stats": [
+    "33’284",
+    "−5’313",
+    "+77’404"
+  ],
+  "controlsBottom": 832,
+  "height": 844,
+  "now": "Now",
+  "animatedTime": "490",
+  "playing": "true",
+  "tiles": 9,
+  "errors": []
+}

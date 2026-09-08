@@ -1,0 +1,1 @@
+{"query":[{"code":"Geschlecht","selection":{"filter":"item","values":["0"]}},{"code":"Arbeitsgemeinde","selection":{"filter":"item","values":["0261","6621","2701","5586","0351","0230","1061","3203","5192","0371","2939","6421"]}},{"code":"Quartal","selection":{"filter":"item","values":["2025Q4"]}}],"response":{"format":"json-stat2"}}

@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "counts": {
+    "blocks": 17,
+    "charts": 1,
+    "html": 0,
+    "metrics": 0,
+    "tables": 6
+  },
+  "html": "/Users/dpradilla/dev/swiss-commutes/audits/2026-09-06-priorities/report.pending.html",
+  "sourceDialog": "passed",
+  "sourceInteraction": "keyboard_menu_semantic_click",
+  "timings": {
+    "browserRunMs": 917.8,
+    "readerReadyMs": 58.6,
+    "contentChecksMs": 32,
+    "sourceDialogMs": 32.1,
+    "responsiveChecksMs": 32,
+    "totalMs": 933.8
+  },
+  "viewports": [
+    1440,
+    390
+  ]
+}

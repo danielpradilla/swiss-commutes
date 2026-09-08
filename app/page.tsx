@@ -1,8 +1,11 @@
-import CommuteDashboard from './components/commute-dashboard';
-import { cities, cityBySlug } from './cities';
+import CityPage, { generateMetadata as cityMetadata } from './[city]/page';
 
-const cityOptions = cities.map(({ slug, displayName }) => ({ slug, displayName }));
+const params = Promise.resolve({ city: 'zurich' });
+
+export function generateMetadata() {
+  return cityMetadata({ params });
+}
 
 export default function Home() {
-  return <CommuteDashboard city={cityBySlug.zurich} cityOptions={cityOptions} />;
+  return <CityPage params={params} />;
 }

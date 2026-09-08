@@ -7,14 +7,21 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/disable-rocket-loader.mjs && node scripts/check-export.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "test": "node --experimental-strip-types --test test/*.test.ts",
-    "routes:preview": "node --experimental-strip-types scripts/generate-route-geometries.mjs"
+    "audit:data": "node --experimental-strip-types scripts/audit-data.mjs",
+    "audit:report": "node scripts/build-audit-fixes-report.mjs",
+    "routes:preview": "node --experimental-strip-types scripts/generate-route-geometries.mjs",
+    "routes:geneva": "node --experimental-strip-types scripts/generate-car-routes.mjs geneva",
+    "routes:cars": "node --experimental-strip-types scripts/generate-car-routes.mjs",
+    "routes:rail": "node --experimental-strip-types scripts/generate-rail-routes.mjs",
+    "routes:transit": "node --experimental-strip-types scripts/generate-transit-routes.mjs",
+    "routes:active": "node --experimental-strip-types scripts/generate-active-routes.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
-    "next": "16.2.6",
+    "next": "16.3.4",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },
@@ -25,7 +32,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "16.3.4",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3"
   },

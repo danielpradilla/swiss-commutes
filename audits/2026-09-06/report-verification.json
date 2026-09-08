@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "counts": {
+    "blocks": 38,
+    "charts": 3,
+    "html": 0,
+    "metrics": 0,
+    "tables": 7
+  },
+  "html": "/Users/dpradilla/dev/swiss-commutes/audits/2026-09-06/report.pending.html",
+  "sourceDialog": "passed",
+  "sourceInteraction": "keyboard_menu_semantic_click",
+  "timings": {
+    "browserRunMs": 1450.3,
+    "readerReadyMs": 80.8,
+    "contentChecksMs": 32,
+    "sourceDialogMs": 32,
+    "responsiveChecksMs": 32,
+    "totalMs": 1472.3
+  },
+  "viewports": [
+    1440,
+    390
+  ],
+  "publishedHtml": "report.html",
+  "sha256": "b024b1af0b50069ed064b0684caad5f9873c0bc127d0996b48095c419c25fb3f"
+}

@@ -1,0 +1,44 @@
+{
+  "build": "passed",
+  "lint": "passed",
+  "tests": {
+    "passed": 35,
+    "failed": 0
+  },
+  "audit": {
+    "passed": 716,
+    "failed": 0
+  },
+  "notebook": {
+    "executedCells": 6,
+    "failed": 0
+  },
+  "browser": {
+    "url": "http://127.0.0.1:3002/swiss-commutes/geneva/",
+    "defaultModes": [
+      "car",
+      "transit",
+      "soft"
+    ],
+    "allAt0745": 33284,
+    "transitAt0745": 10540,
+    "noneTravelling": 0,
+    "nonePopulation": 0,
+    "desktopWidth": 1200,
+    "mobileWidth": 390,
+    "horizontalOverflow": false,
+    "consoleErrors": [
+      "Local preview favicon.ico 404; no application exceptions"
+    ],
+    "heapAfterGcBytes": 451375856,
+    "backingStorageBytes": 86082038,
+    "fastForwardFrameSample": {
+      "frames": 120,
+      "medianMs": 8.3,
+      "p95Ms": 25,
+      "maxMs": 58.7
+    },
+    "performanceNote": "Local Chromium sample only; not a cross-device performance guarantee. New timetable routes increase memory over the preceding model."
+  },
+  "deployment": "not deployed"
+}

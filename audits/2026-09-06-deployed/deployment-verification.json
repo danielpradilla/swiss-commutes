@@ -1,0 +1,144 @@
+{
+  "status": "verified",
+  "verifiedAt": "2026-09-06T20:58:55.443908+00:00",
+  "baseUrl": "https://www.danielpradilla.info/swiss-commutes/",
+  "remotePath": "/home/depr001/danielpradilla.info/swiss-commutes",
+  "method": "rsync compressed, assets first, delayed updates, no deletion of unrelated or old assets",
+  "backup": "/tmp/swiss-commutes-before-20260906-2051.tar.gz",
+  "files": {
+    "checked": 164,
+    "mismatches": 0,
+    "method": "Remote sha256sum --check --quiet; exit 0"
+  },
+  "http": {
+    "checkedAt": "2026-09-06T20:57:48.732642+00:00",
+    "checked": 17,
+    "passed": 17,
+    "normalization": "Remove only the optional Cloudflare analytics beacon; application scripts and content must match byte for byte."
+  },
+  "browser": {
+    "cities": [
+      "geneva",
+      "lausanne",
+      "zurich"
+    ],
+    "results": [
+      {
+        "city": "geneva",
+        "all": [
+          33284,
+          -5313,
+          77404
+        ],
+        "transit": [
+          10540,
+          -3667,
+          15720
+        ],
+        "defaultModes": [
+          true,
+          true,
+          true
+        ],
+        "none": [
+          0,
+          0,
+          0
+        ],
+        "rewrittenScripts": 0,
+        "horizontalOverflow": false
+      },
+      {
+        "city": "lausanne",
+        "all": [
+          14713,
+          -3289,
+          20360
+        ],
+        "transit": [
+          5268,
+          -1702,
+          2820
+        ],
+        "defaultModes": [
+          true,
+          true,
+          true
+        ],
+        "none": [
+          0,
+          0,
+          0
+        ],
+        "rewrittenScripts": 0,
+        "horizontalOverflow": false
+      },
+      {
+        "city": "zurich",
+        "all": [
+          56117,
+          -12761,
+          89049
+        ],
+        "transit": [
+          38107,
+          -9275,
+          59544
+        ],
+        "defaultModes": [
+          true,
+          true,
+          true
+        ],
+        "none": [
+          0,
+          0,
+          0
+        ],
+        "rewrittenScripts": 0,
+        "horizontalOverflow": false
+      }
+    ],
+    "mobile": {
+      "city": "zurich",
+      "width": 390,
+      "horizontalOverflow": false
+    },
+    "ordinaryGenevaUrl": {
+      "scriptOptOutCount": 2657,
+      "rewrittenScripts": 0,
+      "allAt0745": [
+        33284,
+        -5313,
+        77404
+      ]
+    },
+    "applicationExceptions": [],
+    "externalResourceErrors": [
+      "Cloudflare analytics beacon refused by the test browser; application resources loaded"
+    ]
+  },
+  "rocketLoader": {
+    "fix": "data-cfasync=false on all exported scripts",
+    "protectedHtmlPages": 20,
+    "documentation": "https://developers.cloudflare.com/speed/optimization/content/rocket-loader/ignore-javascripts/"
+  },
+  "modelUnchangedFromPriorities": true,
+  "validation": {
+    "auditPassed": 716,
+    "auditFailed": 0,
+    "testsPassed": 36,
+    "testsFailed": 0,
+    "lint": "passed",
+    "build": "passed"
+  },
+  "serverLogSample": {
+    "scope": "Swiss Commutes requests in the last 2000 access-log lines",
+    "statusCounts": {
+      "200": 45,
+      "301": 2,
+      "304": 1
+    },
+    "errors": []
+  }
+}

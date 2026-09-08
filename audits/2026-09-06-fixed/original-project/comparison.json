@@ -1,0 +1,213 @@
+{
+  "provenance": {
+    "originalUrl": "https://www.habibicode.org/commuters/geneva/",
+    "retrievedDate": "2026-09-06",
+    "sourceHtmlSha256": "a15483c965ee2d43704f9e3bc986ca1ecb6808700914efcd3cf46ddec51093ff",
+    "localAuditGeneratedAt": "2026-09-06T19:14:15.057Z",
+    "localAuditSha256": "67b8515538a90623b128ab8c084e4a9a827d3fc755b9d9d926737c59b936c9bc",
+    "localBuildNotProduction": true
+  },
+  "cohorts": [
+    {
+      "cohort": "French incoming: each project’s selected origins",
+      "original": 101745.9,
+      "ours": 118892,
+      "difference": 17146.1,
+      "differencePct": 16.851882975137087
+    },
+    {
+      "cohort": "French incoming: original origin communes only",
+      "original": 101745.9,
+      "ours": 107867,
+      "difference": 6121.1,
+      "differencePct": 6.016065512222113
+    },
+    {
+      "cohort": "Vaud incoming: source cohort",
+      "original": 25406,
+      "ours": 23398,
+      "difference": -2008,
+      "differencePct": -7.903644808312993
+    },
+    {
+      "cohort": "Vaud incoming: mapped cohort",
+      "original": 25406,
+      "ours": 21301,
+      "difference": -4105,
+      "differencePct": -16.15760056679525
+    },
+    {
+      "cohort": "All incoming: source cohort",
+      "original": 127151.9,
+      "ours": 142290,
+      "difference": 15138.1,
+      "differencePct": 11.905524022841973
+    }
+  ],
+  "scope": {
+    "originalFrenchOrigins": 242,
+    "ourFrenchOrigins": 392,
+    "ourPeopleOutsideOriginalOrigins": 11025,
+    "originalInternalGeneva": 259330,
+    "originalGenevaResidents": 518679,
+    "originalAllCohorts": 386481.9,
+    "ourMappedAllCohorts": 145715,
+    "ourRoutedAllCohorts": 116713,
+    "ourGenevaToVaudSource": 6881
+  },
+  "matchedPairs": {
+    "cohort": "Positive OD/mode cells present in both snapshots",
+    "original": 99394.8,
+    "ours": 103710,
+    "difference": 4315.2,
+    "differencePct": 4.341474604305251,
+    "matchedCells": 2141,
+    "originalOnlyCells": 364,
+    "originalOnlyPeople": 2351.1,
+    "oursOnlyCells": 989,
+    "oursOnlyPeople": 15182
+  },
+  "frenchModes": [
+    {
+      "mode": "car",
+      "originalPeople": 81862.9,
+      "ourPeople": 93284,
+      "ourSameOriginPeople": 82952,
+      "ourRoutedPeople": 88961,
+      "ourRouteCoveragePct": 95.36576476137387,
+      "originalPeopleRepresentedByDots": 76596,
+      "originalOriginsWithDots": 210,
+      "ourOriginsWithRoutes": 358
+    },
+    {
+      "mode": "transit",
+      "originalPeople": 14779.5,
+      "ourPeople": 18812,
+      "ourSameOriginPeople": 18214,
+      "ourRoutedPeople": 3083,
+      "ourRouteCoveragePct": 16.38847544120774,
+      "originalPeopleRepresentedByDots": 13650,
+      "originalOriginsWithDots": 90,
+      "ourOriginsWithRoutes": 1
+    },
+    {
+      "mode": "soft",
+      "originalPeople": 5103.5,
+      "ourPeople": 6796,
+      "ourSameOriginPeople": 6701,
+      "ourRoutedPeople": 6407,
+      "ourRouteCoveragePct": 94.2760447321954,
+      "originalPeopleRepresentedByDots": 4368,
+      "originalOriginsWithDots": 39,
+      "ourOriginsWithRoutes": 77
+    }
+  ],
+  "originalFrenchTransit": {
+    "peopleWithExactPairGeometry": 14779.5,
+    "originsWithGeometry": 175,
+    "geometryIsNotValidatedService": true
+  },
+  "vaudModes": [
+    {
+      "mode": "car",
+      "originalExpectedPeople": 10848.55,
+      "originalExpectedPct": 42.70073998268127,
+      "ourMappedPeople": 9516,
+      "ourMappedPct": 44.67395896906248,
+      "ourRoutedPeople": 8700
+    },
+    {
+      "mode": "transit",
+      "originalExpectedPeople": 14104.83,
+      "originalExpectedPct": 55.51771235141306,
+      "ourMappedPeople": 7047,
+      "ourMappedPct": 33.08295385193183,
+      "ourRoutedPeople": 4365
+    },
+    {
+      "mode": "soft",
+      "originalExpectedPeople": 452.62,
+      "originalExpectedPct": 1.7815476659056897,
+      "ourMappedPeople": 4738,
+      "ourMappedPct": 22.24308717900568,
+      "ourRoutedPeople": 1615
+    }
+  ],
+  "largestFrenchTransitGaps": [
+    {
+      "code": "FR74243",
+      "origin": "Saint-Julien-en-Genevois",
+      "mapped": 1179,
+      "routed": 0,
+      "unrouted": 1179,
+      "originalPeople": 1159.7
+    },
+    {
+      "code": "FR74133",
+      "origin": "Gaillard",
+      "mapped": 1175,
+      "routed": 0,
+      "unrouted": 1175,
+      "originalPeople": 1093.6
+    },
+    {
+      "code": "FR01160",
+      "origin": "Ferney-Voltaire",
+      "mapped": 988,
+      "routed": 0,
+      "unrouted": 988,
+      "originalPeople": 766.9
+    },
+    {
+      "code": "FR01354",
+      "origin": "Saint-Genis-Pouilly",
+      "mapped": 847,
+      "routed": 0,
+      "unrouted": 847,
+      "originalPeople": 864.3
+    },
+    {
+      "code": "FR74305",
+      "origin": "Ville-la-Grand",
+      "mapped": 779,
+      "routed": 0,
+      "unrouted": 779,
+      "originalPeople": 354.0
+    },
+    {
+      "code": "FR01033",
+      "origin": "Valserhône",
+      "mapped": 638,
+      "routed": 0,
+      "unrouted": 638,
+      "originalPeople": 431.3
+    },
+    {
+      "code": "FR74281",
+      "origin": "Thonon-les-Bains",
+      "mapped": 613,
+      "routed": 0,
+      "unrouted": 613,
+      "originalPeople": 437.6
+    },
+    {
+      "code": "FR74008",
+      "origin": "Ambilly",
+      "mapped": 473,
+      "routed": 0,
+      "unrouted": 473,
+      "originalPeople": 463.7
+    }
+  ],
+  "limitations": [
+    "Snapshot differences are not errors against ground truth. French vintages and selected origins differ.",
+    "Matched positive OD/mode cells exclude cells absent in either snapshot and cannot establish overall accuracy.",
+    "Original internal Geneva trips are modelled; worker counts equal approximately half the resident population.",
+    "Original Vaud modal shares are distance assumptions; ours are resident-profile proxies.",
+    "Original rail geometry is not proof of a valid train, bus, or combined itinerary.",
+    "Neither model establishes observed simultaneous traffic, attendance, or vehicle occupancy.",
+    "Original chart shows net change per ten-minute interval; ours shows endpoint presence relative to its daily average.",
+    "Original population view includes a Geneva resident baseline. Ours has no resident baseline.",
+    "This comparison covers Geneva only. It does not independently validate Zurich or the other cities."
+  ]
+}

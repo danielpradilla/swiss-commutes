@@ -3,17 +3,20 @@ import 'leaflet/dist/leaflet.css';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://danielpradilla.info'),
-  title: 'Swiss Commutes | One weekday, in motion',
+  metadataBase: new URL('https://www.danielpradilla.info'),
+  icons: { icon: '/swiss-commutes/favicon.svg' },
+  title: 'Swiss Commutes | A day of commuting',
   description: 'Animated maps of weekday commuting in Switzerland’s largest cities.',
   alternates: { canonical: '/swiss-commutes/' },
   openGraph: {
     title: 'Swiss Commutes',
     description: '24-hour maps of commuting in Switzerland’s largest cities.',
     type: 'website',
+    images: ['/swiss-commutes/og.png'],
   },
   twitter: {
     card: 'summary_large_image',
+    images: ['/swiss-commutes/og.png'],
     title: 'Swiss Commutes',
     description: '24-hour maps of commuting in Switzerland’s largest cities.',
   },

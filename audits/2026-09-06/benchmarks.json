@@ -1,0 +1,80 @@
+[
+  {
+    "city": "Basel",
+    "slug": "basel",
+    "appliedMivShare": 0.14754426042261565,
+    "inboundMivShare": 0.31,
+    "inboundPtShare": 0.56,
+    "inboundActiveShare": 0.13,
+    "mappedInbound": 63516,
+    "gapPoints": 16.245573957738436,
+    "source": "https://www.stadt-zuerich.ch/content/dam/web/de/aktuell/publikationen/2023/staedtevergleich-mobilitaet-2021/staedtevergleich-mobilitaet-2021.pdf",
+    "period": "2019–2021",
+    "page": 20
+  },
+  {
+    "city": "Bern",
+    "slug": "bern",
+    "appliedMivShare": 0.1605560922890501,
+    "inboundMivShare": 0.35,
+    "inboundPtShare": 0.58,
+    "inboundActiveShare": 0.06,
+    "mappedInbound": 99175,
+    "gapPoints": 18.94439077109499,
+    "source": "https://www.stadt-zuerich.ch/content/dam/web/de/aktuell/publikationen/2023/staedtevergleich-mobilitaet-2021/staedtevergleich-mobilitaet-2021.pdf",
+    "period": "2019–2021",
+    "page": 20
+  },
+  {
+    "city": "Lucerne",
+    "slug": "lucerne",
+    "appliedMivShare": 0.2848201574126306,
+    "inboundMivShare": 0.44,
+    "inboundPtShare": 0.46,
+    "inboundActiveShare": 0.09,
+    "mappedInbound": 39617,
+    "gapPoints": 15.517984258736938,
+    "source": "https://www.stadt-zuerich.ch/content/dam/web/de/aktuell/publikationen/2023/staedtevergleich-mobilitaet-2021/staedtevergleich-mobilitaet-2021.pdf",
+    "period": "2019–2021",
+    "page": 20
+  },
+  {
+    "city": "St. Gallen",
+    "slug": "st-gallen",
+    "appliedMivShare": 0.3903067197377663,
+    "inboundMivShare": 0.56,
+    "inboundPtShare": 0.42,
+    "inboundActiveShare": 0.02,
+    "mappedInbound": 45851,
+    "gapPoints": 16.969328026223366,
+    "source": "https://www.stadt-zuerich.ch/content/dam/web/de/aktuell/publikationen/2023/staedtevergleich-mobilitaet-2021/staedtevergleich-mobilitaet-2021.pdf",
+    "period": "2019–2021",
+    "page": 20
+  },
+  {
+    "city": "Winterthur",
+    "slug": "winterthur",
+    "appliedMivShare": 0.308175333780406,
+    "inboundMivShare": 0.49,
+    "inboundPtShare": 0.46,
+    "inboundActiveShare": 0.05,
+    "mappedInbound": 35414,
+    "gapPoints": 18.1824666219594,
+    "source": "https://www.stadt-zuerich.ch/content/dam/web/de/aktuell/publikationen/2023/staedtevergleich-mobilitaet-2021/staedtevergleich-mobilitaet-2021.pdf",
+    "period": "2019–2021",
+    "page": 20
+  },
+  {
+    "city": "Zürich",
+    "slug": "zurich",
+    "appliedMivShare": 0.16403987917299234,
+    "inboundMivShare": 0.28,
+    "inboundPtShare": 0.69,
+    "inboundActiveShare": 0.02,
+    "mappedInbound": 233667,
+    "gapPoints": 11.596012082700767,
+    "source": "https://www.stadt-zuerich.ch/content/dam/web/de/aktuell/publikationen/2023/staedtevergleich-mobilitaet-2021/staedtevergleich-mobilitaet-2021.pdf",
+    "period": "2019–2021",
+    "page": 20
+  }
+]

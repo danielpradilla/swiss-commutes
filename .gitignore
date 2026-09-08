@@ -36,3 +36,11 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+/.playwright-mcp/
+*.tsbuildinfo
+/app/data/*.pending
+/app/data/*.tmp
+
+# local writing drafts
+/POST.md
+/LINKEDIN.md

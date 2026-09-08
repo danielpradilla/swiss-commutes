@@ -11,6 +11,7 @@ const args = Object.fromEntries(process.argv.slice(2).map((arg) => arg.split('='
 const commutePath = args['--commutes'];
 const centrePath = args['--centres'];
 const outputDirectory = args['--out'];
+const selectedSlugs = args['--cities']?.split(',');
 
 if (!commutePath || !centrePath || !outputDirectory) {
   throw new Error('Usage: node scripts/generate-top-city-data.mjs --commutes=FILE --centres=FILE --out=DIR');
@@ -49,6 +50,29 @@ const foreignPlaces = {
 };
 
 const cities = [
+  {
+    slug: 'chiasso', file: 'chiasso.ts', code: '5250', name: 'Chiasso', centre: [45.8353, 9.03],
+    bounds: [[45.55, 8.4], [46.5, 9.55]], borderWorkers: 5_590,
+    modes: { car: 920, transit: 594, soft: 514 }, foreignTemplate: 'lugano',
+  },
+  {
+    slug: 'mendrisio', file: 'mendrisio.ts', code: '5254', name: 'Mendrisio', centre: [45.8702, 8.9868],
+    bounds: [[45.55, 8.4], [46.5, 9.55]], borderWorkers: 11_104,
+    modes: { car: 3_206, transit: 1_107, soft: 966 }, foreignTemplate: 'lugano',
+  },
+  {
+    slug: 'zug', file: 'zug.ts', code: '1711', name: 'Zug', centre: [47.1662, 8.5155],
+    bounds: [[46.6, 7.55], [47.85, 9.5]], borderWorkers: 611,
+    modes: { car: 4_354, transit: 4_741, soft: 3_534 },
+    foreign: ['waldshut', 'jestetten', 'lottstetten', 'klettgau', 'hohentengen', 'singen', 'konstanz'],
+  },
+  {
+    slug: 'neuchatel', file: 'neuchatel.ts', code: '6458', codes: ['6458', '6407', '6412', '6485'],
+    name: 'Neuchâtel', centre: [46.992, 6.9311],
+    bounds: [[46.45, 5.85], [47.55, 7.9]], borderWorkers: 2_491,
+    modes: { car: 7_959, transit: 7_281, soft: 3_328 },
+    foreign: ['morteau', 'pontarlier', 'villers', 'maiche', 'besancon', 'delle'],
+  },
   {
     slug: 'zurich', file: 'zurich.ts', code: '261', name: 'Zürich', centre: [47.3769, 8.5417],
     bounds: [[46.82, 7.7], [47.95, 9.35]], borderWorkers: 4_278,
@@ -92,6 +116,8 @@ const cities = [
     foreign: ['morteau', 'pontarlier', 'villers', 'maiche', 'montbeliard', 'delle', 'besancon'],
   },
 ];
+if (selectedSlugs?.some((slug) => !cities.some((city) => city.slug === slug))) throw new Error('Unknown city');
+const selectedCities = cities.filter((city) => !selectedSlugs || selectedSlugs.includes(city.slug));
 
 function lv95ToWgs84(east, north) {
   const y = (east - 2_600_000) / 1_000_000;
@@ -101,7 +127,9 @@ function lv95ToWgs84(east, north) {
   return [Number((lat * 100 / 36).toFixed(5)), Number((lon * 100 / 36).toFixed(5))];
 }
 
-const centres = new Map(fs.readFileSync(centrePath, 'utf8').trim().split(/\r?\n/).map((line) => {
+const centres = centrePath.endsWith('.json')
+  ? new Map(Object.values(JSON.parse(fs.readFileSync(centrePath, 'utf8'))).map(([code, name, lat, lon]) => [code.slice(2), { code, name, lat, lon }]))
+  : new Map(fs.readFileSync(centrePath, 'utf8').trim().split(/\r?\n/).map((line) => {
   const [code, name, east, north] = line.split('\t');
   const [lat, lon] = lv95ToWgs84(Number(east), Number(north));
   return [code, { code: `CH${code}`, name, lat, lon }];
@@ -119,15 +147,17 @@ for (const line of fs.readFileSync(commutePath, 'utf8').split(/\r?\n/).slice(1))
   const [perspective, year, , residence, , work, rawValue] = line.replaceAll('"', '').split(',');
   if (year !== '2020') continue;
   const value = Number(rawValue);
-  const inboundCity = perspective === 'W' ? cities.find((city) => city.code === work) : undefined;
-  if (inboundCity && residence !== work) {
+  if (!Number.isInteger(value) || value < 0) throw new Error('Invalid matrix count');
+  const includes = (city, code) => (city.codes ?? [city.code]).includes(code);
+  const inboundCity = perspective === 'W' ? selectedCities.find((city) => includes(city, work)) : undefined;
+  if (inboundCity && !includes(inboundCity, residence)) {
     const state = cityState[inboundCity.code];
     state.swissInbound2020 += value;
     const place = centres.get(residence);
     if (place && within(place, inboundCity.bounds)) state.inbound.push([place.code, place.name, place.lat, place.lon, value]);
   }
-  const outboundCity = perspective === 'R' ? cities.find((city) => city.code === residence) : undefined;
-  if (outboundCity && work !== residence) {
+  const outboundCity = perspective === 'R' ? selectedCities.find((city) => includes(city, residence)) : undefined;
+  if (outboundCity && !includes(outboundCity, work)) {
     const state = cityState[outboundCity.code];
     state.swissOutbound2020 += value;
     const place = centres.get(work);
@@ -141,8 +171,11 @@ const distanceKm = ([latA, lonA], [, , latB, lonB]) => {
 };
 
 function allocateForeign(city) {
-  const places = city.foreign.map((key) => foreignPlaces[key]);
-  const weights = places.map((place) => place[4] / (distanceKm(city.centre, place) + 25) ** 1.65);
+  // Template weights retain the existing regional allocation; they are not observed home communes.
+  const places = city.foreignTemplate
+    ? JSON.parse(`[${fs.readFileSync(new URL(`../app/data/${city.foreignTemplate}.ts`, import.meta.url), 'utf8').match(/const foreignInbound = \[([\s\S]*?)\] as const/)[1].replace(/,\s*$/, '')}]`)
+    : city.foreign.map((key) => foreignPlaces[key]);
+  const weights = places.map((place) => city.foreignTemplate ? place[4] : place[4] / (distanceKm(city.centre, place) + 25) ** 1.65);
   const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
   const exact = weights.map((weight) => city.borderWorkers * weight / totalWeight);
   const counts = exact.map(Math.floor);
@@ -164,7 +197,7 @@ function lines(name, values) {
 
 fs.mkdirSync(outputDirectory, { recursive: true });
 const report = [];
-for (const city of cities) {
+for (const city of selectedCities) {
   const state = cityState[city.code];
   state.inbound.sort((a, b) => a[1].localeCompare(b[1], 'en'));
   state.outbound.sort((a, b) => a[1].localeCompare(b[1], 'en'));

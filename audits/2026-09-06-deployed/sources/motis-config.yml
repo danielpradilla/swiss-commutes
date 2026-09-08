@@ -1,0 +1,21 @@
+server:
+  host: 127.0.0.1
+  port: 8090
+  n_threads: 2
+osm: /tmp/swiss-commutes-motis/region.osm.pbf
+street_routing: true
+osr_footpath: true
+timetable:
+  first_day: '2026-09-07'
+  num_days: 3
+  with_shapes: true
+  railviz: false
+  route_shapes:
+    mode: missing
+    n_threads: 2
+  datasets:
+    ch:
+      path: /tmp/swiss-commutes-motis/swiss-20260902.zip
+      extend_calendar: false
+logging:
+  log_level: error

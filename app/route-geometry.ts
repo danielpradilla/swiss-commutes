@@ -2,6 +2,24 @@ import type { Corridor } from './data/types';
 
 export type RouteCoordinate = [latitude: number, longitude: number];
 export type ScreenCoordinate = [x: number, y: number];
+export type RailRouteCache = {
+  segments: Record<string, string>;
+  routes: Record<string, { edges: number[]; from: number; to: number }>;
+  stations: Record<string, { name: string; point: RouteCoordinate }>;
+};
+
+export function prepareRailRoutes(cache?: RailRouteCache) {
+  const segments = new Map(Object.entries(cache?.segments ?? {}).map(([id, shape]) => [Number(id), decodePolyline(shape)]));
+  const routes = new Map(Object.entries(cache?.routes ?? {}).map(([key, route]) => {
+    const points = route.edges.flatMap((id, i) => {
+      const segment = segments.get(Math.abs(id))!;
+      const oriented = id > 0 ? segment : [...segment].reverse();
+      return i ? oriented.slice(1) : oriented;
+    });
+    return [key, { points, from: cache!.stations[route.from].name, to: cache!.stations[route.to].name }];
+  }));
+  return { routes, segments: [...segments.values()] };
+}
 
 export function routeKey(citySlug: string, corridor: Corridor) {
   return `${citySlug}:${corridor.origin.code}>${corridor.target.code}:${corridor.mode}:${corridor.direction}`;
@@ -59,19 +77,29 @@ export function encodePolyline(points: RouteCoordinate[], precision = 5) {
   }).join('');
 }
 
+const projectedLengths = new WeakMap<ScreenCoordinate[], number[]>();
+
 export function pointAlongPolyline(points: ScreenCoordinate[], progress: number): ScreenCoordinate {
   if (points.length < 2) return points[0] ?? [0, 0];
-  const lengths: number[] = [];
-  let total = 0;
-  for (let index = 1; index < points.length; index += 1) {
-    total += Math.hypot(points[index][0] - points[index - 1][0], points[index][1] - points[index - 1][1]);
-    lengths.push(total);
+  let lengths = projectedLengths.get(points);
+  if (!lengths) {
+    lengths = [0];
+    for (let index = 1; index < points.length; index += 1) {
+      lengths.push(lengths[index - 1] + Math.hypot(points[index][0] - points[index - 1][0], points[index][1] - points[index - 1][1]));
+    }
+    projectedLengths.set(points, lengths);
   }
-  const target = Math.max(0, Math.min(1, progress)) * total;
-  const segment = lengths.findIndex((length) => length >= target);
-  const index = segment < 0 ? lengths.length - 1 : segment;
-  const previous = index === 0 ? 0 : lengths[index - 1];
-  const share = lengths[index] === previous ? 0 : (target - previous) / (lengths[index] - previous);
+  const target = Math.max(0, Math.min(1, progress)) * lengths.at(-1)!;
+  let low = 1;
+  let high = lengths.length - 1;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if (lengths[middle] < target) low = middle + 1;
+    else high = middle;
+  }
+  const index = low - 1;
+  const span = lengths[low] - lengths[index];
+  const share = span ? (target - lengths[index]) / span : 0;
   return [
     points[index][0] + (points[index + 1][0] - points[index][0]) * share,
     points[index][1] + (points[index + 1][1] - points[index][1]) * share,

@@ -1,0 +1,12 @@
+{
+  "geneva": {
+    "htmlBytes": 13425944,
+    "htmlGzipBytes": 4985426,
+    "longestTaskMs": 3670,
+    "travelling": "33’284",
+    "population": "−5’313",
+    "peak": "+77’404"
+  },
+  "exportBytes": 210423840,
+  "method": "Local Chromium, reduced motion, 07:45, uncompressed Python static server. Single pre-change run; earlier audit longest task was 3217 ms."
+}

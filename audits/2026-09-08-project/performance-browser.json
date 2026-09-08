@@ -1,0 +1,55 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "reducedMotion": true,
+  "runs": [
+    {
+      "longestTaskMs": 0,
+      "longTasks": [],
+      "mapReadyMs": 1940.7999999821186,
+      "domContentLoadedMs": 104.59999999403954,
+      "firstContentfulPaintMs": 160,
+      "stats": [
+        "33’284",
+        "−5’313",
+        "+77’404"
+      ]
+    },
+    {
+      "longestTaskMs": 52,
+      "longTasks": [
+        {
+          "start": 102.10000002384186,
+          "duration": 52
+        }
+      ],
+      "mapReadyMs": 1819.300000011921,
+      "domContentLoadedMs": 22.900000005960464,
+      "firstContentfulPaintMs": 56,
+      "stats": [
+        "33’284",
+        "−5’313",
+        "+77’404"
+      ]
+    },
+    {
+      "longestTaskMs": 50,
+      "longTasks": [
+        {
+          "start": 112,
+          "duration": 50
+        }
+      ],
+      "mapReadyMs": 1895.300000011921,
+      "domContentLoadedMs": 24.30000001192093,
+      "firstContentfulPaintMs": 68,
+      "stats": [
+        "33’284",
+        "−5’313",
+        "+77’404"
+      ]
+    }
+  ]
+}

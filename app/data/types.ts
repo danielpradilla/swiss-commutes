@@ -1,4 +1,5 @@
-export type Mode = 'car' | 'transit' | 'soft';
+export type TransportMode = 'car' | 'transit' | 'soft';
+export type Mode = TransportMode | 'unknown';
 export type FlowDirection = 'inbound' | 'outbound';
 export type Point = { code: string; name: string; lat: number; lon: number };
 export type Corridor = {

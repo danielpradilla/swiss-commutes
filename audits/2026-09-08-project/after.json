@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-09-08T17:39:24.604Z",
+  "checks": {
+    "total": 748,
+    "failed": []
+  },
+  "export": [
+    {
+      "city": "zurich",
+      "htmlBytes": 4768073,
+      "gzipBytes": 1783694
+    },
+    {
+      "city": "geneva",
+      "htmlBytes": 13425944,
+      "gzipBytes": 4958508
+    },
+    {
+      "city": "basel",
+      "htmlBytes": 1473697,
+      "gzipBytes": 472006
+    },
+    {
+      "city": "lausanne",
+      "htmlBytes": 3479480,
+      "gzipBytes": 1327962
+    },
+    {
+      "city": "bern",
+      "htmlBytes": 4621749,
+      "gzipBytes": 1810748
+    },
+    {
+      "city": "winterthur",
+      "htmlBytes": 3216594,
+      "gzipBytes": 1209511
+    },
+    {
+      "city": "lucerne",
+      "htmlBytes": 2941632,
+      "gzipBytes": 1073070
+    },
+    {
+      "city": "st-gallen",
+      "htmlBytes": 2308247,
+      "gzipBytes": 817019
+    },
+    {
+      "city": "lugano",
+      "htmlBytes": 1329145,
+      "gzipBytes": 454539
+    },
+    {
+      "city": "biel-bienne",
+      "htmlBytes": 2919121,
+      "gzipBytes": 1011788
+    },
+    {
+      "city": "schaffhausen",
+      "htmlBytes": 1273820,
+      "gzipBytes": 416515
+    },
+    {
+      "city": "la-chaux-de-fonds",
+      "htmlBytes": 1107930,
+      "gzipBytes": 375654
+    },
+    {
+      "city": "chiasso",
+      "htmlBytes": 640314,
+      "gzipBytes": 216839
+    },
+    {
+      "city": "mendrisio",
+      "htmlBytes": 689229,
+      "gzipBytes": 232287
+    },
+    {
+      "city": "zug",
+      "htmlBytes": 2819612,
+      "gzipBytes": 1111218
+    },
+    {
+      "city": "neuchatel",
+      "htmlBytes": 1380804,
+      "gzipBytes": 531662
+    }
+  ],
+  "browser": {
+    "genevaStartupLongTaskMs": 3217,
+    "reducedMotionInitial": "PAUSED",
+    "clockAriaLive": "off",
+    "keyboardSliderTime": "00:01",
+    "emptyCounters": [
+      "0",
+      "+0",
+      "+0"
+    ],
+    "homeAndZurich0745": [
+      "56117",
+      "-12761",
+      "89049"
+    ],
+    "consoleErrors": 0
+  },
+  "tests": {
+    "passed": 40,
+    "failed": 0
+  },
+  "lint": "pass",
+  "build": "pass",
+  "npmInstallAuditVulnerabilities": 0,
+  "npmAudit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "reportRegressionChecks": "Injected OD and canton failures correctly appear as Needs review"
+}

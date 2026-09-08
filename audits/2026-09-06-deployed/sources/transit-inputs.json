@@ -1,0 +1,42 @@
+{
+  "retrieved": "2026-09-06",
+  "serviceDate": "2026-09-08",
+  "region": {
+    "west": 5.0,
+    "east": 7.2,
+    "south": 45.4,
+    "north": 47.1
+  },
+  "inputs": [
+    {
+      "file": "swiss-20260902.zip",
+      "url": "https://data.opentransportdata.swiss/dataset/3d2c18f9-9ef1-463f-a249-5c67604efd74/resource/c09aba2a-41e9-4117-88af-3fdfe589d64a/download/gtfs_fp2026_20260902.zip",
+      "bytes": 243453821,
+      "sha256": "d325fd0954a91ac50005ad53db1976b8e528ebb1c388e4e8fd5a4415e4139a1e"
+    },
+    {
+      "file": "switzerland.osm.pbf",
+      "url": "https://download.geofabrik.de/europe/switzerland-latest.osm.pbf",
+      "bytes": 544999779,
+      "sha256": "56a57de1cbdac3405046cc4f5e3df3e3c08d8d9eb96f8eae1daba5fab13b3d5c"
+    },
+    {
+      "file": "rhone-alpes.osm.pbf",
+      "url": "https://download.geofabrik.de/europe/france/rhone-alpes-latest.osm.pbf",
+      "bytes": 528112282,
+      "sha256": "3550d09b23052f3fefe24bdfc3d1e54740dd3a7a289e836a7508d4ad7aee092d"
+    },
+    {
+      "file": "region.osm.pbf",
+      "url": null,
+      "bytes": 106332538,
+      "sha256": "95ee3740bea67eeaf4938f686e4f5d05d4fa489c632066e2c2f2de975b974f7a"
+    },
+    {
+      "file": "motis.tar.bz2",
+      "url": "https://github.com/motis-project/motis/releases/download/v2.11.2/motis-macos-arm64.tar.bz2",
+      "bytes": 46722217,
+      "sha256": "00b6f544424107af57bcc8da3d4a03f602360cb2aa8beb2ad4ca54fda7a28a8f"
+    }
+  ]
+}

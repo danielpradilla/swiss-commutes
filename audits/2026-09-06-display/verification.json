@@ -1,0 +1,43 @@
+{
+  "verifiedAt": "2026-09-06T21:13:12.140763+00:00",
+  "remotePath": "/home/depr001/danielpradilla.info/swiss-commutes",
+  "deploymentMethod": "rsync, assets first, delayed updates; no deletes",
+  "remoteFilesChecked": 164,
+  "remoteFileMismatches": 0,
+  "backup": "/tmp/swiss-commutes-before-display-fix-20260906.tar.gz",
+  "testsPassed": 36,
+  "lint": "passed",
+  "build": "passed",
+  "changes": [
+    "Geneva display name restored",
+    "Static road and rail route lines removed",
+    "Moving particle tails removed",
+    "Unused road-volume calculation and shared segment indexes removed"
+  ],
+  "fontComparison": "Pre-deployment CSS and current CSS have identical body, h1, city selector, clock and statistic font rules. Geneva canton triggered the existing mobile longCity rule at 48% size; Geneva does not.",
+  "mobileGeneva": {
+    "width": 390,
+    "headingFontSize": 58.5,
+    "cityFontSize": 58.5,
+    "horizontalOverflow": false
+  },
+  "liveChecks": [
+    {
+      "city": "geneva",
+      "label": "Geneva",
+      "minute": 465,
+      "travelling": 33284,
+      "populationVsAverage": -5313,
+      "overlayLineSegments": 0
+    },
+    {
+      "city": "zurich",
+      "label": "Z\u00fcrich",
+      "minute": 465,
+      "travelling": 56117,
+      "populationVsAverage": -12761,
+      "overlayLineSegments": 0
+    }
+  ],
+  "dataNote": "The observed live counts match the preceding deployment audit. This update changes presentation, not commuter data or journey timings."
+}

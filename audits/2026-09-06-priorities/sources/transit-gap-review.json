@@ -1,0 +1,62 @@
+[
+  {
+    "label": "Lausanne rail",
+    "fromPoint": [
+      46.411781,
+      6.261061
+    ],
+    "toPoint": [
+      46.403018,
+      6.253101
+    ],
+    "maxDistanceToOsmMetres": 0.03
+  },
+  {
+    "label": "Valserhone rail",
+    "fromPoint": [
+      46.10046,
+      5.863631
+    ],
+    "toPoint": [
+      46.108692,
+      5.880691
+    ],
+    "maxDistanceToOsmMetres": 0.03
+  },
+  {
+    "label": "Valserhone rail",
+    "fromPoint": [
+      46.106881,
+      5.835419
+    ],
+    "toPoint": [
+      46.100456,
+      5.852462
+    ],
+    "maxDistanceToOsmMetres": 0.04
+  },
+  {
+    "label": "Valserhone rail",
+    "fromPoint": [
+      46.219894,
+      6.052424
+    ],
+    "toPoint": [
+      46.221233,
+      6.065748
+    ],
+    "maxDistanceToOsmMetres": 0.01
+  },
+  {
+    "label": "Annecy bus",
+    "fromPoint": [
+      46.071667,
+      6.082356
+    ],
+    "toPoint": [
+      46.080282,
+      6.086451
+    ],
+    "maxDistanceToOsmMetres": 0.05
+  }
+]

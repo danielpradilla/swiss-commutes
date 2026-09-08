@@ -1,0 +1,29 @@
+{
+  "geneva": {
+    "html": {
+      "bytes": 1839781,
+      "gzipBytes": 120205
+    },
+    "geometry": {
+      "bytes": 11358688,
+      "gzipBytes": 5031189
+    }
+  },
+  "zurich": {
+    "html": {
+      "bytes": 815227,
+      "gzipBytes": 74750
+    },
+    "geometry": {
+      "bytes": 3939792,
+      "gzipBytes": 1843206
+    }
+  },
+  "exportBytes": 75712724,
+  "validation": {
+    "testsPassed": 40,
+    "dataChecksPassed": 748,
+    "lint": "passed",
+    "build": "passed"
+  }
+}
