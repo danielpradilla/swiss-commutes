@@ -40,6 +40,10 @@ const markerRadius = (commuters: number) => Math.max(1.8, Math.min(9, Math.sqrt(
 const formatNumber = (value: number) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '’');
 const formatDelta = (value: number) => `${value >= 0 ? '+' : '−'}${formatNumber(Math.abs(value))}`;
 type ClockMode = 'realtime' | 'fast' | 'paused';
+const playbackSpeed = 15; // Simulated minutes per second.
+const dotSize = 1.5;
+// Retain the selected slider's proportions across transport modes.
+const sizeBlend = (dotSize - 1.4) / (2.7 - 1.4);
 const reducedMotionQuery = '(prefers-reduced-motion: reduce)';
 
 function subscribeReducedMotion(onChange: () => void) {
@@ -238,8 +242,8 @@ function MapCanvas({
             ctx.restore();
           }
           ctx.beginPath();
-          const radius = carRoute ? Math.max(0.9, 1.4 * Math.sqrt(dot.weight / CAR_COMMUTERS_PER_DOT))
-            : dot.corridor.mode === 'soft' ? 1.2 : 1.5;
+          const radius = carRoute ? Math.max(0.9 + sizeBlend * 0.5, dotSize * Math.sqrt(dot.weight / CAR_COMMUTERS_PER_DOT))
+            : dot.corridor.mode === 'soft' ? 1.2 + sizeBlend : 1.5 + sizeBlend * 1.2;
           ctx.arc(point[0], point[1], radius, 0, Math.PI * 2);
           ctx.fillStyle = colour;
           ctx.fill();
@@ -364,6 +368,7 @@ function PopulationChart({
   fullModel,
   modeLabel,
   onTimeChange,
+  onScrubbingChange,
 }: {
   time: number;
   city: CityConfig;
@@ -371,6 +376,7 @@ function PopulationChart({
   fullModel: DailyModel;
   modeLabel: string;
   onTimeChange: (minute: number) => void;
+  onScrubbingChange: (scrubbing: boolean) => void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const timeRef = useRef(time);
@@ -517,6 +523,18 @@ function PopulationChart({
         max={MINUTES_PER_DAY}
         step="1"
         value={time}
+        onPointerDown={(event) => {
+          event.currentTarget.setPointerCapture(event.pointerId);
+          onScrubbingChange(true);
+        }}
+        onPointerUp={() => onScrubbingChange(false)}
+        onPointerCancel={() => onScrubbingChange(false)}
+        onLostPointerCapture={() => onScrubbingChange(false)}
+        onKeyDown={(event) => {
+          if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) onScrubbingChange(true);
+        }}
+        onKeyUp={() => onScrubbingChange(false)}
+        onBlur={() => onScrubbingChange(false)}
         onInput={(event) => onTimeChange(Number(event.currentTarget.value))}
       />
     </div>
@@ -580,6 +598,7 @@ type DashboardProps = { city: CityConfig; cityOptions: CityOption[]; summary: Ma
 function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
   const [time, setTime] = useState(465);
   const [requestedClockMode, setClockMode] = useState<ClockMode>();
+  const [scrubbing, setScrubbing] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const reducedMotion = useSyncExternalStore(subscribeReducedMotion,
     () => window.matchMedia(reducedMotionQuery).matches, () => true);
@@ -633,7 +652,7 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
   const modeLabel = modes.length === 3 ? 'All transport' : modes.length ? modes.map((mode) => transportLabels[mode]).join(' + ') : 'No modes selected';
 
   useEffect(() => {
-    if (clockMode === 'paused') return;
+    if (scrubbing || clockMode === 'paused') return;
     if (clockMode === 'realtime') {
       const sync = () => { if (!document.hidden) setTime(genevaTime()); };
       sync();
@@ -641,11 +660,19 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
       document.addEventListener('visibilitychange', sync);
       return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', sync); };
     }
-    const timer = window.setInterval(() => {
-      if (!document.hidden) setTime((current) => (current + 5) % MINUTES_PER_DAY);
-    }, 70);
-    return () => window.clearInterval(timer);
-  }, [clockMode]);
+    let previous = performance.now();
+    let frame = 0;
+    const reset = () => { previous = performance.now(); };
+    const advance = (now: number) => {
+      const elapsed = Math.max(0, now - previous);
+      previous = now;
+      if (!document.hidden) setTime(current => (current + elapsed * playbackSpeed / 1_000) % MINUTES_PER_DAY);
+      frame = requestAnimationFrame(advance);
+    };
+    document.addEventListener('visibilitychange', reset);
+    frame = requestAnimationFrame(advance);
+    return () => { cancelAnimationFrame(frame); document.removeEventListener('visibilitychange', reset); };
+  }, [clockMode, scrubbing]);
 
   const stats = useMemo(() => ({
     transit: model.travelling(time),
@@ -715,10 +742,8 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
             model={model}
             fullModel={fullModel}
             modeLabel={modeLabel}
-            onTimeChange={(minute) => {
-              setClockMode('paused');
-              setTime(minute);
-            }}
+            onTimeChange={setTime}
+            onScrubbingChange={setScrubbing}
           />
           <div className="controls">
             <div className="clockControls" aria-label="Clock speed">

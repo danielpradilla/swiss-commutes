@@ -10,6 +10,7 @@
     "build": "next build && node scripts/disable-rocket-loader.mjs && node scripts/check-export.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "test": "node --experimental-strip-types --test test/*.test.ts",
+    "test:live": "php test/live-feed.php && node --experimental-strip-types --test test/live-data.test.ts",
     "audit:data": "node --experimental-strip-types scripts/audit-data.mjs",
     "audit:report": "node scripts/build-audit-fixes-report.mjs",
     "routes:preview": "node --experimental-strip-types scripts/generate-route-geometries.mjs",

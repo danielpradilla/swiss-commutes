@@ -1,0 +1,26 @@
+{
+  "presets": "Exact previous and current radii verified on the canvas",
+  "speeds": [
+    {
+      "requested": 10,
+      "measured": 9.961151509351023
+    },
+    {
+      "requested": 50,
+      "measured": 49.870337125257834
+    }
+  ],
+  "frames": {
+    "frames": 358,
+    "fps": 119.02380475953304,
+    "medianGapMs": 8.300000011920929,
+    "p95GapMs": 9.699999988079071
+  },
+  "mobile": {
+    "controlsBottom": 228,
+    "timelineBottom": 832,
+    "width": 375,
+    "viewport": 390
+  },
+  "errors": []
+}

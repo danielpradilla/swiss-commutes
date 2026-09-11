@@ -19,7 +19,7 @@ Swiss Commutes is an independent implementation of that idea. It expands the vie
 - Grey circles represent communes. Their size follows the routed commuters associated with that commune, and they pulse when a journey arrives.
 - Hovering a moving dot shows its origin and destination. Hovering a commune shows its name.
 - Car / motorcycle, Public transport and Walk / bike start enabled. The buttons filter the map, chart, city circle and travelling counter together. The chart compares the selected commuters with their daily average; all mode counts are estimates.
-- The animation starts at 07:45 once the map is ready. “Use current time” follows the Swiss clock; the data is not a live feed.
+- The animation starts at 07:45 once the map is ready and advances 15 simulated minutes per second. “Use current time” follows the Swiss clock; the data is not a live feed.
 - Reduced-motion preferences start the clock paused. The “Commune journeys” disclosure provides keyboard-accessible names, commuter estimates and journey times; the time slider announces hours and minutes.
 
 ## Data sources

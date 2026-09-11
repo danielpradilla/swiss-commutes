@@ -40,7 +40,10 @@ next-env.d.ts
 *.tsbuildinfo
 /app/data/*.pending
 /app/data/*.tmp
+/public/live/.private/*
+!/public/live/.private/.htaccess
 
 # local writing drafts
 /POST.md
 /LINKEDIN.md
+/REDDIT.md

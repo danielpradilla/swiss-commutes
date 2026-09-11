@@ -2,6 +2,8 @@
 
 The map now starts animating at 07:45 after its first draw. Reduced-motion preferences start paused; a pause requested while loading is preserved. The Now button selects the current Swiss time.
 
+Scrubbing temporarily suspends clock updates and preserves the selected mode. On release, fast-forward continues from the selected time, Now returns to current Swiss time, and pause holds the selected time. Mouse, keyboard and touch checks cover all three modes, release outside the timeline, focus loss and touch cancellation; results are in `scrubbing-results.json`.
+
 On mobile, the timeline follows the map and precedes the statistics. Map and playback controls fit at 390×844, 375×667 and 320×568, including La Chaux-de-Fonds and long transport-filter labels. Shorter viewports can scroll while retaining a map at least 240 pixels tall.
 
 The basemap uses [Stadia Alidade Smooth](https://docs.stadiamaps.com/map-styles/alidade-smooth/). Moving-dot radii are 0.9–1.5 pixels, depending on weight and mode. Direction colours, commuter weights and the population model are unchanged. All 16 exported route files match their previous SHA-256 hashes. Geneva at 07:45 still reports 33,284 travelling, −5,313 relative to the daily average and a peak of +77,404.

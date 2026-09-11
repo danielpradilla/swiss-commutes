@@ -2,9 +2,11 @@ import type { Metadata } from 'next';
 import 'leaflet/dist/leaflet.css';
 import './globals.css';
 
+const image = { url: '/swiss-commutes/social/zurich.jpg', width: 1388, height: 728,
+  alt: 'Commuting in Zürich at 07:45: map and commuter statistics.' };
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.danielpradilla.info'),
-  icons: { icon: '/swiss-commutes/favicon.svg' },
   title: 'Swiss Commutes | A day of commuting',
   description: 'Animated maps of weekday commuting in Switzerland’s largest cities.',
   alternates: { canonical: '/swiss-commutes/' },
@@ -12,11 +14,11 @@ export const metadata: Metadata = {
     title: 'Swiss Commutes',
     description: '24-hour maps of commuting in Switzerland’s largest cities.',
     type: 'website',
-    images: ['/swiss-commutes/og.png'],
+    images: [image],
   },
   twitter: {
     card: 'summary_large_image',
-    images: ['/swiss-commutes/og.png'],
+    images: [image],
     title: 'Swiss Commutes',
     description: '24-hour maps of commuting in Switzerland’s largest cities.',
   },

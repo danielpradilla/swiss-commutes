@@ -1,0 +1,75 @@
+{
+  "chosen": {
+    "circleSize": 1.5,
+    "simulatedMinutesPerSecond": 15
+  },
+  "circleComparison": {
+    "dots": 1355,
+    "hasSelectedRadius": true,
+    "radiiSha256": "78cf38dc5d4704d190f162263ebc7c686836dd377b317998c9d67a1e04bc0265"
+  },
+  "checks": [
+    {
+      "simulatedMinutesPerSecond": 14.782694392604931,
+      "temporaryControls": "removed"
+    },
+    "Autoplay waits for the map; pause, current time, keyboard scrubbing and city changes work; Geneva counts unchanged.",
+    "Pausing during loading prevents autoplay.",
+    {
+      "city": "geneva",
+      "width": 390,
+      "height": 844,
+      "controlsBottom": 832,
+      "mapHeight": 524,
+      "legendBottom": 566,
+      "noteTop": 584,
+      "documentWidth": 375,
+      "viewportWidth": 390
+    },
+    {
+      "city": "geneva",
+      "width": 375,
+      "height": 667,
+      "controlsBottom": 655,
+      "mapHeight": 347,
+      "legendBottom": 389,
+      "noteTop": 407,
+      "documentWidth": 360,
+      "viewportWidth": 375
+    },
+    {
+      "city": "geneva",
+      "width": 320,
+      "height": 568,
+      "controlsBottom": 556,
+      "mapHeight": 248,
+      "legendBottom": 290,
+      "noteTop": 298,
+      "documentWidth": 305,
+      "viewportWidth": 320
+    },
+    {
+      "city": "la-chaux-de-fonds",
+      "width": 320,
+      "height": 568,
+      "controlsBottom": 556,
+      "mapHeight": 248,
+      "legendBottom": 290,
+      "noteTop": 298,
+      "documentWidth": 305,
+      "viewportWidth": 320
+    },
+    {
+      "city": "geneva",
+      "width": 1440,
+      "height": 1000,
+      "controlsBottom": 997.390625,
+      "mapHeight": 560,
+      "legendBottom": 689.390625,
+      "noteTop": 687.390625,
+      "documentWidth": 1425,
+      "viewportWidth": 1440
+    },
+    "Reduced motion stays paused until explicit playback; mobile and desktop layouts fit."
+  ]
+}

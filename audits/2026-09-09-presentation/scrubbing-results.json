@@ -1,0 +1,96 @@
+{
+  "browser": [
+    {
+      "simulatedMinutesPerSecond": 14.891293556857423,
+      "temporaryControls": "removed"
+    },
+    "Pointer and keyboard scrubbing suspend updates while held, then restore fast-forward, current time or pause; release outside the slider and focus loss recover.",
+    "Autoplay waits for the map; pause, current time, keyboard scrubbing and city changes work; Geneva counts unchanged.",
+    "Pausing during loading prevents autoplay.",
+    {
+      "city": "geneva",
+      "width": 390,
+      "height": 844,
+      "controlsBottom": 832,
+      "mapHeight": 524,
+      "legendBottom": 566,
+      "noteTop": 584,
+      "documentWidth": 375,
+      "viewportWidth": 390
+    },
+    {
+      "city": "geneva",
+      "width": 375,
+      "height": 667,
+      "controlsBottom": 655,
+      "mapHeight": 347,
+      "legendBottom": 389,
+      "noteTop": 407,
+      "documentWidth": 360,
+      "viewportWidth": 375
+    },
+    {
+      "city": "geneva",
+      "width": 320,
+      "height": 568,
+      "controlsBottom": 556,
+      "mapHeight": 248,
+      "legendBottom": 290,
+      "noteTop": 298,
+      "documentWidth": 305,
+      "viewportWidth": 320
+    },
+    {
+      "city": "la-chaux-de-fonds",
+      "width": 320,
+      "height": 568,
+      "controlsBottom": 556,
+      "mapHeight": 248,
+      "legendBottom": 290,
+      "noteTop": 298,
+      "documentWidth": 305,
+      "viewportWidth": 320
+    },
+    {
+      "city": "geneva",
+      "width": 1440,
+      "height": 1000,
+      "controlsBottom": 997.390625,
+      "mapHeight": 560,
+      "legendBottom": 689.390625,
+      "noteTop": 687.390625,
+      "documentWidth": 1425,
+      "viewportWidth": 1440
+    },
+    "Reduced motion stays paused until explicit playback; mobile and desktop layouts fit."
+  ],
+  "touch": {
+    "touch": [
+      {
+        "mode": "fast",
+        "endEvent": "touchEnd",
+        "held": 871,
+        "resumed": 876
+      },
+      {
+        "mode": "realtime",
+        "endEvent": "touchEnd",
+        "held": 871,
+        "resumed": 831
+      },
+      {
+        "mode": "paused",
+        "endEvent": "touchEnd",
+        "held": 871,
+        "resumed": 871
+      },
+      {
+        "mode": "fast",
+        "endEvent": "touchCancel",
+        "held": 871,
+        "resumed": 875
+      }
+    ],
+    "pageErrors": []
+  }
+}

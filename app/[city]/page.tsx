@@ -17,12 +17,14 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
   if (!city) return {};
   const title = `${city.displayName} / 24h | Swiss Commutes`;
   const description = `A 24-hour map of commuting in ${city.displayName} and the surrounding region.`;
+  const image = { url: `/swiss-commutes/social/${city.slug}.jpg`, width: 1388, height: 728,
+    alt: `Commuting in ${city.displayName} at 07:45: map and commuter statistics.` };
   return {
     title,
     description,
     alternates: { canonical: `/swiss-commutes/${city.slug}/` },
-    openGraph: { title, description, type: 'website', images: ['/swiss-commutes/og.png'] },
-    twitter: { card: 'summary_large_image', title, description, images: ['/swiss-commutes/og.png'] },
+    openGraph: { title, description, type: 'website', images: [image] },
+    twitter: { card: 'summary_large_image', title, description, images: [image] },
   };
 }
 
