@@ -42,6 +42,9 @@ next-env.d.ts
 /app/data/*.tmp
 /public/live/.private/*
 !/public/live/.private/.htaccess
+/public/trains/.private/*
+!/public/trains/.private/.htaccess
+/public/trains/timetable/
 
 # local writing drafts
 /POST.md

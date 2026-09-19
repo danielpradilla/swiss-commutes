@@ -11,6 +11,7 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "test": "node --experimental-strip-types --test test/*.test.ts",
     "test:live": "php test/live-feed.php && node --experimental-strip-types --test test/live-data.test.ts",
+    "test:trains": "php test/train-feed.php && node --experimental-strip-types --test test/train-data.test.ts",
     "audit:data": "node --experimental-strip-types scripts/audit-data.mjs",
     "audit:report": "node scripts/build-audit-fixes-report.mjs",
     "routes:preview": "node --experimental-strip-types scripts/generate-route-geometries.mjs",
@@ -18,7 +19,8 @@
     "routes:cars": "node --experimental-strip-types scripts/generate-car-routes.mjs",
     "routes:rail": "node --experimental-strip-types scripts/generate-rail-routes.mjs",
     "routes:transit": "node --experimental-strip-types scripts/generate-transit-routes.mjs",
-    "routes:active": "node --experimental-strip-types scripts/generate-active-routes.mjs"
+    "routes:active": "node --experimental-strip-types scripts/generate-active-routes.mjs",
+    "trains:timetable": "node --experimental-strip-types scripts/generate-train-timetable.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

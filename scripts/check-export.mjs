@@ -47,3 +47,14 @@ for (const slug of ['geneva', 'zurich', 'chiasso', 'mendrisio', 'zug', 'neuchate
 assert.match(read('live/'), /Live traffic in/);
 assert.equal(readFileSync('out/live/.private/.htaccess', 'utf8').trim(), 'Require all denied');
 console.log('Verified live pages contain no commuter model, scrubber or route data');
+
+for (const slug of ['geneva', 'zurich', 'chiasso', 'mendrisio', 'zug', 'neuchatel']) {
+  const html = read(`trains/${slug}/`);
+  assert.match(html, /Live trains in/);
+  assert.doesNotMatch(html, /routes\.json|journeyTimes|communeNodes|type="range"|Population vs daily average/);
+  assert.ok(Buffer.byteLength(html) < 100_000, 'Train pages must not embed commuter or timetable datasets');
+  assert.ok(JSON.parse(readFileSync(`out/trains/${slug}/rail.json`, 'utf8')).segments.length, 'Train map must export rail geometry');
+}
+assert.match(read('trains/'), /Live trains in/);
+assert.equal(readFileSync('out/trains/.private/.htaccess', 'utf8').trim(), 'Require all denied');
+console.log('Verified train maps contain no commuter model or static timetable data');
