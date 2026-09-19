@@ -12,7 +12,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const city = cityBySlug[(await params).city];
   if (!city) return {};
-  const title = `Live trains in ${city.displayName} | Swiss Commutes`;
+  const title = `Live trains around ${city.displayName} | Swiss Commutes`;
   const description = `Estimated live train positions, current delays and next stops around ${city.displayName}.`;
   return { title, description, alternates: { canonical: `/swiss-commutes/trains/${city.slug}/` },
     openGraph: { title, description }, twitter: { title, description } };

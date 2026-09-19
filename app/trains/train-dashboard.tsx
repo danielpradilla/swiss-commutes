@@ -183,7 +183,7 @@ export default function TrainDashboard({ initialCity, cities }: { initialCity: s
       <Link href={`/${initialCity}/`} prefetch={false}>Commuting model ↗</Link>
     </header>
     <section className={styles.heading}>
-      <h1>Live trains in <span className="cityChoice"><select className="citySelect" aria-label="City" value={initialCity} onChange={event => changeCity(event.target.value)}>
+      <h1>Live trains around <span className="cityChoice"><select className="citySelect" aria-label="City" value={initialCity} onChange={event => changeCity(event.target.value)}>
         {cities.map(item => <option key={item.slug} value={item.slug}>{item.displayName}</option>)}
       </select><span aria-hidden="true">⌄</span></span></h1>
       <p>{feed ? <>Updated <time dateTime={feed.fetchedAt}>{fetched.format(new Date(feed.fetchedAt))}</time></> : loading ? 'Connecting to the live timetable…' : 'No current update'}</p>
