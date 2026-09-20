@@ -162,15 +162,21 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
           <span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span>
         </div>
         <nav className="dp-navbar-links" aria-label="Site navigation">
+          <Link href="/">Commuting</Link>
+          <Link href="/live/">Traffic</Link>
+          <Link href="/trains/">Trains</Link>
           <a href="#sources">Sources & method</a>
-          <a href="/blog/">Blog</a>
+          <Link href="/blog/">Blog</Link>
           <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
         </nav>
         <details className="dp-navbar-menu">
           <summary aria-label="Menu">☰</summary>
           <nav aria-label="Site navigation (mobile)">
+            <Link href="/">Commuting</Link>
+            <Link href="/live/">Traffic</Link>
+            <Link href="/trains/">Trains</Link>
             <a href="#sources">Sources & method</a>
-            <a href="/blog/">Blog</a>
+            <Link href="/blog/">Blog</Link>
             <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
           </nav>
         </details>
@@ -253,8 +259,11 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
       <div className="dp-footer">
         <span>© 2026 Daniel Pradilla</span>
         <nav aria-label="Footer navigation">
-          <a href="/projects/">Projects</a>
-          <a href="/blog/">Blog</a>
+          <Link href="/">Commuting</Link>
+          <Link href="/live/">Traffic</Link>
+          <Link href="/trains/">Trains</Link>
+          <Link href="/projects/">Projects</Link>
+          <Link href="/blog/">Blog</Link>
           <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
         </nav>
       </div>
