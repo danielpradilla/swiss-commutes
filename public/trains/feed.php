@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 const TRAIN_SOURCE = 'https://api.opentransportdata.swiss/la/gtfs-rt?format=JSON';
 const TRAIN_CACHE_SECONDS = 60;
+const TRAIN_STALE_SECONDS = 900;
 
 function trainField(array $value, string $name): mixed {
     return $value[$name] ?? $value[ucfirst($name)] ?? null;
@@ -39,6 +40,7 @@ function trainBuildFeed(array $header, iterable $entities, array $timetable, ?in
     $published = is_array($header) ? trainField($header, 'timestamp') : null;
     if (!is_numeric($published) || (int)$published <= 0) throw new RuntimeException('Missing train feed timestamp');
     $now ??= time();
+    if ($now - (int)$published > TRAIN_STALE_SECONDS) throw new RuntimeException('Train feed has not published an update in over 15 minutes');
     $trains = [];
     foreach ($entities as $entity) {
         if (!is_array($entity) || (bool)(trainField($entity, 'isDeleted') ?? false)) continue;

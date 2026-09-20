@@ -39,10 +39,16 @@ try { trainFeed(json_encode($source), $timetable); } catch (RuntimeException) { 
 trainCheck($rejected, 'Reject realtime data paired with another static feed version');
 trainCheck(trainEventTime('20261025', '25:15:00')?->format('Y-m-d H:i:sP') === '2026-10-26 01:15:00+01:00', 'Support after-midnight GTFS times across daylight saving');
 
+$source['header']['feedVersion'] = '20260916';
+$stale = false;
+try { trainFeed(json_encode($source), $timetable, time()); } catch (RuntimeException) { $stale = true; }
+trainCheck($stale, 'Reject a feed whose header has not published an update in over 15 minutes');
+
 $cache = sys_get_temp_dir() . '/swiss-trains-' . bin2hex(random_bytes(6));
 mkdir($cache . '/private', 0700, true);
 mkdir($cache . '/timetable', 0700, true);
 $source['header']['feedVersion'] = '20260916';
+$source['header']['timestamp'] = time() - 120;
 file_put_contents($cache . '/private/credentials.env', "GTFS_RT_API_KEY=test\n");
 file_put_contents($cache . '/private/source.json', json_encode($source, JSON_THROW_ON_ERROR));
 file_put_contents($cache . '/timetable/zurich.json', json_encode($timetable, JSON_THROW_ON_ERROR));
