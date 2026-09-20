@@ -177,10 +177,26 @@ export default function TrainDashboard({ initialCity, cities }: { initialCity: s
   }
 
   return <main className={styles.page}>
-    <header className={`masthead ${styles.masthead}`}>
-      <Link className="wordmark" href="/trains/" prefetch={false}>SWISS COMMUTES <span aria-hidden="true">🇨🇭</span> <span className={styles.liveTag}>LIVE</span></Link>
-      <p>Train updates</p>
-      <Link href={`/${initialCity}/`} prefetch={false}>Commuting model ↗</Link>
+    <header>
+      <div className="dp-navbar">
+        <div className="dp-navbar-title">
+          <Link className="dp-navbar-brand" href="/projects/">Daniel Pradilla</Link>
+          <span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span>
+        </div>
+        <nav className="dp-navbar-links" aria-label="Site navigation">
+          <a href="#sources">Sources & method</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+        </nav>
+        <details className="dp-navbar-menu">
+          <summary aria-label="Menu">☰</summary>
+          <nav aria-label="Site navigation (mobile)">
+            <a href="#sources">Sources & method</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+          </nav>
+        </details>
+      </div>
     </header>
     <section className={styles.heading}>
       <h1>Live trains around <span className="cityChoice"><select className="citySelect" aria-label="City" value={initialCity} onChange={event => changeCity(event.target.value)}>
@@ -225,12 +241,22 @@ export default function TrainDashboard({ initialCity, cities }: { initialCity: s
           {filtered.length ? <ul>{filtered.map(train => <li key={train.tripId}>{trainRow(train)}</li>)}</ul>
             : feed && <p>{query ? 'No trains match this search in the current map view.' : 'No current trains in this map view. Zoom out to see more.'}</p>}
         </section>}
-        <details className={styles.sources}><summary>About these positions</summary>
+        <details id="sources" className={styles.sources}><summary>About these positions</summary>
           <p>The live source provides timetable updates and delays, not train GPS or track shapes. Positions are estimated from delay-adjusted times and snapped to the project’s ARE NPVM 2023 rail geometry. Where that network has no nearby track, the dot stays at the nearer timetable stop.</p>
           <p>Coverage depends on each operator. Trips without a realtime update for their next stop are not shown.</p>
           <a href="https://opentransportdata.swiss/en/cookbook/realtime-prediction-cookbook/gtfs-rt/" target="_blank" rel="noreferrer">Source and definitions ↗</a>
         </details>
       </aside>
     </div>
+    <footer className="projectFooter">
+      <div className="dp-footer">
+        <span>© 2026 Daniel Pradilla</span>
+        <nav aria-label="Footer navigation">
+          <a href="/projects/">Projects</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+        </nav>
+      </div>
+    </footer>
   </main>;
 }

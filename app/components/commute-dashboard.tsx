@@ -568,10 +568,26 @@ function CityTitle({ city, cityOptions }: { city: CityConfig; cityOptions: CityO
 function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: CityOption[] }) {
   return (
     <main>
-      <header className="masthead">
-        <a className="wordmark" href="#top">SWISS COMMUTES <span aria-hidden="true">🇨🇭</span></a>
-        <p>A day of commuting</p>
-        <a href="../geneva/">View Geneva →</a>
+      <header>
+        <div className="dp-navbar">
+          <div className="dp-navbar-title">
+            <a className="dp-navbar-brand" href="/projects/">Daniel Pradilla</a>
+            <span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span>
+          </div>
+          <nav className="dp-navbar-links" aria-label="Site navigation">
+            <a href="#sources">Sources & method</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+          </nav>
+          <details className="dp-navbar-menu">
+            <summary aria-label="Menu">☰</summary>
+            <nav aria-label="Site navigation (mobile)">
+              <a href="#sources">Sources & method</a>
+              <a href="/blog/">Blog</a>
+              <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+            </nav>
+          </details>
+        </div>
       </header>
       <section className="hero" id="top">
         <div className="intro">
@@ -579,15 +595,25 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
           <p className="lede">Journeys to work and back around {city.displayName}.</p>
         </div>
       </section>
-      <section className="plannedCity">
+      <section className="plannedCity" id="sources">
         <p className="eyebrow">Coming soon</p>
         <h2>{city.displayName} data is being checked.</h2>
         <p>The map will be available once the commuter counts have been checked.</p>
         <a href="../geneva/">View the Geneva map →</a>
       </section>
-      <footer>
-        <a className="wordmark" href="#top">SWISS COMMUTES <span aria-hidden="true">🇨🇭</span> ↑</a>
-        <p>Built in Geneva · Data: {city.dataYears}</p>
+      <footer className="projectFooter">
+        <div className="projectFooterContent">
+          <a className="wordmark" href="#top">SWISS COMMUTES <span aria-hidden="true">🇨🇭</span> ↑</a>
+          <p>Built in Geneva · Data: {city.dataYears}</p>
+        </div>
+        <div className="dp-footer">
+          <span>© 2026 Daniel Pradilla</span>
+          <nav aria-label="Footer navigation">
+            <a href="/projects/">Projects</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+          </nav>
+        </div>
       </footer>
     </main>
   );
@@ -681,10 +707,26 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
 
   return (
     <main>
-      <header className="masthead">
-        <a className="wordmark" href="#top">SWISS COMMUTES <span aria-hidden="true">🇨🇭</span></a>
-        <p>A day of commuting</p>
-        <a href="#sources">Sources & method ↓</a>
+      <header>
+        <div className="dp-navbar">
+          <div className="dp-navbar-title">
+            <a className="dp-navbar-brand" href="/projects/">Daniel Pradilla</a>
+            <span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span>
+          </div>
+          <nav className="dp-navbar-links" aria-label="Site navigation">
+            <a href="#sources">Sources & method</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+          </nav>
+          <details className="dp-navbar-menu">
+            <summary aria-label="Menu">☰</summary>
+            <nav aria-label="Site navigation (mobile)">
+              <a href="#sources">Sources & method</a>
+              <a href="/blog/">Blog</a>
+              <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+            </nav>
+          </details>
+        </div>
       </header>
 
       <section className="hero" id="top">
@@ -855,9 +897,19 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
         </div>
       </section>
 
-      <footer>
-        <a className="wordmark" href="#top">SWISS COMMUTES <span aria-hidden="true">🇨🇭</span> ↑</a>
-        <p>Built in Geneva · Data: {city.dataYears}</p>
+      <footer className="projectFooter">
+        <div className="projectFooterContent">
+          <a className="wordmark" href="#top">SWISS COMMUTES <span aria-hidden="true">🇨🇭</span> ↑</a>
+          <p>Built in Geneva · Data: {city.dataYears}</p>
+        </div>
+        <div className="dp-footer">
+          <span>© 2026 Daniel Pradilla</span>
+          <nav aria-label="Footer navigation">
+            <a href="/projects/">Projects</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+          </nav>
+        </div>
       </footer>
     </main>
   );

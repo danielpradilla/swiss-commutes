@@ -155,10 +155,26 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
   }
 
   return <main className={styles.page}>
-    <header className={`masthead ${styles.masthead}`}>
-      <Link className="wordmark" href="/live/" prefetch={false}>SWISS COMMUTES <span aria-hidden="true">🇨🇭</span> <span className={styles.liveTag}>LIVE</span></Link>
-      <p>Road counter readings</p>
-      <Link href={`/${slug}/`} prefetch={false}>Commuting model ↗</Link>
+    <header>
+      <div className="dp-navbar">
+        <div className="dp-navbar-title">
+          <Link className="dp-navbar-brand" href="/projects/">Daniel Pradilla</Link>
+          <span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span>
+        </div>
+        <nav className="dp-navbar-links" aria-label="Site navigation">
+          <a href="#sources">Sources & method</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+        </nav>
+        <details className="dp-navbar-menu">
+          <summary aria-label="Menu">☰</summary>
+          <nav aria-label="Site navigation (mobile)">
+            <a href="#sources">Sources & method</a>
+            <a href="/blog/">Blog</a>
+            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+          </nav>
+        </details>
+      </div>
     </header>
     <section className={styles.heading}>
       <h1>Live traffic in <span className="cityChoice"><select className="citySelect" aria-label="City" value={slug} onChange={event => changeCity(event.target.value)}>
@@ -223,7 +239,7 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
             </span></button></li>;
           })}</ul> : feed && <p>There are no counters from this feed in the current view. Zoom out to see nearby stations.</p>}
         </section>}
-        <details className={styles.sources}><summary>About these readings</summary>
+        <details id="sources" className={styles.sources}><summary>About these readings</summary>
           <p>ASTRA / FEDRO and participating road authorities count vehicles at fixed sensors. The feed covers equipped roads, not every street or border approach.</p>
           <p>Counts cover a 60-second interval. Speeds are the measured average for that vehicle class. Light vehicles include cars, motorcycles, buses and small delivery vehicles.</p>
           <p>Map colours show the highest vehicle count from a station’s detectors, from green to red. Both vehicle classes must be reported. Grey means no complete count for the displayed minute. Colours show volume, not congestion.</p>
@@ -233,5 +249,15 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
         </details>
       </aside>
     </div>
+    <footer className="projectFooter">
+      <div className="dp-footer">
+        <span>© 2026 Daniel Pradilla</span>
+        <nav aria-label="Footer navigation">
+          <a href="/projects/">Projects</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+        </nav>
+      </div>
+    </footer>
   </main>;
 }
