@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CircleMarker, LayerGroup, Map as LeafletMap } from 'leaflet';
+import ProductNav from '../components/product-nav';
 import { decodePolyline } from '../route-geometry';
 import { buildRailIndex, isTrainFeed, trainColor, trainMatches, trainPosition, type RailIndex, type Train, type TrainFeed } from './train-data';
 import styles from './trains.module.css';
@@ -204,6 +205,7 @@ export default function TrainDashboard({ initialCity, cities }: { initialCity: s
         </details>
       </div>
     </header>
+    <ProductNav city={initialCity} current="trains" />
     <section className={styles.heading}>
       <h1>Live trains around <span className="cityChoice"><select className="citySelect" aria-label="City" value={initialCity} onChange={event => changeCity(event.target.value)}>
         {cities.map(item => <option key={item.slug} value={item.slug}>{item.displayName}</option>)}
@@ -247,13 +249,37 @@ export default function TrainDashboard({ initialCity, cities }: { initialCity: s
           {filtered.length ? <ul>{filtered.map(train => <li key={train.tripId}>{trainRow(train)}</li>)}</ul>
             : feed && <p>{query ? 'No trains match this search in the current map view.' : 'No current trains in this map view. Zoom out to see more.'}</p>}
         </section>}
-        <details id="sources" className={styles.sources}><summary>About these positions</summary>
-          <p>The live source provides timetable updates and delays, not train GPS or track shapes. Positions are estimated from delay-adjusted times and snapped to the project’s ARE NPVM 2023 rail geometry. Where that network has no nearby track, the dot stays at the nearer timetable stop.</p>
-          <p>Coverage depends on each operator. Trips without a realtime update for their next stop are not shown.</p>
-          <a href="https://opentransportdata.swiss/en/cookbook/realtime-prediction-cookbook/gtfs-rt/" target="_blank" rel="noreferrer">Source and definitions ↗</a>
-        </details>
       </aside>
     </div>
+    <section className="method" id="sources">
+      <div className="methodIntro">
+        <p className="eyebrow">Live timetable · estimated positions</p>
+        <h2>About the train data</h2>
+        <p>Train times and delays come from Swiss public transport timetable data. The moving dots estimate locations between stops; they are not measured train positions.</p>
+      </div>
+      <div className="sourceGrid">
+        <a href="https://opentransportdata.swiss/en/cookbook/realtime-prediction-cookbook/gtfs-rt/" target="_blank" rel="noreferrer">
+          <span>01 · Realtime updates</span><strong>GTFS Realtime Trip Updates</strong>
+          <p>Operator-reported trip and stop updates, including delays and cancellations. The feed does not provide GPS positions.</p>
+        </a>
+        <a href="https://opentransportdata.swiss/en/cookbook/timetable-cookbook/gtfs/" target="_blank" rel="noreferrer">
+          <span>02 · Timetable</span><strong>Swiss GTFS Static</strong>
+          <p>Scheduled stops, train numbers, station coordinates and service dates. The timetable version is matched to the realtime feed.</p>
+        </a>
+        <a href="https://zenodo.org/records/18486217" target="_blank" rel="noreferrer">
+          <span>03 · Rail geometry</span><strong>ARE NPVM 2023</strong>
+          <p>Rail network geometry used to place estimated dots near tracks, not observed train paths.</p>
+        </a>
+      </div>
+      <div className="methodNote">
+        <strong>How to read the map</strong>
+        <div>
+          <p>The update time above the map is when the server fetched the feed. The count covers trains whose estimated dots are inside the current map view, not every train in the selected city. Zooming or panning changes that count.</p>
+          <p>The next-stop estimate adds the reported delay to the scheduled arrival or departure. The dot advances with elapsed time between the previous and next stops, then snaps to nearby rail geometry. This does not establish which track or route the train took. Without nearby geometry, it stays at the nearer stop.</p>
+          <p>Only trains with a realtime report for their next stop appear. Operators and services without that update are omitted, so an empty map is not proof that no trains are running. Delay colours describe the next stop, not the train’s whole journey.</p>
+        </div>
+      </div>
+    </section>
     <footer className="projectFooter">
       <div className="dp-footer">
         <span>© 2026 Daniel Pradilla</span>

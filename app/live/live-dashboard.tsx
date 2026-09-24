@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Map as LeafletMap, LayerGroup, CircleMarker } from 'leaflet';
+import ProductNav from '../components/product-nav';
 import { currentReading, stationIsCurrent, stationVolume, volumeColor, isReplayFeed, replayStations, availableFrameIndices, frameCollected, detectorStatus, stationStatus, type LiveCity, type ReplayFeed, type Station } from './live-data';
 import styles from './live.module.css';
 
@@ -182,6 +183,7 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
         </details>
       </div>
     </header>
+    <ProductNav city={slug} current="traffic" />
     <section className={styles.heading}>
       <h1>Live traffic in <span className="cityChoice"><select className="citySelect" aria-label="City" value={slug} onChange={event => changeCity(event.target.value)}>
         {cities.map(city => <option key={city.slug} value={city.slug}>{city.displayName}</option>)}

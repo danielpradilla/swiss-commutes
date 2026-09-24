@@ -21,7 +21,7 @@
 .kicker { display:block; font-size:9px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; }
 .status strong { font-size:28px; font-weight:400; }
 .status strong small { font-size:14px; font-weight:300; }
-.status p,.hint,.subtle,.sources p,.trains > p { font-size:12px; line-height:1.5; margin:8px 0 0; color:var(--muted); }
+.status p,.hint,.subtle,.trains > p { font-size:12px; line-height:1.5; margin:8px 0 0; color:var(--muted); }
 .search { display:block; font-size:9px; letter-spacing:.12em; text-transform:uppercase; }
 .search input { width:100%; margin-top:8px; padding:9px 10px; border:1px solid var(--line); border-radius:0; background:var(--paper); color:var(--ink); font:inherit; font-size:13px; font-weight:300; letter-spacing:normal; text-transform:none; }
 .search input:focus { outline:2px solid var(--blue); outline-offset:2px; }
@@ -42,9 +42,6 @@
 .detail dl div { display:grid; grid-template-columns:75px 1fr; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); font-size:12px; }
 .detail dt { color:var(--muted); }
 .detail dd { margin:0; }
-.sources { margin-top:auto; border-top:1px solid var(--line); padding-top:16px; font-size:12px; }
-.sources summary { cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
-.sources a { display:inline-block; margin-top:12px; }
 .page button:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
 @media (prefers-reduced-motion:reduce) { .map :global(.train-ripple) { animation:none; stroke-width:4; } }
 @media (max-width:900px) {

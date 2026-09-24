@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import ProductNav from './product-nav';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Map as LeafletMap } from 'leaflet';
 import { useRouter } from 'next/navigation';
@@ -596,6 +597,7 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
           </details>
         </div>
       </header>
+      <ProductNav city={city.slug} current="commuting" />
       <section className="hero" id="top">
         <div className="intro">
           <CityTitle city={city} cityOptions={cityOptions} />
@@ -744,6 +746,7 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
           </details>
         </div>
       </header>
+      <ProductNav city={city.slug} current="commuting" />
 
       <section className="hero" id="top">
         <div className="intro">
