@@ -1,5 +1,5 @@
 import { createReadStream, createWriteStream } from 'node:fs';
-import { access, mkdir, readFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir } from 'node:fs/promises';
 import { once } from 'node:events';
 import { basename, join } from 'node:path';
 import { createInterface } from 'node:readline';
@@ -51,7 +51,8 @@ async function main() {
   const noon = new Date(`${serviceDate.slice(0, 4)}-${serviceDate.slice(4, 6)}-${serviceDate.slice(6)}T12:00:00Z`);
   const serviceDates = [-1, 0, 1].map(offset => new Date(noon.getTime() + offset * 86_400_000).toISOString().slice(0, 10).replaceAll('-', ''));
   const activeByDate = new Map(serviceDates.map(date => [date, new Set()]));
-  const cityFiles = (await import('../app/cities.ts')).cities.map(({ slug }) => slug);
+  const cityFiles = (await readdir(new URL('../app/data/', import.meta.url)))
+    .filter(name => name.endsWith('-rail-routes.json')).map(name => name.slice(0, -'-rail-routes.json'.length));
   const cityStations = new Map();
   for (const city of cityFiles) {
     const rail = JSON.parse(await readFile(new URL(`../app/data/${city}-rail-routes.json`, import.meta.url), 'utf8'));

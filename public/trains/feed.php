@@ -185,7 +185,7 @@ function serveTrains(?string $requestedCity = null, ?callable $fetch = null): vo
     $city = $requestedCity ?? (string)($_GET['city'] ?? 'zurich');
     if (!preg_match('/^[a-z-]+$/', $city)) { http_response_code(400); echo '{"error":"Unknown city"}'; return; }
     $private = getenv('SWISS_TRAINS_PRIVATE_DIR') ?: __DIR__ . '/.private';
-    $timetablePath = getenv('SWISS_TRAINS_TIMETABLE_DIR') ?: __DIR__ . '/timetable';
+    $timetablePath = getenv('SWISS_TRAINS_TIMETABLE_DIR') ?: (is_link($private . '/timetable-current') ? $private . '/timetable-current' : __DIR__ . '/timetable');
     $timetablePath .= '/' . $city . '.json';
     $lock = null;
     try {

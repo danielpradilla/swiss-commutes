@@ -65,10 +65,12 @@ The public feed uses this shape:
 
 ## Checks and deployment
 
-Download the GTFS ZIP matching the realtime feed version, then generate the three-day service window around deployment day:
+`scripts/update-train-timetable.py` checks the realtime header and the active three-day service window. When either changes, it finds the exact-version ZIP in the [official GTFS catalog](https://data.opentransportdata.swiss/dataset/timetable-2026-gtfs2020), verifies `feed_info.txt`, generates all city timetables from the rail-station data, validates each result, and atomically switches `.private/timetable-current`. It retains the ZIP for daily service-window rebuilds and leaves the previous timetable active on failure. Errors go to the cron log. The PHP endpoint prefers this private symlink and falls back to the original public timetable before the first successful update.
+
+Deploy `scripts/update-train-timetable.py` as `.private/updater/scripts/update-train-timetable.py`, `scripts/generate-train-timetable.mjs` alongside it, and `app/data/*-rail-routes.json` under `.private/updater/app/data/`. DreamHost requires Python 3 with `zoneinfo`, Node 18+, and `unzip`. Run the updater once, then schedule it hourly (server time):
 
 ```sh
-npm run trains:timetable -- /path/to/GTFS.zip public/trains/timetable YYYYMMDD
+15 * * * * /usr/bin/python3 /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/updater/scripts/update-train-timetable.py --root /home/depr001/danielpradilla.info/swiss-commutes/trains >> /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/timetable-update.log 2>&1
 ```
 
-Run `npm run test:trains`, `npm run lint` and `npm run build`. Deploy `out/trains/`, preserving `.private/credentials.env`. The generated timetable directory is ignored by Git because it is a reproducible deployment artifact. The export check verifies that train pages contain no commuter model, map, or embedded timetable and that private files remain denied over HTTP.
+Run `npm run test:trains`, `npm run lint` and `npm run build`. Deploy `out/trains/` without deleting `.private/` or its credentials, caches, and generated timetables. Verify the active version, the feed's current timestamp, and a nonempty train list after activation.
