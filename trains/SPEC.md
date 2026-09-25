@@ -49,10 +49,12 @@ The public feed uses this shape:
 
 ## Operation
 
-- `public/trains/feed.php` uses PHP 8.2+ and cURL. Browser requests share a locked 60-second nationwide source cache, so all cities together make at most one upstream attempt per minute.
-- The uncompressed feed is about 62 MB, so the response streams directly to the candidate cache file with `CURLOPT_FILE` instead of being buffered in a PHP string; buffering it exhausted the 128 MB request limit and returned HTTP 500. A body above 64 MB is rejected. The candidate file is parsed before it replaces the last good source.
+- `public/trains/feed.php` uses PHP 8.2+ and cURL. Cron runs it every minute as a collector: it downloads the nationwide feed at most once a minute, then rebuilds the stored feed of every city requested in the last ten minutes. A browser request only reads a stored file.
+- The uncompressed feed reaches 35–66 MB through the day, so the download streams directly to the candidate cache file with `CURLOPT_FILE` instead of being buffered in a PHP string; buffering it exhausted the 128 MB request limit and returned HTTP 500. A body above 256 MB is rejected as a runaway response. The candidate file is parsed before it replaces the last good source.
 - A successful refresh is validated before it replaces the cache. If the API times out, rejects a request or returns invalid data, the endpoint serves the last valid cached feed instead of making the map unavailable. A retry marker prevents other city/browser requests from hammering the upstream API for the next minute. With no valid cache yet, the endpoint returns `503` and retries after one minute.
-- Reading the cached source and building one city's feed takes about 17 seconds, because the streaming parser walks the 62 MB body character by character to stay inside the memory limit. Browsers fetch once per minute, and the client shows its loading state meanwhile.
+- Serving one city reads `feeds/<city>.json`, which the collector rewrites every minute, so a page load does not touch the source. A city that has never been requested is built inline on its first request and joins the collector's set from then on. Responses are gzipped.
+- The entity scanner finds each object's boundaries with `strcspn` and decodes it with `json_decode`, so a 35 MB feed with 8 700 entities scans in about 0.6 seconds instead of 6. One timetable decodes to a peak of about 72 MB, so cities are built one at a time; a city build costs about 0.6 seconds and holds the feed lock while it runs.
+- Activity is recorded as one appended line per request in `feeds/active.jsonl`, which the collector reads and rewrites each run; the client already labels the feed with its `fetchedAt` time, so a stalled collector is visible on the page.
 - The implementation uses `?format=JSON` to avoid adding a PHP/Composer protobuf stack. This endpoint is documented for testing rather than production; move to protobuf when a supported decoder is available in the deployment environment.
 - Credentials follow the existing pattern: `GTFS_RT_API_KEY` in `public/trains/.private/credentials.env`, `.htaccess`-denied.
 - No 30-minute replay buffer is needed the way traffic has one — GTFS-RT is a current-state feed, not a per-minute counter history. A simple "latest fetch" cache, refreshed roughly every 30–60 seconds, covers the concept above. If a played-back history of delays is wanted later, that's an addition, not a default.
@@ -75,4 +77,10 @@ Deploy `scripts/update-train-timetable.py` as `.private/updater/scripts/update-t
 15 * * * * /usr/bin/python3 /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/updater/scripts/update-train-timetable.py --root /home/depr001/danielpradilla.info/swiss-commutes/trains >> /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/timetable-update.log 2>&1
 ```
 
-Run `npm run test:trains`, `npm run lint` and `npm run build`. Deploy `out/trains/` without deleting `.private/` or its credentials, caches, and generated timetables. Verify the active version, the feed's current timestamp, and a nonempty train list after activation.
+Run `npm run test:trains`, `npm run lint` and `npm run build`. Deploy `out/trains/` without deleting `.private/` or its credentials, caches, generated timetables and `feeds/`. Add the collector to the crontab (server time), keeping the existing timetable updater:
+
+```sh
+* * * * * /usr/bin/php /home/depr001/danielpradilla.info/swiss-commutes/trains/feed.php >/dev/null 2>&1 # Swiss Commutes train collector
+```
+
+Verify the active version, then request one city and confirm `feeds/<city>.json` appears with a fresh `fetchedAt`, that a second request is served without a rebuild, and that a nonempty train list comes back after activation.

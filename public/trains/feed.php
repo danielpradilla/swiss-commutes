@@ -4,6 +4,8 @@ declare(strict_types=1);
 const TRAIN_SOURCE = 'https://api.opentransportdata.swiss/la/gtfs-rt?format=JSON';
 const TRAIN_CACHE_SECONDS = 60;
 const TRAIN_STALE_SECONDS = 900;
+// Cities that asked for a feed within this window are the ones the collector rebuilds.
+const TRAIN_ACTIVE_SECONDS = 600;
 
 function trainField(array $value, string $name): mixed {
     return $value[$name] ?? $value[ucfirst($name)] ?? null;
@@ -97,49 +99,76 @@ function trainFeed(string $body, array $timetable, ?int $now = null): array {
     return trainBuildFeed($header, (array)(trainField($source, 'entity') ?? []), $timetable, $now);
 }
 
+// Offset just past the JSON object that opens at $open, or null while the buffer is still incomplete.
+// strcspn skips the bytes between structural characters in C, so the PHP loop runs once per brace or
+// quote instead of once per byte, and strings are skipped whole so braces inside them do not count.
+function trainObjectEnd(string $buffer, int $open): ?int {
+    $depth = 0;
+    $pos = $open;
+    $length = strlen($buffer);
+    while ($pos < $length) {
+        $pos += strcspn($buffer, '"{}', $pos);
+        if ($pos >= $length) return null;
+        $char = $buffer[$pos];
+        if ($char === '"') {
+            $pos++;
+            while (true) {
+                $quote = strpos($buffer, '"', $pos);
+                if ($quote === false) return null;
+                $backslashes = 0;
+                for ($at = $quote - 1; $at >= $pos && $buffer[$at] === '\\'; $at--) $backslashes++;
+                $pos = $quote + 1;
+                if ($backslashes % 2 === 0) break;
+            }
+            continue;
+        }
+        if ($char === '{') {
+            $depth++;
+            $pos++;
+            continue;
+        }
+        $depth--;
+        $pos++;
+        if ($depth === 0) return $pos;
+    }
+    return null;
+}
+
 function trainEntities(string $path): Generator {
     $file = fopen($path, 'rb');
     if (!$file) throw new RuntimeException('Cannot read train source cache');
-    $search = $object = '';
-    $array = $string = $escaped = false;
-    $depth = 0;
+    $buffer = '';
+    $offset = 0;
+    $started = false;
+    // Reading only when an entity is incomplete keeps the buffer at one chunk plus one entity.
+    $read = function () use ($file, &$buffer): bool {
+        $chunk = fread($file, 262144);
+        if ($chunk === false) throw new RuntimeException('Cannot read train source cache');
+        $buffer .= $chunk;
+        return $chunk !== '';
+    };
     try {
-        while (!feof($file)) {
-            $chunk = fread($file, 65536);
-            if ($chunk === false) throw new RuntimeException('Cannot read train source cache');
-            if (!$array) {
-                $search .= $chunk;
-                if (!preg_match('/"(?:entity|Entity)"\s*:\s*\[/s', $search, $match, PREG_OFFSET_CAPTURE)) {
-                    if (strlen($search) > 131072) throw new RuntimeException('Missing train entities');
+        while (true) {
+            $cursor = $offset + strspn($buffer, " \t\r\n,", $offset);
+            if ($cursor < strlen($buffer) && $buffer[$cursor] === ']') return;
+            if (!$started) {
+                if (preg_match('/"(?:entity|Entity)"\s*:\s*\[/', $buffer, $match, PREG_OFFSET_CAPTURE)) {
+                    $offset = $match[0][1] + strlen($match[0][0]);
+                    $started = true;
                     continue;
                 }
-                $offset = $match[0][1] + strlen($match[0][0]);
-                $chunk = substr($search, $offset);
-                $search = '';
-                $array = true;
+                if (strlen($buffer) > 131072 || !$read()) throw new RuntimeException('Missing train entities');
+                continue;
             }
-            for ($i = 0, $length = strlen($chunk); $i < $length; $i++) {
-                $char = $chunk[$i];
-                if ($depth === 0) {
-                    if ($char === ']') return;
-                    if ($char !== '{') continue;
-                    $object = '{'; $depth = 1; $string = $escaped = false;
-                    continue;
-                }
-                $object .= $char;
-                if ($string) {
-                    if ($escaped) $escaped = false;
-                    elseif ($char === '\\') $escaped = true;
-                    elseif ($char === '"') $string = false;
-                    continue;
-                }
-                if ($char === '"') $string = true;
-                elseif ($char === '{') $depth++;
-                elseif ($char === '}' && --$depth === 0) {
-                    yield json_decode($object, true, 512, JSON_THROW_ON_ERROR);
-                    $object = '';
-                }
+            $open = strpos($buffer, '{', $cursor);
+            $end = $open === false ? null : trainObjectEnd($buffer, $open);
+            if ($end === null) {
+                if ($offset !== 0) { $buffer = substr($buffer, $cursor); $offset = 0; }
+                if (!$read()) break;
+                continue;
             }
+            yield json_decode(substr($buffer, $open, $end - $open), true, 512, JSON_THROW_ON_ERROR);
+            if ($end > 1048576) { $buffer = substr($buffer, $end); $offset = 0; } else { $offset = $end; }
         }
         throw new RuntimeException('Incomplete train entity array');
     } finally {
@@ -182,6 +211,131 @@ function trainFetch(string $key, string $path): void {
     if (filesize($path) > 256 * 1024 * 1024) throw new RuntimeException('Train response too large');
 }
 
+// One city's timetable: the updater keeps a current symlink, and the export carries a fallback copy.
+function trainTimetable(string $private, string $city): array {
+    $directory = getenv('SWISS_TRAINS_TIMETABLE_DIR') ?: (is_link($private . '/timetable-current') ? $private . '/timetable-current' : __DIR__ . '/timetable');
+    $path = $directory . '/' . $city . '.json';
+    if (!is_file($path)) throw new RuntimeException('Train timetable not installed');
+    $timetable = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+    if (!is_array($timetable)) throw new RuntimeException('Invalid train timetable');
+    return $timetable;
+}
+
+function trainFeedPath(string $private, string $city): string {
+    return $private . '/feeds/' . $city . '.json';
+}
+
+// The last feed built for a city. Serving this is what keeps a page load off the 66 MB source.
+function trainStoredFeed(string $private, string $city): ?array {
+    $path = trainFeedPath($private, $city);
+    if (!is_file($path)) return null;
+    try {
+        $feed = json_decode(file_get_contents($path) ?: '', true, 512, JSON_THROW_ON_ERROR);
+    } catch (JsonException) {
+        return null; // An unreadable file must not stop a rebuild.
+    }
+    return is_array($feed) && is_array($feed['trains'] ?? null) ? $feed : null;
+}
+
+function trainStoreFeed(string $private, string $city, array $feed): void {
+    $path = trainFeedPath($private, $city);
+    if (!is_dir(dirname($path)) && !mkdir(dirname($path), 0700, true)) throw new RuntimeException('Cannot create train feed directory');
+    // Preserve zero fractions so a stored feed decodes to the same types as a freshly built one.
+    $json = json_encode($feed, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
+    if (file_put_contents($path . '.tmp', $json) === false || !rename($path . '.tmp', $path)) throw new RuntimeException('Cannot save train feed');
+}
+
+// Which cities asked for a feed recently, so the collector rebuilds what is being watched and no more.
+function trainMarkActive(string $private, string $city, int $now): void {
+    $path = $private . '/feeds/active.jsonl';
+    try {
+        if (!is_dir(dirname($path)) && !mkdir(dirname($path), 0700, true)) return;
+        file_put_contents($path, $city . ' ' . $now . "\n", FILE_APPEND);
+    } catch (Throwable $error) {
+        error_log('Swiss Commutes trains: cannot record activity: ' . $error->getMessage());
+    }
+}
+
+function trainActiveCities(string $private, int $now): array {
+    $path = $private . '/feeds/active.jsonl';
+    if (!is_file($path)) return [];
+    $seen = [];
+    foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
+        [$city, $at] = array_pad(explode(' ', trim($line), 2), 2, '');
+        if (!preg_match('/^[a-z-]+$/', $city) || !is_numeric($at)) continue;
+        $seen[$city] = max($seen[$city] ?? 0, (int)$at);
+    }
+    $active = array_filter($seen, fn(int $at) => $now - $at < TRAIN_ACTIVE_SECONDS);
+    file_put_contents($path, implode('', array_map(fn(string $city) => $city . ' ' . $seen[$city] . "\n", array_keys($active))) ?: '');
+    return array_keys($active);
+}
+
+// Download a new source only when the cached one is older than a minute and the last attempt is not retrying.
+function trainRefreshSource(string $private, ?callable $fetch = null): void {
+    $sourcePath = $private . '/source.json';
+    $retryPath = $private . '/source.retry';
+    $due = !is_file($sourcePath) || time() - filemtime($sourcePath) >= TRAIN_CACHE_SECONDS;
+    $retryDue = !is_file($retryPath) || time() - filemtime($retryPath) >= TRAIN_CACHE_SECONDS;
+    if (!$due || !$retryDue) return;
+    $candidate = $sourcePath . '.new';
+    try {
+        $key = getenv('GTFS_RT_API_KEY') ?: '';
+        foreach ([$private . '/credentials.env', dirname(__DIR__, 2) . '/.env.local'] as $file) {
+            if (!$key && is_file($file)) $key = parse_ini_file($file, false, INI_SCANNER_RAW)['GTFS_RT_API_KEY'] ?? '';
+        }
+        if (!$key) throw new RuntimeException('Train API key not configured');
+        $fetch ??= 'trainFetch';
+        $fetch($key, $candidate);
+        $matching = null;
+        foreach (trainTimetables($private) as $timetable) { $matching = trainFeedFile($candidate, $timetable); break; }
+        if ($matching === null) throw new RuntimeException('Train timetable not installed');
+        if (!rename($candidate, $sourcePath)) throw new RuntimeException('Cannot save train source cache');
+        if (is_file($retryPath)) unlink($retryPath);
+    } catch (Throwable $refreshError) {
+        if (is_file($candidate)) unlink($candidate);
+        touch($retryPath);
+        if (!is_file($sourcePath)) throw $refreshError;
+        error_log('Swiss Commutes trains: refresh failed, serving the stored feed: ' . $refreshError->getMessage());
+    }
+}
+
+// Every installed city timetable, decoded one at a time so only one is in memory.
+function trainTimetables(string $private): Generator {
+    $directory = getenv('SWISS_TRAINS_TIMETABLE_DIR') ?: (is_link($private . '/timetable-current') ? $private . '/timetable-current' : __DIR__ . '/timetable');
+    foreach (glob($directory . '/*.json') ?: [] as $path) yield basename($path, '.json') => json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+}
+
+function trainBuildCity(string $private, string $city, int $now): array {
+    $sourcePath = $private . '/source.json';
+    $feed = trainFeedFile($sourcePath, trainTimetable($private, $city), $now);
+    $feed['fetchedAt'] = gmdate('Y-m-d\TH:i:s\Z', filemtime($sourcePath));
+    trainStoreFeed($private, $city, $feed);
+    return $feed;
+}
+
+// The cron entry: refresh the source, then rebuild the cities that were requested recently.
+function trainCollect(string $private, ?callable $fetch = null, ?int $now = null): array {
+    $now ??= time();
+    if (!is_dir($private) && !mkdir($private, 0700, true)) throw new RuntimeException('Cannot create train cache');
+    $lock = fopen($private . '/feed.lock', 'c');
+    if (!$lock || !flock($lock, LOCK_EX)) throw new RuntimeException('Cannot lock train cache');
+    $built = [];
+    try {
+        trainRefreshSource($private, $fetch);
+        if (filemtime($private . '/source.json') < $now - TRAIN_STALE_SECONDS) throw new RuntimeException('Train source has not refreshed in 15 minutes');
+        foreach (trainActiveCities($private, $now) as $city) { trainBuildCity($private, $city, $now); $built[] = $city; }
+    } finally {
+        flock($lock, LOCK_UN);
+        fclose($lock);
+    }
+    return $built;
+}
+
+function trainRespond(array $feed): void {
+    if (extension_loaded('zlib')) ob_start('ob_gzhandler');
+    echo json_encode($feed, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
+}
+
 function serveTrains(?string $requestedCity = null, ?callable $fetch = null): void {
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store');
@@ -190,42 +344,21 @@ function serveTrains(?string $requestedCity = null, ?callable $fetch = null): vo
     $city = $requestedCity ?? (string)($_GET['city'] ?? 'zurich');
     if (!preg_match('/^[a-z-]+$/', $city)) { http_response_code(400); echo '{"error":"Unknown city"}'; return; }
     $private = getenv('SWISS_TRAINS_PRIVATE_DIR') ?: __DIR__ . '/.private';
-    $timetablePath = getenv('SWISS_TRAINS_TIMETABLE_DIR') ?: (is_link($private . '/timetable-current') ? $private . '/timetable-current' : __DIR__ . '/timetable');
-    $timetablePath .= '/' . $city . '.json';
+    // Any request, stored or not, puts the city in the collector's set for the next ten minutes.
+    trainMarkActive($private, $city, time());
     $lock = null;
     try {
-        if (!is_file($timetablePath)) throw new RuntimeException('Train timetable not installed');
+        // The stored feed answers the request; the collector keeps it current out of band.
+        $stored = trainStoredFeed($private, $city);
+        if ($stored) {
+            trainRespond($stored);
+            return;
+        }
         if (!is_dir($private) && !mkdir($private, 0700, true)) throw new RuntimeException('Cannot create train cache');
-        $timetable = json_decode(file_get_contents($timetablePath), true, 512, JSON_THROW_ON_ERROR);
         $lock = fopen($private . '/feed.lock', 'c');
         if (!$lock || !flock($lock, LOCK_EX)) throw new RuntimeException('Cannot lock train cache');
-        $sourcePath = $private . '/source.json';
-        $retryPath = $private . '/source.retry';
-        $refreshDue = !is_file($sourcePath) || time() - filemtime($sourcePath) >= TRAIN_CACHE_SECONDS;
-        $retryDue = !is_file($retryPath) || time() - filemtime($retryPath) >= TRAIN_CACHE_SECONDS;
-        if ($refreshDue && $retryDue) {
-            $candidate = $sourcePath . '.new';
-            try {
-                $key = getenv('GTFS_RT_API_KEY') ?: '';
-                foreach ([$private . '/credentials.env', dirname(__DIR__, 2) . '/.env.local'] as $file) {
-                    if (!$key && is_file($file)) $key = parse_ini_file($file, false, INI_SCANNER_RAW)['GTFS_RT_API_KEY'] ?? '';
-                }
-                if (!$key) throw new RuntimeException('Train API key not configured');
-                $fetch ??= 'trainFetch';
-                $fetch($key, $candidate);
-                $feed = trainFeedFile($candidate, $timetable); // Validate before replacing the last good source.
-                if (!rename($candidate, $sourcePath)) throw new RuntimeException('Cannot save train source cache');
-                if (is_file($retryPath)) unlink($retryPath);
-            } catch (Throwable $refreshError) {
-                if (is_file($candidate)) unlink($candidate);
-                touch($retryPath);
-                if (!is_file($sourcePath)) throw $refreshError;
-                error_log('Swiss Commutes trains: refresh failed, serving cached feed: ' . $refreshError->getMessage());
-            }
-        }
-        $feed ??= trainFeedFile($sourcePath, $timetable);
-        $feed['fetchedAt'] = gmdate('Y-m-d\TH:i:s\Z', filemtime($sourcePath));
-        echo json_encode($feed, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+        trainRefreshSource($private, $fetch);
+        trainRespond(trainBuildCity($private, $city, time()));
     } catch (Throwable $error) {
         error_log('Swiss Commutes trains: ' . $error->getMessage());
         http_response_code(503);
@@ -237,6 +370,16 @@ function serveTrains(?string $requestedCity = null, ?callable $fetch = null): vo
 }
 
 if (realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === __FILE__) {
-    serveTrains();
-    if (PHP_SAPI === 'cli' && http_response_code() >= 400) exit(1);
+    if (PHP_SAPI === 'cli') {
+        $private = getenv('SWISS_TRAINS_PRIVATE_DIR') ?: __DIR__ . '/.private';
+        try {
+            $built = trainCollect($private);
+            error_log('Swiss Commutes trains: collected ' . (count($built) ? implode(', ', $built) : 'the source only'));
+        } catch (Throwable $error) {
+            error_log('Swiss Commutes trains: ' . $error->getMessage());
+            exit(1);
+        }
+    } else {
+        serveTrains();
+    }
 }

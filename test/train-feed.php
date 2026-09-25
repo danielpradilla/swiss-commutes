@@ -61,9 +61,41 @@ ob_start(); serveTrains('zurich', $failure); $cached = json_decode(ob_get_clean(
 ob_start(); serveTrains('zurich', $failure); ob_end_clean();
 trainCheck($cached['feedVersion'] === '20260916', 'Serve the last valid feed when refresh fails');
 trainCheck($calls === 1 && is_file($cache . '/private/source.retry'), 'Back off upstream refreshes for one minute after failure');
+
+// A page load must read a stored per-city feed instead of parsing the nationwide source.
+$stored = ['fetchedAt' => '2026-09-19T10:06:00Z', 'publishedAt' => '2026-09-19T10:05:00Z', 'feedVersion' => '20260916', 'trains' => [$train]];
+trainStoreFeed($cache . '/private', 'lausanne', $stored);
+file_put_contents($cache . '/timetable/lausanne.json', json_encode($timetable, JSON_THROW_ON_ERROR));
+$calls = 0;
+$never = function (string $key, string $path) use (&$calls): void { $calls++; throw new RuntimeException('must not fetch'); };
+ob_start(); serveTrains('lausanne', $never); $served = json_decode(ob_get_clean(), true, 512, JSON_THROW_ON_ERROR);
+trainCheck($served === $stored && $calls === 0, 'Serve the stored city feed without touching the source or the timetable');
+
+// The cron collector rebuilds the cities requested within the activity window, one build each.
+// The failure above left a retry marker; a fresh minute is due again once it clears.
+unlink($cache . '/private/source.retry');
+touch($cache . '/private/source.json', time() - 120);
+$arrived = ['stopSequence' => 2, 'arrival' => ['delay' => 180], 'departure' => ['delay' => 180], 'scheduleRelationship' => 'SCHEDULED'];
+$published = $source;
+$published['entity'][0]['tripUpdate']['stopTimeUpdate'] = [$published['entity'][0]['tripUpdate']['stopTimeUpdate'][0], $arrived];
+$calls = 0;
+$download = function (string $key, string $path) use (&$calls, $published): void { $calls++; file_put_contents($path, json_encode($published, JSON_THROW_ON_ERROR)); };
+$nowFixture = (new DateTimeImmutable('2026-09-19 10:06:00', new DateTimeZone('Europe/Zurich')))->getTimestamp();
+$built = trainCollect($cache . '/private', $download, $nowFixture);
+sort($built);
+trainCheck($built === ['lausanne', 'zurich'], 'Collect only the cities requested recently');
+$rebuilt = trainStoredFeed($cache . '/private', 'lausanne');
+trainCheck($rebuilt['trains'][0]['trainNumber'] === $train['trainNumber'] && $rebuilt['fetchedAt'] === gmdate('Y-m-d\TH:i:s\Z', filemtime($cache . '/private/source.json')), 'Store a fresh feed stamped with the source fetch time');
+trainCheck($calls === 1 && !is_file($cache . '/private/source.retry'), 'Download once per collection and clear the retry marker');
+
+trainMarkActive($cache . '/private', 'geneva', time() - TRAIN_ACTIVE_SECONDS - 1);
+trainCheck(!in_array('geneva', trainActiveCities($cache . '/private', time()), true), 'Drop activity older than the window');
+
 foreach (['credentials.env', 'source.json', 'source.retry', 'feed.lock'] as $file) if (is_file($cache . '/private/' . $file)) unlink($cache . '/private/' . $file);
-unlink($cache . '/timetable/zurich.json');
+foreach (glob($cache . '/private/feeds/*') ?: [] as $file) unlink($file);
+rmdir($cache . '/private/feeds');
+unlink($cache . '/timetable/zurich.json'); unlink($cache . '/timetable/lausanne.json');
 rmdir($cache . '/private'); rmdir($cache . '/timetable'); rmdir($cache);
 putenv('SWISS_TRAINS_PRIVATE_DIR'); putenv('SWISS_TRAINS_TIMETABLE_DIR');
 
-echo "Verified train feed matching, next-stop selection, units and timetable versions\n";
+echo "Verified train feed matching, next-stop selection, units, stored city feeds and the collector\n";

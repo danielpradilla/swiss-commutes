@@ -123,7 +123,7 @@ Two views read live sources instead of the model: `/live/` (measured road counte
 | State | Location | Holds |
 | --- | --- | --- |
 | Traffic private directory | `/home/depr001/.swiss-commutes/live` on DreamHost | `credentials.env` with `ASTRA_API_KEY`, the last collected minute, station metadata, `collection.log` |
-| Train private directory | `trains/.private/` | `credentials.env` with `GTFS_RT_API_KEY`, the GTFS-RT source cache, `timetable-current` |
+| Train private directory | `trains/.private/` | `credentials.env` with `GTFS_RT_API_KEY`, the GTFS-RT source cache, `timetable-current`, and one stored feed per city under `feeds/` |
 
 `SWISS_LIVE_PRIVATE_DIR` names the traffic directory. Web requests read it from `live/.htaccess` (`SetEnv`); CLI reads it from the cron line. Without it the collector falls back to `live/.private`, which stores no key: `/live/` answers 503 and the error log records `Traffic key not configured`. Publishing the export must therefore exclude `live/.private/`, `trains/.private/` and `trains/timetable/`, and must not remove `live/.htaccess`.
 
@@ -131,10 +131,11 @@ Two views read live sources instead of the model: `/live/` (measured road counte
 
 ```sh
 * * * * * SWISS_LIVE_PRIVATE_DIR=/home/depr001/.swiss-commutes/live /usr/bin/php /home/depr001/danielpradilla.info/swiss-commutes/live/feed.php >/dev/null 2>&1 # Swiss Commutes live collector
+* * * * * /usr/bin/php /home/depr001/danielpradilla.info/swiss-commutes/trains/feed.php >/dev/null 2>&1 # Swiss Commutes train collector
 15 * * * * /usr/bin/python3 /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/updater/scripts/update-train-timetable.py --root /home/depr001/danielpradilla.info/swiss-commutes/trains >> /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/timetable-update.log 2>&1
 ```
 
-The traffic collector waits for the source's publication minute itself, so its entry adds no `sleep`. The train feed needs no entry: a request refreshes its cache at most once a minute.
+The traffic collector waits for the source's publication minute itself, so its entry adds no `sleep`. The train collector downloads the feed at most once a minute and rebuilds only the cities requested in the last ten minutes; its entry needs no arguments.
 
 ### Checklist
 
