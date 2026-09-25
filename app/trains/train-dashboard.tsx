@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CircleMarker, LayerGroup, Map as LeafletMap } from 'leaflet';
-import ProductNav from '../components/product-nav';
 import { decodePolyline } from '../route-geometry';
 import { buildRailIndex, isTrainFeed, trainColor, trainMatches, trainPosition, type RailIndex, type Train, type TrainFeed } from './train-data';
 import styles from './trains.module.css';
@@ -205,7 +204,6 @@ export default function TrainDashboard({ initialCity, cities }: { initialCity: s
         </details>
       </div>
     </header>
-    <ProductNav city={initialCity} current="trains" />
     <section className={styles.heading}>
       <h1>Live trains around <span className="cityChoice"><select className="citySelect" aria-label="City" value={initialCity} onChange={event => changeCity(event.target.value)}>
         {cities.map(item => <option key={item.slug} value={item.slug}>{item.displayName}</option>)}
