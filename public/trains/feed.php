@@ -159,22 +159,27 @@ function trainFeedFile(string $path, array $timetable, ?int $now = null): array 
     return trainBuildFeed($header, trainEntities($path), $timetable, $now);
 }
 
-function trainFetch(string $key): string {
-    $curl = curl_init(TRAIN_SOURCE);
-    curl_setopt_array($curl, [CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_TIMEOUT => 25, CURLOPT_ENCODING => '',
-        CURLOPT_HTTPHEADER => ['Authorization: ' . (str_starts_with($key, 'Bearer ') ? $key : 'Bearer ' . $key),
-            'Accept: application/json', 'User-Agent: SwissCommutesTrains/1.0']]);
-    $data = curl_exec($curl);
-    $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-    if ($data === false || $status !== 200) throw new RuntimeException('Train source HTTP ' . $status . ' (cURL ' . curl_errno($curl) . ')');
-    if (strlen($data) > 64 * 1024 * 1024) throw new RuntimeException('Train response too large');
-    return $data;
-}
-
-function trainWrite(string $path, string $content): void {
-    $temp = $path . '.tmp';
-    if (file_put_contents($temp, $content) === false || !rename($temp, $path)) throw new RuntimeException('Cannot save train cache');
+function trainFetch(string $key, string $path): void {
+    $file = fopen($path, 'wb');
+    if (!$file) throw new RuntimeException('Cannot open train source cache');
+    try {
+        $curl = curl_init(TRAIN_SOURCE);
+        // The body takes about 16 seconds to download from the server and grows through the day, so
+        // allow well over the 25-second cap that previously left almost no headroom for a slow run.
+        curl_setopt_array($curl, [CURLOPT_FILE => $file, CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_TIMEOUT => 60, CURLOPT_ENCODING => '',
+            CURLOPT_HTTPHEADER => ['Authorization: ' . (str_starts_with($key, 'Bearer ') ? $key : 'Bearer ' . $key),
+                'Accept: application/json', 'User-Agent: SwissCommutesTrains/1.0']]);
+        // Stream to disk: the uncompressed feed exceeds the request memory limit when buffered.
+        $ok = curl_exec($curl);
+        $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+        $error = curl_errno($curl);
+    } finally {
+        fclose($file);
+    }
+    if ($ok === false || $status !== 200) throw new RuntimeException('Train source HTTP ' . $status . ' (cURL ' . $error . ')');
+    // The body is about 64 MB and grows through the day; the cap only catches a runaway response.
+    if (filesize($path) > 256 * 1024 * 1024) throw new RuntimeException('Train response too large');
 }
 
 function serveTrains(?string $requestedCity = null, ?callable $fetch = null): void {
@@ -207,7 +212,7 @@ function serveTrains(?string $requestedCity = null, ?callable $fetch = null): vo
                 }
                 if (!$key) throw new RuntimeException('Train API key not configured');
                 $fetch ??= 'trainFetch';
-                trainWrite($candidate, $fetch($key));
+                $fetch($key, $candidate);
                 $feed = trainFeedFile($candidate, $timetable); // Validate before replacing the last good source.
                 if (!rename($candidate, $sourcePath)) throw new RuntimeException('Cannot save train source cache');
                 if (is_file($retryPath)) unlink($retryPath);

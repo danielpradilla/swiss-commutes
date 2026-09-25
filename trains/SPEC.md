@@ -50,7 +50,9 @@ The public feed uses this shape:
 ## Operation
 
 - `public/trains/feed.php` uses PHP 8.2+ and cURL. Browser requests share a locked 60-second nationwide source cache, so all cities together make at most one upstream attempt per minute.
+- The uncompressed feed is about 62 MB, so the response streams directly to the candidate cache file with `CURLOPT_FILE` instead of being buffered in a PHP string; buffering it exhausted the 128 MB request limit and returned HTTP 500. A body above 64 MB is rejected. The candidate file is parsed before it replaces the last good source.
 - A successful refresh is validated before it replaces the cache. If the API times out, rejects a request or returns invalid data, the endpoint serves the last valid cached feed instead of making the map unavailable. A retry marker prevents other city/browser requests from hammering the upstream API for the next minute. With no valid cache yet, the endpoint returns `503` and retries after one minute.
+- Reading the cached source and building one city's feed takes about 17 seconds, because the streaming parser walks the 62 MB body character by character to stay inside the memory limit. Browsers fetch once per minute, and the client shows its loading state meanwhile.
 - The implementation uses `?format=JSON` to avoid adding a PHP/Composer protobuf stack. This endpoint is documented for testing rather than production; move to protobuf when a supported decoder is available in the deployment environment.
 - Credentials follow the existing pattern: `GTFS_RT_API_KEY` in `public/trains/.private/credentials.env`, `.htaccess`-denied.
 - No 30-minute replay buffer is needed the way traffic has one — GTFS-RT is a current-state feed, not a per-minute counter history. A simple "latest fetch" cache, refreshed roughly every 30–60 seconds, covers the concept above. If a played-back history of delays is wanted later, that's an addition, not a default.

@@ -56,7 +56,7 @@ touch($cache . '/private/source.json', time() - 120);
 putenv('SWISS_TRAINS_PRIVATE_DIR=' . $cache . '/private');
 putenv('SWISS_TRAINS_TIMETABLE_DIR=' . $cache . '/timetable');
 $calls = 0;
-$failure = function () use (&$calls): string { $calls++; throw new RuntimeException('rate limited'); };
+$failure = function (string $key, string $path) use (&$calls): void { $calls++; throw new RuntimeException('rate limited'); };
 ob_start(); serveTrains('zurich', $failure); $cached = json_decode(ob_get_clean(), true, 512, JSON_THROW_ON_ERROR);
 ob_start(); serveTrains('zurich', $failure); ob_end_clean();
 trainCheck($cached['feedVersion'] === '20260916', 'Serve the last valid feed when refresh fails');
