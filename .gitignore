@@ -50,3 +50,7 @@ next-env.d.ts
 /POST.md
 /LINKEDIN.md
 /REDDIT.md
+
+# Next.js regenerates these during agent-assisted development
+/AGENTS.md
+/CLAUDE.md
