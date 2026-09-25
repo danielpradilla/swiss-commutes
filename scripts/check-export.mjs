@@ -45,7 +45,11 @@ for (const slug of ['geneva', 'zurich', 'chiasso', 'mendrisio', 'zug', 'neuchate
   assert.ok(Buffer.byteLength(html) < 100_000, 'Live pages must not embed commuter datasets');
 }
 assert.match(read('live/'), /Live traffic in/);
+assert.doesNotMatch(read('live/'), /replay|30 minutes/i, 'The live view shows one measured minute with no playback');
+assert.ok(existsSync('out/live/feed.php') && !existsSync('out/live/replay.php'), 'The live endpoint serves the current feed only');
 assert.equal(readFileSync('out/live/.private/.htaccess', 'utf8').trim(), 'Require all denied');
+assert.match(readFileSync('out/live/.htaccess', 'utf8'), /^SetEnv SWISS_LIVE_PRIVATE_DIR \/home\/depr001\/\.swiss-commutes\/live$/m,
+  'Live keys and history must stay outside the published directory');
 console.log('Verified live pages contain no commuter model, scrubber or route data');
 
 for (const slug of ['geneva', 'zurich', 'chiasso', 'mendrisio', 'zug', 'neuchatel']) {

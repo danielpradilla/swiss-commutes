@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 require __DIR__ . '/../public/live/feed.php';
-require __DIR__ . '/../public/live/replay.php';
 
 function check(bool $condition, string $message): void {
     if (!$condition) throw new RuntimeException($message);
@@ -37,57 +36,32 @@ foreach ([str_replace('>real<', '>test<', $dynamic), str_replace('version="3"', 
     try { $extract($invalid); } catch (RuntimeException) { $rejected = true; }
     check($rejected, 'Reject test data, metadata mismatches and DTDs');
 }
-$private = sys_get_temp_dir() . '/swiss-live-history-' . bin2hex(random_bytes(6));
+$private = sys_get_temp_dir() . '/swiss-live-cache-' . bin2hex(random_bytes(6));
 mkdir($private, 0700);
 $previousPrivate = getenv('SWISS_LIVE_PRIVATE_DIR');
 try {
-    $now = strtotime('2026-09-10T15:30:00Z');
+    $now = strtotime('2026-09-10T14:31:20Z');
     $feed = trafficReadings($dynamic, $table);
-    $edge = $now - LIVE_HISTORY_SECONDS;
-    foreach ([$edge - 1, $edge] as $at) trafficWrite($private . '/history-' . $at . '.json', '{}');
-    foreach (['expired' => $edge - 1, 'recent' => $now - 60, 'future' => $now + 60] as $id => $at) {
-        $feed['stations'][0]['detectors'][] = ['id' => $id, 'reading' => array_replace($reading, ['at' => gmdate('Y-m-d\TH:i:s\Z', $at)])];
-    }
-    $kept = trafficHistory($private, $feed, $now);
-    check(!is_file($private . '/history-' . ($edge - 1) . '.json'), 'Delete readings older than 60 minutes');
-    check($kept['stations'][0]['detectors'][0]['reading'] === $reading, 'Retain readings exactly 60 minutes old');
-    check($kept['stations'][0]['detectors'][1]['reading'] === null && $kept['stations'][0]['detectors'][3]['reading'] === null, 'Remove expired and future readings from the feed cache too');
-    $path = $private . '/history-' . $edge . '.json';
-    $saved = file_get_contents($path);
-    trafficHistory($private, $feed, $now);
-    check(file_get_contents($path) === $saved && count(glob($private . '/history-*.json')) === 2, 'Repeated queries must not duplicate readings');
-    $feed['stations'][0]['detectors'][0]['reading']['light'] = 21;
-    trafficHistory($private, $feed, $now);
-    check(json_decode(file_get_contents($path), true)['ZH.CH:TEST.01']['light'] === 21, 'Source corrections replace the same detector and observation');
-
-    $end = intdiv($now, 60) * 60 - 60;
-    $start = $end - 29 * 60;
-    $feed['fetchedAt'] = gmdate('Y-m-d\TH:i:s\Z', $now);
-    $feed['stations'][0]['detectors'][0]['reading'] = array_replace($reading, ['at' => gmdate('Y-m-d\TH:i:s\Z', $end)]);
-    trafficWrite($private . '/feed.json', json_encode($feed));
-    foreach ([$start => 7, $start + 120 => 0] as $at => $count) {
-        trafficWrite($private . '/history-' . $at . '.json', json_encode([
-            'ZH.CH:TEST.01' => array_replace($reading, ['at' => gmdate('Y-m-d\TH:i:s\Z', $at), 'light' => $count]),
-            'unknown' => array_replace($reading, ['at' => gmdate('Y-m-d\TH:i:s\Z', $at)]),
-        ]));
-    }
-    $replay = trafficReplay($private, $now);
-    check(count($replay['frames']) === 30 && strtotime($replay['frames'][0]['at']) === $start && strtotime($replay['frames'][29]['at']) === $end, 'Replay covers exactly the last 30 completed minutes in order');
-    check($replay['frames'][0]['readings']->{'ZH.CH:TEST.01'}[0] === 7 && !isset($replay['frames'][0]['readings']->unknown), 'Keep measured counts and exclude unknown detectors');
-    check(count((array)$replay['frames'][1]['readings']) === 0 && $replay['frames'][2]['readings']->{'ZH.CH:TEST.01'}[0] === 0, 'Missing minutes stay empty; measured zero stays zero');
-    check(!$replay['frames'][1]['collected'] && $replay['frames'][2]['collected'], 'Distinguish a missing collection from a measured zero');
-    trafficWrite($private . '/history-' . ($start + 180) . '.json', json_encode([
-        'ZH.CH:TEST.01' => array_replace($extract($offline), ['at' => gmdate('Y-m-d\TH:i:s\Z', $start + 180)]),
-    ]));
-    $flagged = trafficReplay($private, $now)['frames'][3];
-    check($flagged['collected'] && count((array)$flagged['readings']) === 0 && $flagged['errors']->{'ZH.CH:TEST.01'} === 'VD_OFFLINE', 'Source errors belong to their recorded minute even when no counts are available');
-    check($replay['stations'][0]['detectors'][0]['reading'] === null, 'Do not leak the latest reading into historical frames');
-    trafficWrite($private . '/history-' . ($edge - 1) . '.json', '{}');
-    trafficReplay($private, $now);
-    check(!is_file($private . '/history-' . ($edge - 1) . '.json'), 'Replay queries also prune expired history');
+    $saved = json_encode($feed, JSON_THROW_ON_ERROR);
+    trafficWrite($private . '/feed.json', $saved);
+    check(trafficCachedFeed($private) === $feed, 'A cached minute is returned exactly as collected');
+    check(file_get_contents($private . '/feed.json') === $saved, 'Reading the cache never rewrites or expires it');
+    check(trafficCachedFeed($private) !== null, 'An old minute stays available instead of expiring');
+    trafficWrite($private . '/feed.json', '{not json');
+    check(trafficCachedFeed($private) === null, 'An unreadable cache reads as absent so collection can still recover');
+    trafficWrite($private . '/feed.json', $saved);
+    check(!glob($private . '/history-*.json'), 'Caching must not write a replay history');
 
     trafficWrite($private . '/sites.json', json_encode($table));
     $target = trafficExpectedMinute(time());
+    $calls = 0; $rejected = false;
+    try {
+        trafficCollect($private, 'test', function () use (&$calls, $dynamic) {
+            $calls++;
+            return preg_replace('/<vehicleFlowRate>[^<]*<\/vehicleFlowRate>/', '<vehicleFlowRate>unavailable</vehicleFlowRate>', $dynamic);
+        }, fn($seconds) => null, $target);
+    } catch (RuntimeException $error) { $rejected = str_contains($error->getMessage(), 'no usable readings'); }
+    check($rejected && $calls === 2, 'A publication without usable readings never replaces the stored minute');
     $liveDynamic = str_replace('2026-09-10T14:30:00Z', gmdate('Y-m-d\TH:i:s\Z', $target), $dynamic);
     foreach (['http', 'empty', 'stale', 'duplicate'] as $failure) {
         $calls = 0; $delays = [];
@@ -121,24 +95,29 @@ try {
     // Exercise the real request paths without making upstream API calls.
     putenv('SWISS_LIVE_PRIVATE_DIR=' . $private);
     $now = time();
+    // No explicit status is set on success, so compare the body and the absence of an error status.
     $feed['fetchedAt'] = gmdate('Y-m-d\TH:i:s\Z', $now);
-    $feed['stations'][0]['detectors'][0]['reading']['at'] = gmdate('Y-m-d\TH:i:s\Z', trafficExpectedMinute($now));
-    $feed['stations'][0]['detectors'][1]['reading']['at'] = gmdate('Y-m-d\TH:i:s\Z', $now - 3601);
-    $expired = $private . '/history-' . ($now - 3601) . '.json';
-    trafficWrite($expired, '{}');
+    $current = array_replace($reading, ['at' => gmdate('Y-m-d\TH:i:s\Z', trafficExpectedMinute($now))]);
+    $feed['stations'][0]['detectors'][0]['reading'] = $current;
     trafficWrite($private . '/feed.json', json_encode($feed));
     ob_start(); serveTraffic(); $response = json_decode(ob_get_clean(), true);
-    check(!is_file($expired) && $response['stations'][0]['detectors'][1]['reading'] === null, 'Cache hits still expire history and cached readings');
-    check(json_decode(file_get_contents($private . '/feed.json'), true)['stations'][0]['detectors'][1]['reading'] === null, 'Remove expired readings from disk, not only the response');
-    $feed['stations'][0]['detectors'][0]['reading']['at'] = gmdate('Y-m-d\TH:i:s\Z', trafficExpectedMinute($now) - 60);
+    check(http_response_code() !== 503 && $response['stations'][0]['detectors'][0]['reading'] === $current, 'A current cache is served as collected');
+
+    // A stale cache whose collection already ran this minute keeps the last minute on screen.
+    $feed['stations'][0]['detectors'][0]['reading'] = array_replace($current, ['at' => gmdate('Y-m-d\TH:i:s\Z', trafficExpectedMinute($now) - 60)]);
     trafficWrite($private . '/feed.json', json_encode($feed));
-    trafficWrite($expired, '{}');
     touch($private . '/attempt');
     ob_start(); serveTraffic(); $response = json_decode(ob_get_clean(), true);
-    check(http_response_code() === 503 && isset($response['error']) && !is_file($expired), 'Failed queries still prune; a recent fetch must not make duplicate observations current');
+    check(http_response_code() !== 503 && $response['stations'][0]['detectors'][0]['reading']['light'] === $reading['light'],
+        'A skipped or failed collection still serves the last collected minute');
+
+    // With nothing stored there is nothing to keep, so the endpoint reports unavailability.
+    unlink($private . '/feed.json');
+    ob_start(); serveTraffic(); $response = json_decode(ob_get_clean(), true);
+    check(http_response_code() === 503 && isset($response['error']), 'Without a stored minute the endpoint reports unavailability');
 } finally {
     putenv($previousPrivate === false ? 'SWISS_LIVE_PRIVATE_DIR' : 'SWISS_LIVE_PRIVATE_DIR=' . $previousPrivate);
     foreach (glob($private . '/*') as $file) unlink($file);
     rmdir($private);
 }
-echo "Verified live traffic parsing, units, quality flags, versions, retention and 30-minute replay\n";
+echo "Verified live traffic parsing, units, quality flags, versions, cache retention and collection retries\n";

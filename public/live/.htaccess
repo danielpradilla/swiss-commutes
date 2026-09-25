@@ -1,0 +1,3 @@
+# Keys and the collected minute live outside the published directory so a deployment cannot delete them.
+# The collector cron entry sets the same variable, because CLI PHP does not read this file.
+SetEnv SWISS_LIVE_PRIVATE_DIR /home/depr001/.swiss-commutes/live

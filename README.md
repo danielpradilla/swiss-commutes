@@ -114,6 +114,34 @@ Map particles, the travelling counter and population chart share those distribut
 
 The chart samples the resulting population estimate every ten minutes. Its centre line is the modelled daily average, not midnight, so the same curve can show both the quieter and busier parts of the day.
 
+## Live views: what the server needs
+
+Two views read live sources instead of the model: `/live/` (measured road counters) and `/trains/` (reported timetable delays). Both are PHP on DreamHost; the static export ships the pages, not the data. [LIVE.md](LIVE.md) documents the traffic source, units and the retained minute; [trains/SPEC.md](trains/SPEC.md) documents the train feed.
+
+### State kept outside the published directory
+
+| State | Location | Holds |
+| --- | --- | --- |
+| Traffic private directory | `/home/depr001/.swiss-commutes/live` on DreamHost | `credentials.env` with `ASTRA_API_KEY`, the last collected minute, station metadata, `collection.log` |
+| Train private directory | `trains/.private/` | `credentials.env` with `GTFS_RT_API_KEY`, the GTFS-RT source cache, `timetable-current` |
+
+`SWISS_LIVE_PRIVATE_DIR` names the traffic directory. Web requests read it from `live/.htaccess` (`SetEnv`); CLI reads it from the cron line. Without it the collector falls back to `live/.private`, which stores no key: `/live/` answers 503 and the error log records `Traffic key not configured`. Publishing the export must therefore exclude `live/.private/`, `trains/.private/` and `trains/timetable/`, and must not remove `live/.htaccess`.
+
+### Required cron entries
+
+```sh
+* * * * * SWISS_LIVE_PRIVATE_DIR=/home/depr001/.swiss-commutes/live /usr/bin/php /home/depr001/danielpradilla.info/swiss-commutes/live/feed.php >/dev/null 2>&1 # Swiss Commutes live collector
+15 * * * * /usr/bin/python3 /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/updater/scripts/update-train-timetable.py --root /home/depr001/danielpradilla.info/swiss-commutes/trains >> /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/timetable-update.log 2>&1
+```
+
+The traffic collector waits for the source's publication minute itself, so its entry adds no `sleep`. The train feed needs no entry: a request refreshes its cache at most once a minute.
+
+### Checklist
+
+1. Run `npm run test:live`, `npm run test:trains`, `npm run lint` and `npm run build`. The export check reads `public/live/.htaccess` and both `.private/.htaccess` files, so these three must stay tracked in git; credentials and caches are ignored by `.gitignore`.
+2. Publish `out/` to `/home/depr001/danielpradilla.info/swiss-commutes/`, `_next/` first, without `--delete` and excluding the private directories and `trains/timetable/`.
+3. Confirm `live/feed.php` returns the collected minute, `live/.private/` returns 403, collection advances without page visits, and every `/live/<city>/` page shows that minute. `trains/feed.php?city=zurich` must report a recent `fetchedAt`.
+
 ## Development
 
 ### Data audit

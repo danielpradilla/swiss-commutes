@@ -10,12 +10,10 @@
 .map :global(.leaflet-tile-pane) { filter:saturate(.35); opacity:.8; }
 .map :global(.leaflet-control-attribution) { font-size:9px; }
 .mapMessage { position:absolute; z-index:700; left:20px; top:20px; max-width:calc(100% - 85px); padding:12px; margin:0; background:var(--paper); font-size:14px; border:1px solid var(--line); }
-.playback { position:absolute; z-index:700; top:16px; left:16px; max-width:calc(100% - 85px); display:flex; align-items:center; gap:12px; padding:8px 12px 8px 6px; background:var(--paper); border:1px solid var(--line); }
-.playback button { display:grid; place-items:center; flex-shrink:0; width:40px; height:40px; padding:8px; border:0; background:none; cursor:pointer; }
-.playback svg { width:24px; height:24px; fill:var(--ink); }
-.playback span { display:block; margin-bottom:3px; font-size:9px; color:var(--muted); }
-.playback time { display:block; white-space:nowrap; font-size:18px; font-variant-numeric:tabular-nums; }
-.playback small { font-size:10px; white-space:nowrap; color:var(--muted); }
+.measured { position:absolute; z-index:700; top:16px; left:16px; max-width:calc(100% - 85px); display:flex; align-items:baseline; gap:12px; padding:8px 12px; background:var(--paper); border:1px solid var(--line); }
+.measured span { display:block; margin-bottom:3px; font-size:9px; color:var(--muted); }
+.measured time { display:block; white-space:nowrap; font-size:18px; font-variant-numeric:tabular-nums; }
+.measured small { font-size:10px; white-space:nowrap; color:var(--muted); }
 .legend { position:absolute; bottom:30px; left:16px; z-index:700; display:flex; flex-wrap:wrap; max-width:calc(100% - 32px); gap:8px 16px; padding:8px 10px; background:var(--paper); border:1px solid var(--line); font-size:10px; }
 .legend span { display:flex; gap:6px; align-items:center; }
 .legendTitle { width:100%; }

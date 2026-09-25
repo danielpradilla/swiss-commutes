@@ -4,8 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Map as LeafletMap, LayerGroup, CircleMarker } from 'leaflet';
-import ProductNav from '../components/product-nav';
-import { currentReading, stationIsCurrent, stationVolume, volumeColor, isReplayFeed, replayStations, availableFrameIndices, frameCollected, detectorStatus, stationStatus, type LiveCity, type ReplayFeed, type Station } from './live-data';
+import { isLiveFeed, measuredMinute, minuteReading, stationHasCount, stationStatus, stationVolume, volumeColor, markerOpacity, readingStatus, type LiveCity, type LiveFeed, type Station } from './live-data';
 import styles from './live.module.css';
 
 const timeFormat = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Zurich', hour: '2-digit', minute: '2-digit' });
@@ -18,13 +17,12 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
   const slug = initialCity;
   const router = useRouter();
   const city = cities.find(city => city.slug === slug)!;
-  const [replay, setReplay] = useState<ReplayFeed | null>(null);
-  const [frameIndex, setFrameIndex] = useState(0);
-  const [playing, setPlaying] = useState(true);
+  const [feed, setFeed] = useState<LiveFeed | null>(null);
   const [visibleTab, setVisibleTab] = useState(true);
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [failed, setFailed] = useState(false);
+  const [clock, setClock] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [bounds, setBounds] = useState<Bounds | null>(null);
   const [mapReady, setMapReady] = useState(false);
@@ -33,17 +31,10 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
   const map = useRef<LeafletMap | null>(null);
   const markers = useRef<LayerGroup | null>(null);
   const points = useRef(new Map<string, CircleMarker>());
-  const refreshAfter = useRef(0);
-  const availableFrames = useMemo(() => {
-    if (!replay) return [];
-    const ids = new Set(replay.stations.filter(station => !bounds || (station.lat >= bounds.south && station.lat <= bounds.north &&
-      station.lon >= bounds.west && station.lon <= bounds.east)).flatMap(station => station.detectors.map(detector => detector.id)));
-    return availableFrameIndices(replay, ids);
-  }, [replay, bounds]);
-  const displayedIndex = availableFrames.find(index => index >= frameIndex) ?? availableFrames[0] ?? 29;
-  const frame = replay?.frames[displayedIndex];
-  const now = frame ? Date.parse(frame.at) : 0;
-  const feed = useMemo(() => replay ? { stations: replayStations(replay, displayedIndex), maxAgeSeconds: 0 } : null, [replay, displayedIndex]);
+  const volumes = useRef(new Map<string, number | null>());
+  const opacities = useRef(new Map<string, number>());
+  const elapsed = useRef<number | null>(null);
+  const minute = useMemo(() => feed ? measuredMinute(feed.stations) : 0, [feed]);
 
   useEffect(() => {
     if (!visibleTab || document.hidden) return;
@@ -53,30 +44,27 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
     async function refresh() {
       setLoading(true);
       try {
-        const response = await fetch('/swiss-commutes/live/replay.php', { cache: 'no-store', signal: controller.signal });
-        if (!response.ok) throw new Error('History unavailable');
+        const response = await fetch('/swiss-commutes/live/feed.php', { cache: 'no-store', signal: controller.signal });
+        if (!response.ok) throw new Error('Readings unavailable');
         const data: unknown = await response.json();
-        if (!isReplayFeed(data)) throw new Error('Invalid history');
-        if (!disposed) { refreshAfter.current = Date.now() + 60_000; setReplay(data); setFrameIndex(0); setError(''); }
+        if (!isLiveFeed(data)) throw new Error('Invalid readings');
+        if (!disposed) { setFeed(data); setFailed(false); }
       } catch {
-        if (!disposed) setError('Could not refresh the replay. Retrying in a minute.');
+        // Keep the last received minute on screen; the status line reports the failed refresh.
+        if (!disposed) setFailed(true);
       } finally { clearTimeout(timeout); if (!disposed) setLoading(false); }
     }
     void refresh();
-    return () => { disposed = true; controller.abort(); clearTimeout(timeout); };
+    const interval = window.setInterval(refresh, 60_000);
+    return () => { disposed = true; controller.abort(); clearTimeout(timeout); clearInterval(interval); };
   }, [refreshVersion, visibleTab]);
 
   useEffect(() => {
-    if (!visibleTab || loading || (!error && (!replay || (!playing && availableFrames.length > 0)))) return;
-    const next = availableFrames.find(index => index > displayedIndex);
-    // A sparse window must not turn the end-of-loop refresh into rapid polling.
-    const delay = error ? 60_000 : next !== undefined ? 2_000 : Math.max(2_000, refreshAfter.current - Date.now());
-    const timer = window.setTimeout(() => {
-      if (error || next === undefined) setRefreshVersion(value => value + 1);
-      else setFrameIndex(next);
-    }, delay);
-    return () => clearTimeout(timer);
-  }, [displayedIndex, availableFrames, playing, replay, loading, error, visibleTab]);
+    const tick = () => setClock(Date.now());
+    tick();
+    const interval = window.setInterval(tick, 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const resume = () => {
@@ -123,10 +111,13 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
       if (disposed || !markers.current) return;
       const ids = new Set(feed.stations.map(station => station.id));
       for (const [id, point] of points.current) {
-        if (!ids.has(id)) { markers.current.removeLayer(point); points.current.delete(id); }
+        if (!ids.has(id)) { markers.current.removeLayer(point); points.current.delete(id); volumes.current.delete(id); opacities.current.delete(id); }
       }
       for (const station of feed.stations) {
-        const volume = error ? null : stationVolume(station, now, feed.maxAgeSeconds);
+        const volume = stationVolume(station, minute);
+        const opacity = Math.round(markerOpacity(volume, elapsed.current) * 64) / 64;
+        volumes.current.set(station.id, volume);
+        opacities.current.set(station.id, opacity);
         const chosen = station.id === selectedId;
         let point = points.current.get(station.id);
         if (!point) {
@@ -134,20 +125,46 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
           points.current.set(station.id, point);
         }
         point.setLatLng([station.lat, station.lon]).setRadius(chosen ? 9 : 5).setStyle({ weight: chosen ? 2 : 1,
-          color: chosen ? '#000' : '#fffdf9', fillColor: volumeColor(volume), fillOpacity: volume !== null ? .95 : .55 });
+          color: chosen ? '#000' : '#fffdf9', fillColor: volumeColor(volume), fillOpacity: opacity });
         const tooltip = document.createElement('span');
-        tooltip.textContent = `${label(station)} · ${error ? 'Replay unavailable' : volume === null ? stationStatus(station, frame!) : `${volume} vehicles/min at busiest detector`}`;
+        tooltip.textContent = `${label(station)} · ${volume === null ? stationStatus(station, minute) : `${volume} vehicles/min at busiest detector`}`;
         if (point.getTooltip()) point.setTooltipContent(tooltip); else point.bindTooltip(tooltip);
       }
     });
     return () => { disposed = true; };
-  }, [feed, frame, mapReady, now, selectedId, error]);
+  }, [feed, minute, mapReady, selectedId]);
+
+  // Blink the markers in view at the rate of the vehicles counted, redrawing only when an opacity changes.
+  useEffect(() => {
+    if (!mapReady || !visibleTab) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const start = performance.now();
+    let handle = 0;
+    let painted = 0;
+    const tick = (at: number) => {
+      handle = requestAnimationFrame(tick);
+      if (at - painted < 50 || !map.current) return;
+      painted = at;
+      elapsed.current = at - start;
+      const view = map.current.getBounds();
+      for (const [id, point] of points.current) {
+        if (!view.contains(point.getLatLng())) continue;
+        const opacity = Math.round(markerOpacity(volumes.current.get(id) ?? null, elapsed.current) * 64) / 64;
+        if (opacities.current.get(id) === opacity) continue;
+        opacities.current.set(id, opacity);
+        point.setStyle({ fillOpacity: opacity });
+      }
+    };
+    handle = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(handle); elapsed.current = null; };
+  }, [mapReady, visibleTab]);
 
   const visible = useMemo(() => feed?.stations.filter(station => bounds && station.lat >= bounds.south && station.lat <= bounds.north &&
     station.lon >= bounds.west && station.lon <= bounds.east).sort((a, b) => label(a).localeCompare(label(b))) ?? [], [feed, bounds]);
-  const current = error ? [] : visible.filter(station => stationIsCurrent(station, now, feed!.maxAgeSeconds));
+  const current = visible.filter(station => stationHasCount(station, minute));
   const selected = feed?.stations.find(station => station.id === selectedId);
-  const delayed = replay && (!replay.collectedAt || Date.parse(replay.generatedAt) - Date.parse(replay.collectedAt) > 180_000);
+  // Healthy collection lags the clock by the source's publication minute; four minutes means it stalled.
+  const behind = minute > 0 && clock > 0 && clock - minute > 240_000;
 
   function changeCity(value: string) {
     if (!cities.some(city => city.slug === value)) return;
@@ -183,67 +200,61 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
         </details>
       </div>
     </header>
-    <ProductNav city={slug} current="traffic" />
     <section className={styles.heading}>
       <h1>Live traffic in <span className="cityChoice"><select className="citySelect" aria-label="City" value={slug} onChange={event => changeCity(event.target.value)}>
         {cities.map(city => <option key={city.slug} value={city.slug}>{city.displayName}</option>)}
       </select><span aria-hidden="true">⌄</span></span></h1>
-      <p>Last 30 minutes. Empty minutes skipped.</p>
+      <p>Newest measured minute. Detectors without a count stay grey.</p>
     </section>
     <div className={styles.dashboard}>
       <section className={styles.mapPanel} aria-label={`Live traffic counters around ${city.displayName}`}>
         <div ref={container} className={styles.map} />
         {mapError && <p className={styles.mapMessage}>The map could not load. Readings are available in the station list.</p>}
-        {!feed && <p className={styles.mapMessage} role="status">{error || 'Connecting to road counters…'}</p>}
-        {frame && availableFrames.length > 0 && <div className={styles.playback} role="group" aria-label="Replay controls">
-          <button aria-label={playing ? 'Pause replay' : 'Play replay'} onClick={() => {
-            if (!playing && Date.now() >= refreshAfter.current) setRefreshVersion(value => value + 1);
-            setPlaying(value => !value);
-          }}>{playing ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zm7 0h3v14h-3z" /></svg> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7z" /></svg>}</button>
-          <div><span>Recorded minute</span><time dateTime={frame.at} title={dateFormat.format(new Date(frame.at))}>{time(frame.at)}–{time(new Date(now + 60_000).toISOString())}</time></div>
-          <small>{loading ? 'Refreshing…' : `${availableFrames.indexOf(displayedIndex) + 1} / ${availableFrames.length}`}</small>
+        {!feed && <p className={styles.mapMessage} role="status">{failed ? 'Live readings are temporarily unavailable. Retrying in a minute.' : 'Connecting to road counters…'}</p>}
+        {minute > 0 && <div className={styles.measured} role="status" aria-label="Measured minute">
+          <div><span>Measured minute</span><time dateTime={new Date(minute).toISOString()} title={dateFormat.format(new Date(minute))}>{time(new Date(minute).toISOString())}–{time(new Date(minute + 60_000).toISOString())}</time></div>
+          {loading && <small>Refreshing…</small>}
         </div>}
         <div className={styles.legend}>
           <span className={styles.legendTitle}>Vehicles/min · busiest detector</span>
           {[0, 10, 20, 30].map(value => <span key={value}><i style={{ background: volumeColor(value) }} />{value === 30 ? '30+' : `${value}–${value + 9}`}</span>)}
           <span><i style={{ background: volumeColor(null) }} /> No total</span>
+          <span className={styles.legendTitle}>Markers dim once per vehicle counted per minute: 5/min is 5 dims a minute.</span>
         </div>
       </section>
       <aside className={styles.sidebar}>
         <div className={styles.status}>
           <span className={styles.kicker}>In this view</span>
           <strong>{feed ? current.length : '—'} <small>stations with data</small></strong>
-          <p>{feed ? availableFrames.length ? `${availableFrames.length} of 30 minutes have usable counts in this view.`
-            : 'No usable counts in the last 30 minutes. Checking again in a minute.' : 'Waiting for the first readings.'}</p>
-          {frame && visible.length > 0 && !current.length && !error && <p>{frameCollected(frame)
-            ? 'The source returned no usable counts in this view for this minute.' : 'This minute was not collected.'}</p>}
-          {delayed && <p>Collection is delayed. Showing saved readings.</p>}
-          {error && <p role="status">{error}</p>}
+          <p>{feed ? minute > 0 ? `${current.length} of ${visible.length} stations in this view report a count for this minute.`
+            : 'No usable counts in the latest collection. Checking again in a minute.' : 'Waiting for the first readings.'}</p>
+          {failed && <p role="status">The last refresh failed. Retrying in a minute. Showing the last collected minute.</p>}
+          {!failed && behind && <p>Collection is behind. Showing the last collected minute.</p>}
         </div>
         {selected ? <section className={styles.detail} aria-label="Selected counter">
           <button className={styles.back} onClick={() => setSelectedId(null)}>← All stations</button>
           <h2>{label(selected)}</h2>
           <p className={styles.subtle}>{selected.road ? `${selected.road} · ` : ''}{selected.id}</p>
           {selected.detectors.map(detector => {
-            const reading = error ? null : currentReading(detector.reading, now, feed!.maxAgeSeconds);
+            const reading = minuteReading(detector.reading, minute);
             return <div className={styles.detector} key={detector.id}>
               <h3>Detector {detector.id.split(':').at(-1)}</h3>
               {reading ? <><p>60 seconds from <time dateTime={reading.at}>{time(reading.at)}</time></p>
                 <table><thead><tr><th>Vehicles</th><th>Count</th><th>km/h</th></tr></thead>
                   <tbody><tr><th>Light</th><td>{reading.light ?? '—'}</td><td>{reading.lightSpeed ?? '—'}</td></tr>
                     <tr><th>Heavy goods</th><td>{reading.heavy ?? '—'}</td><td>{reading.heavySpeed ?? '—'}</td></tr></tbody></table>
-                {(reading.light === null || reading.heavy === null) && <p>{detectorStatus(detector, frame!)}</p>}
-              </> : <p>{error ? 'Replay unavailable' : detectorStatus(detector, frame!)}</p>}
+                {(reading.light === null || reading.heavy === null) && <p>{readingStatus(detector.reading, minute)}</p>}
+              </> : <p>{readingStatus(detector.reading, minute)}</p>}
             </div>;
           })}
         </section> : <section className={styles.stations} aria-label="Counting stations">
           <p className={styles.hint}>Select a station to see its counts and speeds.</p>
           {visible.length ? <ul>{visible.map(station => {
-            const volume = error ? null : stationVolume(station, now, feed!.maxAgeSeconds);
+            const volume = stationVolume(station, minute);
             return <li key={station.id}><button onClick={() => setSelectedId(station.id)}>
             <span>{label(station)}{station.road && <small>{station.road}</small>}</span>
-            <span className={!error && stationIsCurrent(station, now, feed!.maxAgeSeconds) ? styles.available : styles.unavailable}>
-              {volume !== null ? `${volume}/min` : error ? 'Replay unavailable' : stationStatus(station, frame!)}
+            <span className={stationHasCount(station, minute) ? styles.available : styles.unavailable}>
+              {volume !== null ? `${volume}/min` : stationStatus(station, minute)}
             </span></button></li>;
           })}</ul> : feed && <p>There are no counters from this feed in the current view. Zoom out to see nearby stations.</p>}
         </section>}
@@ -251,7 +262,8 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
           <p>ASTRA / FEDRO and participating road authorities count vehicles at fixed sensors. The feed covers equipped roads, not every street or border approach.</p>
           <p>Counts cover a 60-second interval. Speeds are the measured average for that vehicle class. Light vehicles include cars, motorcycles, buses and small delivery vehicles.</p>
           <p>Map colours show the highest vehicle count from a station’s detectors, from green to red. Both vehicle classes must be reported. Grey means no complete count for the displayed minute. Colours show volume, not congestion.</p>
-          <p>The replay shows available minutes from the last 30 minutes, for two seconds each. It skips minutes without usable counts in this view; the clock shows the recorded time. After the last available minute, it waits for the next refresh. Readings are provisional. Zero means none counted.</p>
+          <p>The map shows the newest measured minute in the feed, refreshed every minute. When the source has not published a newer minute, the map keeps the last minute it collected and the clock still shows that minute. Detectors that report no usable count for it stay grey. Readings are provisional. Zero means none counted.</p>
+          <p>Markers dim once per vehicle counted in the displayed minute, so five vehicles a minute means five dims a minute. Dimming stops above 120 vehicles a minute, where markers stay lit, and reduced-motion settings keep every marker steady. The dimming shows the average rate over the minute, not individual vehicles.</p>
           <p>The same vehicle can pass several sensors. These counts cannot be added to calculate a city’s population or number of commuters.</p>
           <a href="https://opentransportdata.swiss/en/cookbook/road-traffic-cookbook/rt-road-traffic-counters/" target="_blank" rel="noreferrer">Source and definitions ↗</a>
         </details>

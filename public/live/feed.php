@@ -3,9 +3,15 @@ declare(strict_types=1);
 
 // ASTRA DATEX II: measured vehicle flow and speed, never routed commuter estimates.
 const LIVE_SOURCE = 'https://api.opentransportdata.swiss/TDP/Soap_Datex2/Pull';
-const LIVE_MAX_AGE = 180;
-const LIVE_HISTORY_SECONDS = 3600;
 const LIVE_ERRORS = ['EMPTY_RESPONSE', 'PRV_OFFLINE', 'AGG_OFFLINE', 'VD_OFFLINE', 'VD_ERROR', 'SENSOR_ERROR', 'SENSOR_WWD', 'INVALID'];
+
+// Keys and 60-minute history belong outside the published directory. Apache sets this from
+// live/.htaccess for web requests; the collector cron entry sets it for CLI. The in-directory
+// fallback stays for a fresh checkout and is denied by live/.private/.htaccess.
+function trafficPrivate(): string {
+    $configured = getenv('SWISS_LIVE_PRIVATE_DIR');
+    return $configured !== false && $configured !== '' ? $configured : __DIR__ . '/.private';
+}
 
 function trafficXml(string $body): SimpleXMLElement {
     if (stripos($body, '<!DOCTYPE') !== false) throw new RuntimeException('Unexpected XML document type');
@@ -125,8 +131,7 @@ function trafficReadings(string $body, array $table): array {
             'direction' => $site['direction'], 'reading' => $readings[$id] ?? null];
     }
     return ['fetchedAt' => gmdate('Y-m-d\TH:i:s\Z'), 'publishedAt' => trafficField($xml, 'publicationTime'),
-        'maxAgeSeconds' => LIVE_MAX_AGE, 'intervalSeconds' => 60, 'source' => 'ASTRA / FEDRO',
-        'stations' => array_values($stations)];
+        'intervalSeconds' => 60, 'source' => 'ASTRA / FEDRO', 'stations' => array_values($stations)];
 }
 
 function trafficFetch(string $operation, string $key): string {
@@ -150,49 +155,17 @@ function trafficWrite(string $path, string $content): void {
     if (file_put_contents($temp, $content) === false || !rename($temp, $path)) throw new RuntimeException('Cannot save traffic cache');
 }
 
-function trafficHistory(string $private, ?array $feed, int $now): ?array {
-    $cutoff = $now - LIVE_HISTORY_SECONDS;
-    foreach (glob($private . '/history-*.json') ?: [] as $file) {
-        if (preg_match('/^history-(\d+)\.json$/', basename($file), $match) && (int)$match[1] < $cutoff) {
-            if (!unlink($file)) throw new RuntimeException('Cannot expire traffic history');
-        }
-    }
-    if ($feed === null) return null;
-    $frames = [];
-    foreach ($feed['stations'] as &$station) {
-        foreach ($station['detectors'] as &$detector) {
-            $reading = $detector['reading'];
-            if ($reading === null) continue;
-            $at = strtotime($reading['at']);
-            if ($at === false || $at < $cutoff || $at > $now) {
-                $detector['reading'] = null;
-                continue;
-            }
-            $frames[$at][$detector['id']] = $reading;
-        }
-        unset($detector);
-    }
-    unset($station);
-    // Store each observation once per detector and time, without repeating station metadata.
-    foreach ($frames as $at => $readings) {
-        $path = $private . '/history-' . $at . '.json';
-        $previous = is_file($path) ? file_get_contents($path) : '{}';
-        $saved = json_decode($previous, true, 512, JSON_THROW_ON_ERROR);
-        $json = json_encode(array_replace($saved, $readings), JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
-        if ($json !== $previous) trafficWrite($path, $json);
-    }
-    return $feed;
-}
-
-function trafficCachedFeed(string $private, int $now): ?array {
-    trafficHistory($private, null, $now);
+// The cache holds the last minute we collected readings for. Reads never expire or rewrite it, and a
+// failed collection keeps it, so the map always has the newest minute the source published to us.
+function trafficCachedFeed(string $private): ?array {
     $path = $private . '/feed.json';
     if (!is_file($path)) return null;
-    $previous = file_get_contents($path);
-    $feed = trafficHistory($private, json_decode($previous, true, 512, JSON_THROW_ON_ERROR), $now);
-    $json = json_encode($feed, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
-    if ($json !== $previous) trafficWrite($path, $json);
-    return $feed;
+    try {
+        $feed = json_decode(file_get_contents($path) ?: '', true, 512, JSON_THROW_ON_ERROR);
+    } catch (JsonException) {
+        return null; // An unreadable cache must not stop a fresh collection.
+    }
+    return is_array($feed) ? $feed : null;
 }
 
 // Publication is at :20; before then the preceding publication is still current.
@@ -249,10 +222,10 @@ function trafficCollect(string $private, string $key, ?callable $fetch = null, ?
             }
             unset($xml);
             $feed = trafficReadings($body, $table);
-            // Keep late observations and source error flags even if this attempt needs a retry.
-            $feed = trafficHistory($private, $feed, time());
             $latest = trafficLatestMinute($feed);
             $entry += ['latest' => $latest ? gmdate('Y-m-d\TH:i:s\Z', $latest) : null, 'publishedAt' => $feed['publishedAt']];
+            // Never replace the stored minute with an empty or repeated one; the map keeps the last read.
+            if ($latest === 0) throw new RuntimeException('Source returned no usable readings');
             if ($latest < $target || $latest <= $previous) throw new RuntimeException('Expected minute not received (duplicate or delayed source)');
             trafficLog($private, $entry + ['outcome' => 'success', 'seconds' => round(microtime(true) - $started, 3)]);
             return $feed;
@@ -271,14 +244,15 @@ function serveTraffic(): void {
     header('Cache-Control: no-store');
     header('X-Content-Type-Options: nosniff');
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') { http_response_code(405); echo '{"error":"Use GET"}'; return; }
-    $private = getenv('SWISS_LIVE_PRIVATE_DIR') ?: __DIR__ . '/.private';
+    $private = trafficPrivate();
     $lock = null;
+    $feed = null;
     try {
         $lock = fopen($private . '/feed.lock', 'c');
         if (!$lock || !flock($lock, LOCK_EX)) throw new RuntimeException('Cannot lock traffic cache');
         $now = time();
         $cache = $private . '/feed.json';
-        $feed = trafficCachedFeed($private, $now);
+        $feed = trafficCachedFeed($private);
         if ($feed) {
             // Cache by observation time, never by the time an old response was fetched.
             if (trafficLatestMinute($feed) >= trafficExpectedMinute($now)) {
@@ -300,6 +274,8 @@ function serveTraffic(): void {
         echo $json;
     } catch (Throwable $error) {
         error_log('Swiss Commutes live: ' . $error->getMessage());
+        // The last collected minute outranks a failed attempt: keep it on screen while collection recovers.
+        if ($feed) { echo json_encode($feed, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES); return; }
         http_response_code(503);
         header('Retry-After: 60');
         echo '{"error":"Live traffic readings are temporarily unavailable."}';
