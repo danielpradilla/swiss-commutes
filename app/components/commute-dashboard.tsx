@@ -579,6 +579,7 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
             <Link href="/">Commuting</Link>
             <Link href="/live/">Traffic</Link>
             <Link href="/trains/">Trains</Link>
+            <Link href="/mobility/">Shared mobility</Link>
             <a href="#sources">Sources & method</a>
             <Link href="/blog/">Blog</Link>
             <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
@@ -589,6 +590,7 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
               <Link href="/">Commuting</Link>
               <Link href="/live/">Traffic</Link>
               <Link href="/trains/">Trains</Link>
+              <Link href="/mobility/">Shared mobility</Link>
               <a href="#sources">Sources & method</a>
               <Link href="/blog/">Blog</Link>
               <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
@@ -619,6 +621,7 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
             <Link href="/">Commuting</Link>
             <Link href="/live/">Traffic</Link>
             <Link href="/trains/">Trains</Link>
+            <Link href="/mobility/">Shared mobility</Link>
             <Link href="/projects/">Projects</Link>
             <Link href="/blog/">Blog</Link>
             <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
@@ -727,6 +730,7 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
             <Link href="/">Commuting</Link>
             <Link href="/live/">Traffic</Link>
             <Link href="/trains/">Trains</Link>
+            <Link href="/mobility/">Shared mobility</Link>
             <a href="#sources">Sources & method</a>
             <Link href="/blog/">Blog</Link>
             <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
@@ -737,6 +741,7 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
               <Link href="/">Commuting</Link>
               <Link href="/live/">Traffic</Link>
               <Link href="/trains/">Trains</Link>
+              <Link href="/mobility/">Shared mobility</Link>
               <a href="#sources">Sources & method</a>
               <Link href="/blog/">Blog</Link>
               <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
@@ -924,6 +929,7 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
             <Link href="/">Commuting</Link>
             <Link href="/live/">Traffic</Link>
             <Link href="/trains/">Trains</Link>
+            <Link href="/mobility/">Shared mobility</Link>
             <Link href="/projects/">Projects</Link>
             <Link href="/blog/">Blog</Link>
             <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>

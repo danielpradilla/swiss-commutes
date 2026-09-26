@@ -116,7 +116,7 @@ The chart samples the resulting population estimate every ten minutes. Its centr
 
 ## Live views: what the server needs
 
-Two views read live sources instead of the model: `/live/` (measured road counters) and `/trains/` (reported timetable delays). Both are PHP on DreamHost; the static export ships the pages, not the data. [LIVE.md](LIVE.md) documents the traffic source, units and the retained minute; [trains/SPEC.md](trains/SPEC.md) documents the train feed.
+Three views read live sources instead of the commute model: `/live/` (measured road counters), `/trains/` (reported timetable delays) and `/mobility/` (reported shared-vehicle availability). The static export ships the pages, while PHP on DreamHost serves the feeds. [LIVE.md](LIVE.md) documents the traffic source and retained minute; [trains/SPEC.md](trains/SPEC.md) documents train updates; [MOBILITY.md](MOBILITY.md) documents GBFS availability and the same-origin cache.
 
 ### State kept outside the published directory
 
@@ -139,9 +139,9 @@ The traffic collector waits for the source's publication minute itself, so its e
 
 ### Checklist
 
-1. Run `npm run test:live`, `npm run test:trains`, `npm run lint` and `npm run build`. The export check reads `public/live/.htaccess` and both `.private/.htaccess` files, so these three must stay tracked in git; credentials and caches are ignored by `.gitignore`.
-2. Publish `out/` to `/home/depr001/danielpradilla.info/swiss-commutes/`, `_next/` first, without `--delete` and excluding the private directories and `trains/timetable/`.
-3. Confirm `live/feed.php` returns the collected minute, `live/.private/` returns 403, collection advances without page visits, and every `/live/<city>/` page shows that minute. `trains/feed.php?city=zurich` must report a recent `fetchedAt`.
+1. Run `npm run test`, `npm run test:live`, `npm run test:trains`, `npm run lint` and `npm run build`. The export check reads `public/live/.htaccess` and both `.private/.htaccess` files, so these three must stay tracked in git; credentials and caches are ignored by `.gitignore`.
+2. Publish `out/` to `/home/depr001/danielpradilla.info/swiss-commutes/`, `_next/` first, without `--delete` and excluding the private directories and `trains/timetable/`. Include `out/mobility/feed.php`; its cache stays outside the published tree.
+3. Confirm `live/feed.php` returns the collected minute, `live/.private/` returns 403, collection advances without visits, and every `/live/<city>/` page shows that minute. `trains/feed.php?city=zurich` must report a recent `fetchedAt`. Confirm `mobility/feed.php?path=vehicle_types.json` returns a current GBFS timestamp and a mobility city page shows available sites.
 
 ## Development
 
