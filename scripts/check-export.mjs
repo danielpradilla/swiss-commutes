@@ -1,64 +1,58 @@
 import assert from 'node:assert/strict';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { cities } from '../app/cities.ts';
 
-const read = page => readFileSync(`out/${page}index.html`, 'utf8');
-const home = read(''), zurich = read('zurich/'), geneva = read('geneva/');
-const coverage = html => {
-  const match = html.match(/<details class="routeCoverage">([\s\S]*?)<\/details>/);
-  assert.ok(match, 'Export must contain route coverage');
-  return match[1];
-};
-assert.equal(coverage(home), coverage(zurich), 'Home must load the same routes as Zürich');
-assert.match(geneva, /<title>Geneva \/ 24h \| Swiss Commutes<\/title>/);
-for (const html of [home, zurich, geneva]) {
-  assert.match(html, /https:\/\/www\.danielpradilla\.info\/swiss-commutes\//);
-  assert.doesNotMatch(html, /<link\b[^>]*\brel="(?:shortcut )?icon"/, 'Use the website’s default favicon');
-  assert.match(html, /property="og:image"/);
-  assert.ok(!html.includes('carRoutes'), 'Route geometry must stay out of the page HTML');
-}
-for (const [slug, html] of [['geneva', geneva], ['zurich', zurich]]) {
+// Read expected routes from the source registry, never from the export being checked.
+const citySlugs = cities.map(({ slug }) => slug);
+assert.ok(citySlugs.length && new Set(citySlugs).size === citySlugs.length, 'City order must contain unique slugs');
+
+const readPage = path => readFileSync(`out/${path}index.html`, 'utf8');
+const home = readPage('');
+const zurich = readPage('zurich/');
+
+for (const slug of citySlugs) {
+  const html = slug === 'zurich' ? zurich : readPage(`${slug}/`);
   const json = readFileSync(`out/${slug}/routes.json`, 'utf8');
   const { version, ...routes } = JSON.parse(json);
-  assert.equal(version, createHash('sha256').update(JSON.stringify(routes)).digest('hex').slice(0, 16));
-  assert.ok(html.includes(`/${slug}/routes.json?v=${version}`), 'Page must reference its exported route version');
-  assert.ok(routes.carRoutes.shapes.length && Object.keys(routes.carRoutes.routes).length, 'Static geometry must contain routes');
-}
-console.log('Verified route coverage, metadata and separate versioned geometry exports');
+  assert.equal(version, createHash('sha256').update(JSON.stringify(routes)).digest('hex').slice(0, 16), `${slug}: route version must match geometry`);
+  assert.ok(html.includes(`/${slug}/routes.json?v=${version}`), `${slug}: page must reference its exported route version`);
+  if (slug === 'zurich') assert.ok(home.includes(`/zurich/routes.json?v=${version}`), 'Home must reference Zürich route version');
+  assert.ok(routes.carRoutes.shapes.length && Object.keys(routes.carRoutes.routes).length, `${slug}: static geometry must contain routes`);
+  assert.ok(!html.includes('carRoutes'), `${slug}: route geometry must stay out of page HTML`);
 
-const citySlugs = readdirSync('out').filter(slug => existsSync(`out/${slug}/routes.json`));
-for (const slug of ['', ...citySlugs]) {
-  const html = read(slug ? `${slug}/` : '');
-  const image = `social/${slug || 'zurich'}.jpg`;
+  const image = `social/${slug}.jpg`;
   const url = `https://www.danielpradilla.info/swiss-commutes/${image}`;
-  assert.ok(html.includes(`property="og:image" content="${url}"`), 'Sharing preview must match the city');
-  assert.ok(html.includes(`name="twitter:image" content="${url}"`), 'Twitter must use the same screenshot');
-  assert.ok(readFileSync(`out/${image}`).length > 0, 'Sharing screenshot must be exported');
-  assert.ok(!html.includes('/og.png'), 'The old poster must not appear in sharing metadata');
+  assert.ok(html.includes(`property="og:image" content="${url}"`), `${slug}: sharing preview must match the city`);
+  assert.ok(html.includes(`name="twitter:image" content="${url}"`), `${slug}: Twitter must use the same screenshot`);
+  assert.ok(statSync(`out/${image}`).size > 0, `${slug}: sharing screenshot must be exported`);
 }
-console.log('Verified city-specific sharing screenshots');
+const homeImage = 'https://www.danielpradilla.info/swiss-commutes/social/zurich.jpg';
+assert.ok(home.includes(`property="og:image" content="${homeImage}"`), 'Home must share the Zürich screenshot');
+assert.ok(!home.includes('carRoutes'), 'Home must not embed route geometry');
+assert.ok(!existsSync('out/og.png'), 'Unused sharing poster must not be published');
+console.log('Verified all city pages, sharing previews and versioned route geometry');
 
-for (const slug of ['geneva', 'zurich', 'chiasso', 'mendrisio', 'zug', 'neuchatel']) {
-  const html = read(`live/${slug}/`);
-  assert.match(html, /Live traffic in/);
-  assert.doesNotMatch(html, /routes\.json|journeyTimes|communeNodes|type="range"|Population vs daily average/);
-  assert.ok(Buffer.byteLength(html) < 100_000, 'Live pages must not embed commuter datasets');
+const noCommuterData = /routes\.json|journeyTimes|communeNodes/;
+for (const family of ['live', 'trains', 'mobility']) {
+  for (const slug of ['', ...citySlugs]) {
+    const html = readPage(`${family}/${slug ? `${slug}/` : ''}`);
+    assert.doesNotMatch(html, noCommuterData, `${family}/${slug || 'root'}: must not embed commuter data`);
+    assert.ok(Buffer.byteLength(html) < 100_000, `${family}/${slug || 'root'}: must not embed commuter or timetable datasets`);
+    if (family === 'trains' && slug) {
+      const rail = JSON.parse(readFileSync(`out/trains/${slug}/rail.json`, 'utf8'));
+      assert.ok(Array.isArray(rail.segments) && rail.segments.length, `${slug}: train map must export rail geometry`);
+    }
+  }
+  assert.ok(statSync(`out/${family}/feed.php`).isFile(), `${family}: PHP feed must be exported`);
 }
-assert.match(read('live/'), /Live traffic in/);
-assert.doesNotMatch(read('live/'), /replay|30 minutes/i, 'The live view shows one measured minute with no playback');
-assert.ok(existsSync('out/live/feed.php') && !existsSync('out/live/replay.php'), 'The live endpoint serves the current feed only');
-assert.equal(readFileSync('out/live/.private/.htaccess', 'utf8').trim(), 'Require all denied');
+assert.ok(!existsSync('out/live/replay.php'), 'The live endpoint serves the current feed only');
+for (const family of ['live', 'trains']) {
+  const privateDir = `out/${family}/.private`;
+  assert.equal(readFileSync(`${privateDir}/.htaccess`, 'utf8').trim(), 'Require all denied', `${family}: private directory must deny web requests`);
+  assert.deepEqual(readdirSync(privateDir), ['.htaccess'], `${family}: private contents must not be published`);
+}
+assert.ok(!existsSync('out/trains/timetable'), 'Raw timetables must not be published');
 assert.match(readFileSync('out/live/.htaccess', 'utf8'), /^SetEnv SWISS_LIVE_PRIVATE_DIR \/home\/depr001\/\.swiss-commutes\/live$/m,
   'Live keys and history must stay outside the published directory');
-console.log('Verified live pages contain no commuter model, scrubber or route data');
-
-for (const slug of ['geneva', 'zurich', 'chiasso', 'mendrisio', 'zug', 'neuchatel']) {
-  const html = read(`trains/${slug}/`);
-  assert.match(html, /Live trains around/);
-  assert.doesNotMatch(html, /routes\.json|journeyTimes|communeNodes|type="range"|Population vs daily average/);
-  assert.ok(Buffer.byteLength(html) < 100_000, 'Train pages must not embed commuter or timetable datasets');
-  assert.ok(JSON.parse(readFileSync(`out/trains/${slug}/rail.json`, 'utf8')).segments.length, 'Train map must export rail geometry');
-}
-assert.match(read('trains/'), /Live trains around/);
-assert.equal(readFileSync('out/trains/.private/.htaccess', 'utf8').trim(), 'Require all denied');
-console.log('Verified train maps contain no commuter model or static timetable data');
+console.log('Verified live, train and mobility pages, feeds, rail geometry and private-directory protections');

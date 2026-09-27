@@ -139,11 +139,17 @@ The traffic collector waits for the source's publication minute itself, so its e
 
 ### Checklist
 
-1. Run `npm run test`, `npm run test:live`, `npm run test:trains`, `npm run lint` and `npm run build`. The export check reads `public/live/.htaccess` and both `.private/.htaccess` files, so these three must stay tracked in git; credentials and caches are ignored by `.gitignore`.
-2. Publish `out/` to `/home/depr001/danielpradilla.info/swiss-commutes/`, `_next/` first, without `--delete` and excluding the private directories and `trains/timetable/`. Include `out/mobility/feed.php`; its cache stays outside the published tree.
+1. Run `npm run test`, `npm run test:live`, `npm run test:trains`, `npm run lint` and `npm run build`. Next copies all of `public/`, including ignored local caches, into `out/`; the build removes those caches and generated timetable files from `out/` before checking the export. The three `.htaccess` files must stay tracked in git. Never publish an export that skipped this sanitization.
+2. Publish the checked `out/` to `/home/depr001/danielpradilla.info/swiss-commutes/`, `_next/` first and without `--delete`. Include `out/mobility/feed.php` and the `.htaccess` rules; the feed caches and active train timetable stay on the server.
 3. Confirm `live/feed.php` returns the collected minute, `live/.private/` returns 403, collection advances without visits, and every `/live/<city>/` page shows that minute. `trains/feed.php?city=zurich` must report a recent `fetchedAt`. Confirm `mobility/feed.php?path=vehicle_types.json` returns a current GBFS timestamp and a mobility city page shows available sites.
 
 ## Development
+
+### Repository layout and publication boundary
+
+`app/` contains the commute map and three separate live dashboards under `live/`, `trains/` and `mobility/`. Their city pages share the sixteen slugs in `app/cities.ts`. `app/data/` holds the generated city modules and route caches used to build the static pages; `scripts/` contains the import, audit and export checks. `test/` covers the model and the PHP collectors. `audits/` preserves historical source snapshots and reports, not deployment files. See [CLEANUP.md](CLEANUP.md) for the current cleanup checklist.
+
+Only the checked `out/` is published to `/home/depr001/danielpradilla.info/swiss-commutes/`. The export includes PHP feeds and access-control files from `public/`, but its `.private/` directories contain only `.htaccess` and `trains/timetable/` is absent. Do not sync the repository, `outputs/`, `work/`, `.env.local` or generated private state. Deploy `_next/` before HTML, without `--delete`, preserving the server's credentials, caches and active train timetable. Keep the existing cron jobs described above.
 
 ### Data audit
 
@@ -170,7 +176,7 @@ npm run lint
 npm run build
 ```
 
-The production files are written to `out/` and expect the `/swiss-commutes` base path. The build adds `data-cfasync="false"` to exported scripts so Cloudflare Rocket Loader preserves Next’s script execution order.
+The production files are written to `out/` and expect the `/swiss-commutes` base path. The build adds `data-cfasync="false"` to exported scripts so Cloudflare Rocket Loader preserves Next’s script execution order, then removes copied local feed state before validating all exported apps.
 
 The generated city modules can be rebuilt from downloaded FSO and swisstopo inputs with:
 
