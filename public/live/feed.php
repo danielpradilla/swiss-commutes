@@ -79,7 +79,9 @@ function trafficReadings(string $body, array $table): array {
         foreach ($measurement->xpath('./*[local-name()="measuredValue"][@index]') as $value) {
             $index = (int)$value['index'];
             $spec = $site['characteristics'][$index] ?? null;
-            // 1/2 are error categories in this profile, not total flow/speed.
+            // The site table declares 1/2 as any-vehicle flow and speed, but most detectors publish
+            // them as zero while reporting the classes, so only the class indices are read. Index 0
+            // carries the source error flags.
             if (!$spec || !in_array($index, [11, 12, 21, 22], true) || (float)$spec['period'] !== 60.0) continue;
             if ($value->xpath('.//*[local-name()="dataError" or local-name()="reasonForDataError"]') ||
                 $value->xpath('.//*[@dataError="true" or @dataError="1" or @forecast="true" or @forecast="1"]')) continue;
