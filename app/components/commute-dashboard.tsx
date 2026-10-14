@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import SiteNavigation from './site-navigation';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Map as LeafletMap } from 'leaflet';
 import { useRouter } from 'next/navigation';
@@ -572,28 +572,16 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
       <header>
         <div className="dp-navbar">
           <div className="dp-navbar-title">
-            <Link className="dp-navbar-brand" href="/projects/">Daniel Pradilla</Link>
+            <a className="dp-navbar-brand" href="https://www.danielpradilla.info/projects/">Daniel Pradilla</a>
             <span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span>
           </div>
           <nav className="dp-navbar-links" aria-label="Site navigation">
-            <Link href="/">Commuting</Link>
-            <Link href="/live/">Traffic</Link>
-            <Link href="/trains/">Trains</Link>
-            <Link href="/mobility/">Shared mobility</Link>
-            <a href="#sources">Sources & method</a>
-            <Link href="/blog/">Blog</Link>
-            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+            <SiteNavigation active="commuting" />
           </nav>
           <details className="dp-navbar-menu">
             <summary aria-label="Menu">☰</summary>
             <nav aria-label="Site navigation (mobile)">
-              <Link href="/">Commuting</Link>
-              <Link href="/live/">Traffic</Link>
-              <Link href="/trains/">Trains</Link>
-              <Link href="/mobility/">Shared mobility</Link>
-              <a href="#sources">Sources & method</a>
-              <Link href="/blog/">Blog</Link>
-              <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+              <SiteNavigation active="commuting" />
             </nav>
           </details>
         </div>
@@ -618,13 +606,8 @@ function PlannedCity({ city, cityOptions }: { city: CityConfig; cityOptions: Cit
         <div className="dp-footer">
           <span>© 2026 Daniel Pradilla</span>
           <nav aria-label="Footer navigation">
-            <Link href="/">Commuting</Link>
-            <Link href="/live/">Traffic</Link>
-            <Link href="/trains/">Trains</Link>
-            <Link href="/mobility/">Shared mobility</Link>
-            <Link href="/projects/">Projects</Link>
-            <Link href="/blog/">Blog</Link>
-            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+            <SiteNavigation active="commuting" />
+            <a href="https://www.danielpradilla.info/projects/">Projects</a>
           </nav>
         </div>
       </footer>
@@ -723,28 +706,16 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
       <header>
         <div className="dp-navbar">
           <div className="dp-navbar-title">
-            <Link className="dp-navbar-brand" href="/projects/">Daniel Pradilla</Link>
+            <a className="dp-navbar-brand" href="https://www.danielpradilla.info/projects/">Daniel Pradilla</a>
             <span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span>
           </div>
           <nav className="dp-navbar-links" aria-label="Site navigation">
-            <Link href="/">Commuting</Link>
-            <Link href="/live/">Traffic</Link>
-            <Link href="/trains/">Trains</Link>
-            <Link href="/mobility/">Shared mobility</Link>
-            <a href="#sources">Sources & method</a>
-            <Link href="/blog/">Blog</Link>
-            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+            <SiteNavigation active="commuting" />
           </nav>
           <details className="dp-navbar-menu">
             <summary aria-label="Menu">☰</summary>
             <nav aria-label="Site navigation (mobile)">
-              <Link href="/">Commuting</Link>
-              <Link href="/live/">Traffic</Link>
-              <Link href="/trains/">Trains</Link>
-              <Link href="/mobility/">Shared mobility</Link>
-              <a href="#sources">Sources & method</a>
-              <Link href="/blog/">Blog</Link>
-              <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+              <SiteNavigation active="commuting" />
             </nav>
           </details>
         </div>
@@ -926,13 +897,8 @@ function ReadyCity({ city, cityOptions, summary, routesUrl }: DashboardProps) {
         <div className="dp-footer">
           <span>© 2026 Daniel Pradilla</span>
           <nav aria-label="Footer navigation">
-            <Link href="/">Commuting</Link>
-            <Link href="/live/">Traffic</Link>
-            <Link href="/trains/">Trains</Link>
-            <Link href="/mobility/">Shared mobility</Link>
-            <Link href="/projects/">Projects</Link>
-            <Link href="/blog/">Blog</Link>
-            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+            <SiteNavigation active="commuting" />
+            <a href="https://www.danielpradilla.info/projects/">Projects</a>
           </nav>
         </div>
       </footer>

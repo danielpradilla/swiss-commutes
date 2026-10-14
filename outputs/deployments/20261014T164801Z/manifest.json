@@ -1,0 +1,158 @@
+{
+  "createdUtc": "2026-10-14T16:51:49.084Z",
+  "status": "deployed-and-verified",
+  "change": "Separate rail-only /trains and mixed /public-transport; partial background track/route context and darker selected routes.",
+  "remote": {
+    "host": "depr001@iad1-shared-b7-33.dreamhost.com",
+    "path": "/home/depr001/danielpradilla.info/projects/swiss-commutes"
+  },
+  "method": "Checksum rsync, _next first, no --delete; existing checked export.",
+  "excluded": [
+    "live/.htaccess",
+    "live/.private/",
+    "trains/.private/",
+    "trains/timetable/",
+    ".env*"
+  ],
+  "privateRollback": "/home/depr001/danielpradilla.info/projects/swiss-commutes/trains/.private/deployments/20261014T164801Z/site-before.tar.gz",
+  "credentials": "Existing private credentials and access rules unchanged; credentials mode 600.",
+  "cron": "Unchanged; compared pre/post crontab fingerprints.",
+  "priorImplementationChecks": {
+    "tests": 58,
+    "staticRoutes": 120,
+    "targetedLint": "passed",
+    "globalLint": "Known archived deployment JavaScript errors; not rerun."
+  },
+  "verification": {
+    "exportChecksumDryRun": "No source-file differences",
+    "serverPhp": "8.2.30; feed.php syntax valid",
+    "initialViews": [
+      {
+        "path": "/projects/swiss-commutes/trains/geneva/",
+        "count": "13 trains",
+        "rows": 13,
+        "allTrains": true,
+        "modes": 0,
+        "contextPixels": 10754,
+        "markerLegendWidths": []
+      },
+      {
+        "path": "/projects/swiss-commutes/public-transport/geneva/",
+        "count": "469 vehicles",
+        "rows": 469,
+        "allTrains": false,
+        "modes": 3,
+        "contextPixels": 81683,
+        "markerLegendWidths": [
+          14,
+          10,
+          6
+        ]
+      }
+    ],
+    "selectedTrips": [
+      {
+        "vehicle": "Train IR15",
+        "stops": 13,
+        "context": {
+          "colored": 10754,
+          "dark": 0
+        },
+        "route": {
+          "colored": 10543,
+          "dark": 8760
+        }
+      },
+      {
+        "vehicle": "Bus 1",
+        "stops": 34,
+        "context": {
+          "colored": 0,
+          "dark": 0
+        },
+        "route": {
+          "colored": 9918,
+          "dark": 5569
+        }
+      }
+    ],
+    "deselection": {
+      "selected": false,
+      "contextRestored": true
+    },
+    "mobile": {
+      "width": 390,
+      "viewport": 390,
+      "links": [
+        {
+          "label": "Commuting",
+          "clickable": true
+        },
+        {
+          "label": "Traffic",
+          "clickable": true
+        },
+        {
+          "label": "Trains",
+          "clickable": true
+        },
+        {
+          "label": "Public transport",
+          "clickable": true
+        },
+        {
+          "label": "Shared mobility",
+          "clickable": true
+        },
+        {
+          "label": "Sources & method",
+          "clickable": true
+        },
+        {
+          "label": "Blog",
+          "clickable": true
+        },
+        {
+          "label": "GitHub",
+          "clickable": true
+        }
+      ]
+    },
+    "roots": {
+      "publicTransport": {
+        "url": "https://www.danielpradilla.info/projects/swiss-commutes/public-transport/",
+        "city": "zurich"
+      },
+      "trains": {
+        "url": "https://www.danielpradilla.info/projects/swiss-commutes/trains/",
+        "city": "zurich"
+      }
+    },
+    "privatePaths": {
+      "method": "HEAD",
+      "results": [
+        {
+          "path": "/trains/.private/",
+          "status": 403
+        },
+        {
+          "path": "/trains/.private/credentials.env",
+          "status": 403
+        },
+        {
+          "path": "/trains/.private/deployments/20261014T164801Z/site-before.tar.gz",
+          "status": 403
+        },
+        {
+          "path": "/live/.private/",
+          "status": 403
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Background tracks and route context are partial, not complete networks.",
+    "Positions are timetable/realtime estimates, not guaranteed GPS.",
+    "geOps quota and licence not independently verified."
+  ]
+}

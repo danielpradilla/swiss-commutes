@@ -1,0 +1,180 @@
+{
+  "createdUtc": "2026-10-14T19:41:10.542Z",
+  "status": "deployed-and-verified",
+  "change": "Continuous mapped public-transport network context and cursor wheel zoom in both transit views.",
+  "remote": {
+    "host": "depr001@iad1-shared-b7-33.dreamhost.com",
+    "path": "/home/depr001/danielpradilla.info/projects/swiss-commutes"
+  },
+  "method": "Checksum rsync; _next first; no --delete; deployed the previously checked export.",
+  "excluded": [
+    "live/.htaccess",
+    "live/.private/",
+    "trains/.private/",
+    "trains/timetable/",
+    ".env*"
+  ],
+  "privateRollback": "/home/depr001/danielpradilla.info/projects/swiss-commutes/trains/.private/deployments/20261014T192659Z/site-before.tar.gz",
+  "credentials": "Existing credentials and access rules unchanged; credential file mode 600.",
+  "cron": "Unchanged; pre/post crontab fingerprints match.",
+  "priorImplementationChecks": {
+    "applicationTests": 63,
+    "transitDataTests": 17,
+    "phpFeedAndNetworkChecks": "passed",
+    "targetedLint": "passed",
+    "staticRoutes": 120
+  },
+  "verification": {
+    "exportChecksumDryRun": "No source-file differences",
+    "serverPhp": "8.2.30; network.php syntax valid",
+    "productionMapsAccess": {
+      "status": 200,
+      "type": "application/x-protobuf",
+      "bytes": 178643
+    },
+    "initialNetwork": {
+      "networkTiles": 20,
+      "networkPixels": 109392,
+      "count": "179 vehicles",
+      "rows": 179,
+      "modes": 3,
+      "status": "Updated · 21:28:39 · Mapped network loaded"
+    },
+    "initialTrains": {
+      "count": "9 trains",
+      "rows": 9,
+      "railOnly": true,
+      "tracks": true
+    },
+    "wheel": [
+      {
+        "view": "public-transport",
+        "before": 12,
+        "after": 13,
+        "pageScrollUnchanged": true,
+        "out": 12
+      },
+      {
+        "view": "trains",
+        "before": 12,
+        "after": 13,
+        "pageScrollUnchanged": true,
+        "out": 12
+      }
+    ],
+    "networkInteractions": {
+      "selected": {
+        "vehicle": "Bus 1",
+        "stops": 31,
+        "networkTiles": 0,
+        "darkPixels": 1196
+      },
+      "restoredPixels": 109392,
+      "disabledBusPixels": 16067,
+      "outsidePageScroll": {
+        "scrollY": 300,
+        "zoom": 12
+      },
+      "highZoom": 17,
+      "highZoomStrokeWidths": [
+        1.5,
+        1.5,
+        1.5,
+        1.5,
+        1.5,
+        1.5,
+        1.5,
+        1.5,
+        1.5,
+        1.5
+      ]
+    },
+    "mobile": {
+      "city": "zurich",
+      "width": 390,
+      "viewport": 390,
+      "links": [
+        {
+          "label": "Commuting",
+          "clickable": true
+        },
+        {
+          "label": "Traffic",
+          "clickable": true
+        },
+        {
+          "label": "Trains",
+          "clickable": true
+        },
+        {
+          "label": "Public transport",
+          "clickable": true
+        },
+        {
+          "label": "Shared mobility",
+          "clickable": true
+        },
+        {
+          "label": "Sources & method",
+          "clickable": true
+        },
+        {
+          "label": "Blog",
+          "clickable": true
+        },
+        {
+          "label": "GitHub",
+          "clickable": true
+        }
+      ]
+    },
+    "tileProtocol": {
+      "tile": {
+        "status": 200,
+        "type": "application/x-protobuf",
+        "cacheControl": "public, max-age=86400, max-age=5",
+        "bytes": 178643
+      },
+      "outsideCoverage": {
+        "status": 204,
+        "bytes": 0
+      },
+      "privatePaths": [
+        {
+          "path": "/trains/.private/credentials.env",
+          "status": 403
+        },
+        {
+          "path": "/trains/.private/network/12/2117/1452.pbf",
+          "status": 403
+        },
+        {
+          "path": "/trains/.private/deployments/20261014T192659Z/site-before.tar.gz",
+          "status": 403
+        },
+        {
+          "path": "/live/.private/",
+          "status": 403
+        }
+      ],
+      "directGeOpsRequests": 0
+    },
+    "warmTileTimestampAndSizeUnchanged": true,
+    "cachePermissions": [
+      "700 1792006406 52 /home/depr001/danielpradilla.info/projects/swiss-commutes/trains/.private/network",
+      "600 1792006123 178643 /home/depr001/danielpradilla.info/projects/swiss-commutes/trains/.private/network/12/2117/1452.pbf"
+    ],
+    "trainRoot": {
+      "city": "zurich",
+      "count": "50 trains",
+      "rows": 50,
+      "railOnly": true,
+      "modeButtons": 0
+    }
+  },
+  "limitations": [
+    "Mapped coverage may omit operators, line variants and current diversions.",
+    "geOps Maps/Realtime quota and publication licence not independently verified.",
+    "Production appends max-age=5 to the tile endpoint max-age=86400 response header; existing override unchanged. Verified private tile cache remains 24 hours."
+  ]
+}

@@ -6,7 +6,7 @@ import { decodePolyline, encodePolyline, routeKey } from '../app/route-geometry.
 const ROUTES_PER_CITY = 5;
 const OUTPUT_PRECISION = 5;
 const TRANSIT_TIME = '2026-09-02T07:00:00+02:00';
-const USER_AGENT = 'swiss-commutes/0.1 (https://www.danielpradilla.info/swiss-commutes/)';
+const USER_AGENT = 'swiss-commutes/0.1 (https://www.danielpradilla.info/projects/swiss-commutes/)';
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 

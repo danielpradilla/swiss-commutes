@@ -2,7 +2,7 @@
 
 Swiss Commutes is an illustrative working-day model for sixteen Swiss locations. It turns commune-level home-to-work records into a map that can follow Swiss local time, fast-forward through the day or be scrubbed by hand.
 
-[Open the live project](https://www.danielpradilla.info/swiss-commutes/geneva/)
+[Open the live project](https://www.danielpradilla.info/projects/swiss-commutes/geneva/)
 
 The current cities are Zürich, Geneva, Basel, Lausanne, Bern, Winterthur, Lucerne, St. Gallen, Lugano, Biel/Bienne, Schaffhausen, La Chaux-de-Fonds, Chiasso, Mendrisio, Zug and Neuchâtel. Geneva covers the canton; the other pages cover city communes.
 
@@ -116,40 +116,42 @@ The chart samples the resulting population estimate every ten minutes. Its centr
 
 ## Live views: what the server needs
 
-Three views read live sources instead of the commute model: `/live/` (measured road counters), `/trains/` (reported timetable delays) and `/mobility/` (reported shared-vehicle availability). The static export ships the pages, while PHP on DreamHost serves the feeds. [LIVE.md](LIVE.md) documents the traffic source and retained minute; [trains/SPEC.md](trains/SPEC.md) documents train updates; [MOBILITY.md](MOBILITY.md) documents GBFS availability and the same-origin cache.
+Four views read live sources instead of the commute model: Traffic at `/live/` (measured road counters), Trains at `/trains/` (rail-only geOps trajectories), Public transport at `/public-transport/` (geOps trains, trams and buses, with subway grouped as tram), and Shared mobility at `/mobility/` (reported shared-vehicle availability). Transit positions derive from timetables and available realtime updates; they are estimates, not guaranteed GPS observations. The static export ships the pages, while three PHP feeds serve them: both transit views share `trains/feed.php` and its private city/trip cache. Public transport also uses one tile proxy, `trains/network.php`, for day-cached geOps Maps / OpenStreetMap route geometry. [LIVE.md](LIVE.md) documents the traffic source and retained minute; [TRAINS.md](TRAINS.md) documents transit coverage, mapped-network limits, trip details and shared polling; [MOBILITY.md](MOBILITY.md) documents GBFS availability and the same-origin cache.
+
+The mapped-network and wheel-zoom update was deployed on 14 October 2026. See [production verification](outputs/deployments/20261014T192659Z/manifest.json). Both maps zoom under the pointer while wheel events outside scroll the page, within zoom limits 7 to 17. Public transport draws continuous mapped train, tram and bus geometry for enabled modes, removes it immediately on selection and restores it with Back. Disconnected parts are not bridged; mapped coverage does not guarantee every operator, line variant or diversion. Selected trips still use their complete supplied geOps journey geometry and stops, and `/trains/` retains its partial ARE 2023 track context. Production checks covered mode filtering, selection/Back, wheel/page scrolling, zoom-17 strokes, mobile navigation, tile cache reuse and private-path access denial. Credentials and cron were unchanged.
 
 ### State kept outside the published directory
 
 | State | Location | Holds |
 | --- | --- | --- |
 | Traffic private directory | `/home/depr001/.swiss-commutes/live` on DreamHost | `credentials.env` with `ASTRA_API_KEY`, the last collected minute, station metadata, `collection.log` |
-| Train private directory | `trains/.private/` | `credentials.env` with `GTFS_RT_API_KEY`, the GTFS-RT source cache, `timetable-current`, and one stored feed per city under `feeds/` |
+| Train private directory | `SWISS_TRAINS_PRIVATE_DIR`, default `trains/.private/` | `credentials.env` with `GEOPS_API_KEY`, shared city/trip caches under `geops/`, and tile caches under `network/<z>/<x>/<y>.pbf` |
 
 `SWISS_LIVE_PRIVATE_DIR` names the traffic directory. Web requests read it from `live/.htaccess` (`SetEnv`); CLI reads it from the cron line. Without it the collector falls back to `live/.private`, which stores no key: `/live/` answers 503 and the error log records `Traffic key not configured`. Publishing the export must therefore exclude `live/.private/`, `trains/.private/` and `trains/timetable/`, and must not remove `live/.htaccess`.
 
-### Required cron entries
+The transit feed and tile proxy read the same `GEOPS_API_KEY` from the PHP environment or its private credentials file. Keep the default `trains/.private/.htaccess` access denial. `.env.local` is private Node configuration: Next development does not execute PHP, so setting a key there alone does not enable the feed. PHP must receive its own environment key or private credentials file. No geOps key is sent to the browser. See [TRAINS.md](TRAINS.md) for PHP 8/cURL requirements, the fixed regional bounds, 15-second city/trip cache and 24-hour tile cache at `<private>/network/<z>/<x>/<y>.pbf` (directories `0700`, tile files `0600`). Panning and zooming add Maps tile traffic beyond Realtime polling; Maps quota and publication licence remain unverified.
+
+### Required traffic cron entry
 
 ```sh
-* * * * * SWISS_LIVE_PRIVATE_DIR=/home/depr001/.swiss-commutes/live /usr/bin/php /home/depr001/danielpradilla.info/swiss-commutes/live/feed.php >/dev/null 2>&1 # Swiss Commutes live collector
-* * * * * /usr/bin/php /home/depr001/danielpradilla.info/swiss-commutes/trains/feed.php >/dev/null 2>&1 # Swiss Commutes train collector
-15 * * * * /usr/bin/python3 /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/updater/scripts/update-train-timetable.py --root /home/depr001/danielpradilla.info/swiss-commutes/trains >> /home/depr001/danielpradilla.info/swiss-commutes/trains/.private/timetable-update.log 2>&1
+* * * * * SWISS_LIVE_PRIVATE_DIR=/home/depr001/.swiss-commutes/live /usr/bin/php /home/depr001/danielpradilla.info/projects/swiss-commutes/live/feed.php >/dev/null 2>&1 # Swiss Commutes live collector
 ```
 
-The traffic collector waits for the source's publication minute itself, so its entry adds no `sleep`. The train collector downloads the feed at most once a minute and rebuilds only the cities requested in the last ten minutes; its entry needs no arguments.
+The traffic collector waits for the source's publication minute itself, so its entry adds no `sleep`. The former train collector and hourly train timetable updater entries were removed during the 14 October geOps cutover; retain the traffic entry above. Transit refreshes are request-driven; no train cron or timetable import is needed. Keep `GEOPS_API_KEY` server-private without replacing `ASTRA_API_KEY` or other credentials. The split requires no key or cron changes.
 
 ### Checklist
 
-1. Run `npm run test`, `npm run test:live`, `npm run test:trains`, `npm run lint` and `npm run build`. Next copies all of `public/`, including ignored local caches, into `out/`; the build removes those caches and generated timetable files from `out/` before checking the export. The three `.htaccess` files must stay tracked in git. Never publish an export that skipped this sanitization.
-2. Publish the checked `out/` to `/home/depr001/danielpradilla.info/swiss-commutes/`, `_next/` first and without `--delete`. Include `out/mobility/feed.php` and the `.htaccess` rules; the feed caches and active train timetable stay on the server.
-3. Confirm `live/feed.php` returns the collected minute, `live/.private/` returns 403, collection advances without visits, and every `/live/<city>/` page shows that minute. `trains/feed.php?city=zurich` must report a recent `fetchedAt`. Confirm `mobility/feed.php?path=vehicle_types.json` returns a current GBFS timestamp and a mobility city page shows available sites.
+1. Run `npm run test`, `npm run test:live`, `npm run test:trains`, `npm run lint` and `npm run build`. Local verification of the mapped-network/wheel update passed all 63 application tests, the transit PHP checks and 17 train-data JavaScript tests, targeted lint with zero errors and the production build with 120 static routes; global lint still reports twelve errors in archived JavaScript under `outputs/deployments/20260927-cleanup/`. Local browser checks covered mode filtering, selection/Back, zoom-17 strokes, wheel/page scrolling, 390-pixel mobile navigation and a tile failure that preserved vehicles without segment fallback. Next copies all of `public/`, including ignored local caches, into `out/`; the build removes those caches before checking the export, including per-city track provenance and geometry. Excluding old local `trains/timetable/` files remains intentional historical-data sanitization, not an active timetable requirement. The three `.htaccess` files must stay tracked in git. Never publish an export that skipped sanitization.
+2. After publication is authorized and the geOps Realtime/Maps plan and licence limits are checked, publish the checked `out/` to `/home/depr001/danielpradilla.info/projects/swiss-commutes/`, `_next/` first and without `--delete`. Include the three PHP feeds plus `trains/network.php`, both transit page families, `/trains/<city>/tracks.json`, `trains/cities.json` and `.htaccess` rules; credentials and all feed/tile caches stay server-private. Never deploy `.env.local` or local cache contents. The original mixed geOps dashboard, subsequent split and mapped-network/wheel update were deployed on 14 October 2026; see [original cutover verification](outputs/deployments/20261014T154455Z/manifest.json), [split deployment verification](outputs/deployments/20261014T164801Z/manifest.json) and [network/wheel deployment verification](outputs/deployments/20261014T192659Z/manifest.json).
+3. Confirm `live/feed.php` returns the collected minute, `live/.private/` returns 403, collection advances without visits, and every `/live/<city>/` page shows that minute. Confirm the default train private directory denies access, `trains/feed.php?city=zurich` reports a recent `fetchedAt`, and selecting a vehicle loads its complete supplied route and stops. Check rail-only markers/count/list and persistent partial ARE track context in `/trains/`; in `/public-transport/`, check all three mode filters, train > tram > bus marker sizes and the mapped network disappearing immediately on selection and returning filtered with Back. Verify network tile access, regional coverage, outside-coverage 204 responses, 24-hour cache reuse and tile errors retaining vehicles without a segment fallback. Check wheel zoom, normal page scrolling outside the map, high zoom and mobile navigation. Confirm `mobility/feed.php?path=vehicle_types.json` returns a current GBFS timestamp and a mobility city page shows available sites.
 
 ## Development
 
 ### Repository layout and publication boundary
 
-`app/` contains the commute map and three separate live dashboards under `live/`, `trains/` and `mobility/`. Their city pages share the sixteen slugs in `app/cities.ts`. `app/data/` holds the generated city modules and route caches used to build the static pages; `scripts/` contains the import, audit and export checks. `test/` covers the model and the PHP collectors. `audits/` preserves historical source snapshots and reports, not deployment files. See [CLEANUP.md](CLEANUP.md) for the current cleanup checklist.
+`app/` contains the commute map and four live view families under `live/`, `trains/`, `public-transport/` and `mobility/`. Their city pages share the sixteen slugs in `app/cities.ts`; both transit families have a Zürich default root plus sixteen city pages and share `app/trains/train-dashboard.tsx`. Transit exports the city centres once as `trains/cities.json`, and `/trains/<city>/tracks.json` exports partial ARE track context from existing city rail caches. The default `SiteNavigation` export in `app/components/site-navigation.tsx` supplies one section list and active `aria-current` links for every dashboard's desktop, mobile and footer navigation. `app/data/` holds the generated city modules and route caches used to build the static pages; `scripts/` contains the import, audit and export checks. `test/` covers the model and PHP feeds. `audits/` preserves historical source snapshots and reports, not deployment files. See [CLEANUP.md](CLEANUP.md) for the current cleanup checklist.
 
-Only the checked `out/` is published to `/home/depr001/danielpradilla.info/swiss-commutes/`. The export includes PHP feeds and access-control files from `public/`, but its `.private/` directories contain only `.htaccess` and `trains/timetable/` is absent. Do not sync the repository, `outputs/`, `work/`, `.env.local` or generated private state. Deploy `_next/` before HTML, without `--delete`, preserving the server's credentials, caches and active train timetable. Keep the existing cron jobs described above.
+Only the checked `out/` is published to `/home/depr001/danielpradilla.info/projects/swiss-commutes/`. The export includes PHP feeds, the local-update tile proxy and access-control files from `public/`, but its `.private/` directories contain only `.htaccess` and historical local `trains/timetable/` files are excluded. Do not sync the repository, `outputs/`, `work/`, `.env.local` or generated private state. Deploy `_next/` before HTML, without `--delete`, preserving the server's credentials and caches. Keep the traffic cron above; the obsolete train jobs were removed during the geOps cutover. The deployed split and undeployed mapped-network update reuse the same private key and add no cron jobs.
 
 ### Data audit
 
@@ -160,6 +162,8 @@ The [audit and deployment verification](audits/2026-09-06-deployed/README.md) co
 The site is a statically exported Next.js application using React, Leaflet and a canvas overlay.
 
 Pages include commuter counts and journey durations, while geometry loads from each city’s separate `routes.json` file. A content version keeps the page and geometry in sync. Route preparation yields between batches so filters, the clock and navigation stay usable while the map loads. Failed downloads can be retried without losing the counts or chart. These files use Next.js’s [static Route Handler export](https://nextjs.org/docs/app/guides/static-exports#route-handlers); production needs no application server.
+
+Navigation within Swiss Commutes uses Next links under the `/projects/swiss-commutes` base path. The Daniel Pradilla brand and the Projects and Blog links use plain anchors to the parent site's full `/projects/` and `/blog/` URLs; using Next links there would incorrectly add `/projects/swiss-commutes` and lead to a 404. The former `/swiss-commutes/` URLs permanently redirect to the new base, preserving deep links and query strings.
 
 Requirements: Node.js 22.13 or newer.
 
@@ -176,7 +180,7 @@ npm run lint
 npm run build
 ```
 
-The production files are written to `out/` and expect the `/swiss-commutes` base path. The build adds `data-cfasync="false"` to exported scripts so Cloudflare Rocket Loader preserves Next’s script execution order, then removes copied local feed state before validating all exported apps.
+The production files are written to `out/` and expect the `/projects/swiss-commutes` base path. The build adds `data-cfasync="false"` to exported scripts so Cloudflare Rocket Loader preserves Next’s script execution order, then removes copied local feed state before validating all exported apps.
 
 The generated city modules can be rebuilt from downloaded FSO and swisstopo inputs with:
 

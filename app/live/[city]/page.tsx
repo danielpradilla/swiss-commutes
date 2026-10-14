@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!city) return {};
   const title = `Live traffic in ${city.displayName} | Swiss Commutes`;
   const description = `Live road counter readings around ${city.displayName}: measured vehicle counts and speeds, updated every minute.`;
-  return { title, description, alternates: { canonical: `/swiss-commutes/live/${city.slug}/` },
+  return { title, description, alternates: { canonical: `/projects/swiss-commutes/live/${city.slug}/` },
     openGraph: { title, description }, twitter: { title, description } };
 }
 

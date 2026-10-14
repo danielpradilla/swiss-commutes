@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import TrainCityPage from './[city]/page';
 
 export const metadata: Metadata = {
-  title: 'Live trains | Swiss Commutes',
-  description: 'Estimated live train positions, current delays and next stops for the project cities.',
-  alternates: { canonical: '/swiss-commutes/trains/' },
-  openGraph: { title: 'Live trains | Swiss Commutes', description: 'Estimated live train positions, current delays and next stops.' },
-  twitter: { title: 'Live trains | Swiss Commutes', description: 'Estimated live train positions, current delays and next stops.' },
+  title: 'Trains | Swiss Commutes',
+  description: 'Estimated train positions, current delays, rail track context and selectable full trip routes for the project cities.',
+  alternates: { canonical: '/projects/swiss-commutes/trains/' },
+  openGraph: { title: 'Trains | Swiss Commutes', description: 'Moving trains, rail track context, trip routes and stop times.' },
+  twitter: { title: 'Trains | Swiss Commutes', description: 'Moving trains, rail track context, trip routes and stop times.' },
 };
 
 export default function TrainsPage() {

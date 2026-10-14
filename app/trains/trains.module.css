@@ -5,17 +5,22 @@
 .heading h1 { font-size:clamp(26px,2.7vw,36px); line-height:1.2; }
 .heading p { margin:0; font-size:13px; color:var(--muted); }
 .dashboard { display:grid; grid-template-columns:minmax(0,1fr) 310px; flex:1; min-height:600px; }
-.mapPanel { position:relative; min-height:600px; border-right:1px solid var(--ink); }
+.mapPanel { position:relative; isolation:isolate; min-height:600px; border-right:1px solid var(--ink); }
 .map { position:absolute; inset:0; background:#e9e6dc; }
 .map :global(.leaflet-tile-pane) { filter:saturate(.35); opacity:.8; }
 .map :global(.leaflet-control-attribution) { font-size:9px; }
-.map :global(.train-ripple) { pointer-events:none; transform-box:fill-box; transform-origin:center; animation:trainRipple 1.15s ease-out infinite; }
-@keyframes trainRipple { from { stroke-opacity:.9; transform:scale(.7); } to { stroke-opacity:0; transform:scale(2.4); } }
+.map :global(.leaflet-tooltip.transit-line-label) { padding:1px 4px; border:1px solid var(--ink); border-radius:0; background:rgba(255,253,249,.92); box-shadow:none; color:var(--ink); font-size:9px; font-weight:500; line-height:1.3; letter-spacing:.02em; white-space:nowrap; }
+.map :global(.leaflet-tooltip.transit-line-label)::before { display:none; }
 .mapMessage { position:absolute; z-index:700; left:20px; top:20px; max-width:calc(100% - 85px); padding:12px; margin:0; background:var(--paper); font-size:14px; border:1px solid var(--line); }
-.legend { position:absolute; bottom:30px; left:16px; z-index:700; display:flex; flex-wrap:wrap; max-width:calc(100% - 32px); gap:8px 16px; padding:8px 10px; background:var(--paper); border:1px solid var(--line); font-size:10px; }
+.legend { position:absolute; bottom:30px; left:16px; z-index:700; display:flex; flex-wrap:wrap; max-width:min(460px,calc(100% - 32px)); gap:8px 16px; padding:8px 10px; background:var(--paper); border:1px solid var(--line); font-size:10px; }
 .legend span { display:flex; gap:6px; align-items:center; }
 .legendTitle { width:100%; }
-.legend i { width:8px; height:8px; border-radius:50%; }
+.legend i { flex-shrink:0; width:8px; height:8px; border-radius:50%; }
+/* Mode-size and route-context rows: size/colour/weight come inline from the same constants the map uses. */
+.sizeLegend,.routeContextLegend { flex-basis:100%; display:flex; flex-wrap:wrap; align-items:center; gap:6px 16px; padding-top:8px; border-top:1px solid var(--line-soft); }
+.routeContextLegend:empty { display:none; }
+.legend .sizeLegend i { background:var(--secondary); }
+.legend .routeContextLegend i { width:20px; min-height:2px; border-radius:0; }
 .sidebar { padding:24px; display:flex; flex-direction:column; gap:22px; height:calc(100svh - 140px); min-height:600px; overflow:auto; }
 .sidebar > * { flex-shrink:0; }
 .kicker { display:block; font-size:9px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; }
@@ -42,8 +47,40 @@
 .detail dl div { display:grid; grid-template-columns:75px 1fr; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); font-size:12px; }
 .detail dt { color:var(--muted); }
 .detail dd { margin:0; }
+.modeLabel { display:inline-block; margin-right:6px; color:var(--secondary); font-size:9px; letter-spacing:.1em; text-transform:uppercase; }
+.filters { display:flex; gap:4px; }
+.filters button { flex:1; min-width:0; height:32px; padding:0 8px; border:1px solid var(--line); border-radius:0; background:var(--paper); color:var(--ink); font-size:10px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
+.filters button:hover { border-color:var(--ink); }
+.filters button[aria-pressed="true"] { border-color:var(--ink); background:var(--ink); color:var(--paper); }
+.filters button:disabled { opacity:.45; cursor:not-allowed; }
+.trains li > button[aria-pressed="true"] { color:var(--blue); }
+.freshness { display:block; margin-top:6px; color:var(--secondary); font-size:10px; font-variant-numeric:tabular-nums; }
+.stale { color:var(--red); }
+.stale::before { content:""; display:inline-block; width:6px; height:6px; margin-right:6px; border-radius:50%; background:var(--red); vertical-align:1px; }
+.routeAction { margin-top:14px; padding:7px 10px; border:1px solid var(--ink); border-radius:0; background:var(--paper); color:var(--ink); font-size:10px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
+.routeAction:hover { background:var(--ink); color:var(--paper); }
+.routeAction:disabled { opacity:.45; cursor:not-allowed; background:var(--paper); color:var(--ink); }
+.stopList { list-style:none; margin:18px 0 0; padding:0; border-top:1px solid var(--line); }
+.stopList li { position:relative; padding-left:18px; }
+/* Timeline rail and stop dot; the first stop after past stops is the current/next stop. */
+.stopList li::before { content:""; position:absolute; left:4px; top:0; bottom:0; width:1px; background:var(--line); }
+.stopList li:first-child::before { top:15px; }
+.stopList li:last-child::before { bottom:auto; height:15px; }
+.stopList li::after { content:""; position:absolute; left:0; top:11px; width:9px; height:9px; border:1px solid var(--ink); border-radius:50%; background:var(--paper); }
+.stopList button { width:100%; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:10px; padding:8px 4px 8px 0; border:0; border-bottom:1px solid var(--line-soft); background:none; color:inherit; text-align:left; font-size:12px; line-height:1.35; cursor:pointer; }
+.stopList button:hover { color:var(--blue); }
+.stopList li button:focus-visible { outline-offset:-2px; }
+.stopList button > span:last-child { min-width:0; overflow-wrap:anywhere; }
+.stopList small { display:block; margin-top:2px; color:var(--secondary); font-size:10px; }
+.stopTime { min-width:38px; white-space:nowrap; font-size:11px; font-variant-numeric:tabular-nums; }
+.stopTime s,.stopTime del { display:block; color:var(--secondary); font-size:10px; }
+.pastStop { color:var(--secondary); }
+.stopList .pastStop::before { background:var(--secondary); }
+.stopList .pastStop::after { border-color:var(--secondary); background:var(--secondary); }
+.pastStop + li:not(.pastStop)::after { border-color:var(--blue); background:var(--blue); box-shadow:0 0 0 3px var(--blue-soft); }
+.selectedStop > button,.stopList button[aria-pressed="true"] { background:var(--paper-soft); color:var(--ink); }
+.stopList .selectedStop::after { border-width:2px; border-color:var(--ink); }
 .page button:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
-@media (prefers-reduced-motion:reduce) { .map :global(.train-ripple) { animation:none; stroke-width:4; } }
 @media (max-width:900px) {
   .heading { flex-direction:column; gap:8px; }
   .dashboard { grid-template-columns:minmax(0,1fr) 280px; }
@@ -55,8 +92,11 @@
   .heading h1 { font-size:26px; }
   .heading :global(.citySelect) { max-width:calc(100vw - 48px); }
   .dashboard { display:flex; flex-direction:column; min-height:0; }
-  .mapPanel { min-height:55svh; border-right:0; border-bottom:1px solid var(--ink); }
+  .mapPanel { display:flex; flex-direction:column; flex:none; min-height:0; border-right:0; border-bottom:1px solid var(--ink); }
+  .map { position:relative; inset:auto; flex:none; height:55svh; }
   .sidebar { height:auto; min-height:0; overflow:visible; padding:20px 16px; }
-  .trains ul { max-height:290px; overflow:auto; }
-  .legend { left:10px; bottom:28px; gap:10px; font-size:9px; }
+  .trains ul,.stopList { max-height:360px; overflow:auto; }
+  .filters button { height:40px; }
+  /* Below the map in flow so legend rows never cover geography or attribution. */
+  .legend { position:static; max-width:none; padding:10px 16px; border:0; border-top:1px solid var(--line); gap:8px 14px; }
 }

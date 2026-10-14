@@ -3,7 +3,7 @@ export type Counts = Record<Mode, number>;
 export type Site = { id: string; name: string; provider: string; lat: number; lon: number; kind: 'station' | 'street'; counts: Counts };
 export type MobilityFeed = { updatedAt: number; sites: Site[] };
 
-const base = '/swiss-commutes/mobility/feed.php?path=';
+const base = '/projects/swiss-commutes/mobility/feed.php?path=';
 const empty = (): Counts => ({ bike: 0, scooter: 0, car: 0, moped: 0 });
 const mode = (form: string): Mode | null => {
   if (form === 'bicycle' || form === 'cargo_bicycle' || form === 'bike') return 'bike';

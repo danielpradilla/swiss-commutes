@@ -2,14 +2,14 @@ import type { Metadata } from 'next';
 import 'leaflet/dist/leaflet.css';
 import './globals.css';
 
-const image = { url: '/swiss-commutes/social/zurich.jpg', width: 1388, height: 728,
+const image = { url: '/projects/swiss-commutes/social/zurich.jpg', width: 1388, height: 728,
   alt: 'Commuting in Zürich at 07:45: map and commuter statistics.' };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.danielpradilla.info'),
   title: 'Swiss Commutes | A day of commuting',
   description: 'Animated maps of weekday commuting in Switzerland’s largest cities.',
-  alternates: { canonical: '/swiss-commutes/' },
+  alternates: { canonical: '/projects/swiss-commutes/' },
   openGraph: {
     title: 'Swiss Commutes',
     description: '24-hour maps of commuting in Switzerland’s largest cities.',

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import SiteNavigation from '../components/site-navigation';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { CircleMarker, LayerGroup, Map as LeafletMap } from 'leaflet';
@@ -139,12 +139,12 @@ export default function MobilityDashboard({ initialCity, cities }: { initialCity
 
   return <main className={styles.page}>
     <header><div className="dp-navbar">
-      <div className="dp-navbar-title"><Link className="dp-navbar-brand" href="/projects/">Daniel Pradilla</Link><span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span></div>
-      <nav className="dp-navbar-links" aria-label="Site navigation"><Link href="/">Commuting</Link><Link href="/live/">Traffic</Link><Link href="/trains/">Trains</Link><Link href="/mobility/" aria-current="page">Shared mobility</Link><a href="#sources">Sources & method</a><Link href="/blog/">Blog</Link><a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a></nav>
-      <details className="dp-navbar-menu"><summary aria-label="Menu">☰</summary><nav aria-label="Site navigation (mobile)"><Link href="/">Commuting</Link><Link href="/live/">Traffic</Link><Link href="/trains/">Trains</Link><Link href="/mobility/">Shared mobility</Link><a href="#sources">Sources & method</a><Link href="/blog/">Blog</Link></nav></details>
+      <div className="dp-navbar-title"><a className="dp-navbar-brand" href="https://www.danielpradilla.info/projects/">Daniel Pradilla</a><span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span></div>
+      <nav className="dp-navbar-links" aria-label="Site navigation"><SiteNavigation active="mobility" /></nav>
+      <details className="dp-navbar-menu"><summary aria-label="Menu">☰</summary><nav aria-label="Site navigation (mobile)"><SiteNavigation active="mobility" /></nav></details>
     </div></header>
     <section className={styles.heading}><h1>Shared mobility in <span className="cityChoice"><select className="citySelect" aria-label="City" value={initialCity} onChange={event => changeCity(event.target.value)}>{cities.map(item => <option key={item.slug} value={item.slug}>{item.displayName}</option>)}</select><span aria-hidden="true">⌄</span></span></h1>
-      <p>{feed ? <>Source updated <time dateTime={new Date(feed.updatedAt * 1000).toISOString()}>{updated.format(new Date(feed.updatedAt * 1000))}</time></> : 'Loading availability…'}</p></section>
+      <p>{feed ? <>Updated at <time dateTime={new Date(feed.updatedAt * 1000).toISOString()}>{updated.format(new Date(feed.updatedAt * 1000))}</time></> : 'Loading availability…'}</p></section>
     <div className={styles.dashboard}>
       <section className={styles.mapPanel} aria-label={`Shared vehicle pickup sites around ${city.displayName}`}>
         <div ref={container} className={styles.map} />
@@ -169,6 +169,6 @@ export default function MobilityDashboard({ initialCity, cities }: { initialCity
       <div className="sourceGrid"><a href="https://data.opentransportdata.swiss/dataset/sharedmobility" target="_blank" rel="noreferrer"><span>01 · Locations and availability</span><strong>Sharedmobility.ch / BFE</strong><p>Provider-reported station locations, vehicle types and availability across participating services.</p></a><a href="https://github.com/SFOE/sharedmobility/blob/main/Access%20the%20data.md" target="_blank" rel="noreferrer"><span>02 · Feed documentation</span><strong>GBFS data access</strong><p>Combined GBFS 2.0 feeds and provider-specific GBFS 2.3 station counts.</p></a></div>
       <div className="methodNote"><strong>How to read the map</strong><div><p>Colour identifies the most available selected vehicle type at a site; ties follow the selector order. Larger dots indicate more available vehicles of the selected types, using a square-root scale capped for readability. These are absolute counts, not availability relative to capacity. The list and total follow the current map bounds. Hover a marker for its site name, full vehicle-type breakdown, count and provider.</p><p>Vehicles at a matching station coordinate use that station’s name. Where a fresh station count exists, individually listed vehicles there are not counted twice. Other vehicles appear at their reported coordinates; only vehicles at identical coordinates share a marker. Closed stations, disabled and reserved vehicles are omitted. Availability can change after publication, and some providers may not be represented.</p></div></div>
     </section>
-    <footer className="projectFooter"><div className="dp-footer"><span>© 2026 Daniel Pradilla</span><nav aria-label="Footer navigation"><Link href="/">Commuting</Link><Link href="/live/">Traffic</Link><Link href="/trains/">Trains</Link><Link href="/mobility/">Shared mobility</Link><Link href="/projects/">Projects</Link><Link href="/blog/">Blog</Link></nav></div></footer>
+    <footer className="projectFooter"><div className="dp-footer"><span>© 2026 Daniel Pradilla</span><nav aria-label="Footer navigation"><SiteNavigation active="mobility" /><a href="https://www.danielpradilla.info/projects/">Projects</a></nav></div></footer>
   </main>;
 }

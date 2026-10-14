@@ -61,7 +61,7 @@ export async function fetchRoutes(jobs, costing = 'auto') {
     await wait(1000);
     try {
       const response = await fetch(url, {
-        headers: { 'X-Client-Id': 'swiss-commutes', 'User-Agent': 'swiss-commutes/0.1 (https://www.danielpradilla.info/swiss-commutes/)' },
+        headers: { 'X-Client-Id': 'swiss-commutes', 'User-Agent': 'swiss-commutes/0.1 (https://www.danielpradilla.info/projects/swiss-commutes/)' },
         signal: AbortSignal.timeout(20_000),
       });
       if (!response.ok) {

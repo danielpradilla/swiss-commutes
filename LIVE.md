@@ -1,6 +1,6 @@
 # Live traffic
 
-The live variation is at `/swiss-commutes/live/`, with the same sixteen city routes under `/live/<city>/`. It shows the newest measured minute available from Swiss road counters, refreshed every minute. Detectors that report no usable count for that minute stay grey, and the measured zeros remain visible. The clock names the minute the readings describe. There is no playback, scrubber, commuter model, route interpolation or population calculation.
+The live variation is at `/swiss-commutes/live/`, with the same sixteen city routes under `/live/<city>/`. It shows the newest measured minute available from Swiss road counters, refreshed every minute. Detectors that report no usable count for that minute stay grey, and the measured zeros remain visible. The update time above the map names the minute the readings describe. There is no playback, scrubber, commuter model, route interpolation or population calculation.
 
 ## Source and units
 

@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!city) return {};
   const title = `Shared mobility in ${city.displayName} | Swiss Commutes`;
   const description = `Reported availability of shared bikes, scooters and cars around ${city.displayName}.`;
-  return { title, description, alternates: { canonical: `/swiss-commutes/mobility/${city.slug}/` },
+  return { title, description, alternates: { canonical: `/projects/swiss-commutes/mobility/${city.slug}/` },
     openGraph: { title, description }, twitter: { title, description } };
 }
 export default async function MobilityCityPage({ params }: Props) {

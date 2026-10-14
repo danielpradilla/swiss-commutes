@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
+import SiteNavigation from '../components/site-navigation';
 import { useRouter } from 'next/navigation';
 import type { Map as LeafletMap, LayerGroup, CircleMarker } from 'leaflet';
 import { isLiveFeed, measuredMinute, minuteReading, stationHasCount, stationStatus, stationVolume, volumeColor, markerOpacity, readingStatus, type LiveCity, type LiveFeed, type Station } from './live-data';
@@ -44,7 +44,7 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
     async function refresh() {
       setLoading(true);
       try {
-        const response = await fetch('/swiss-commutes/live/feed.php', { cache: 'no-store', signal: controller.signal });
+        const response = await fetch('/projects/swiss-commutes/live/feed.php', { cache: 'no-store', signal: controller.signal });
         if (!response.ok) throw new Error('Readings unavailable');
         const data: unknown = await response.json();
         if (!isLiveFeed(data)) throw new Error('Invalid readings');
@@ -176,28 +176,16 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
     <header>
       <div className="dp-navbar">
         <div className="dp-navbar-title">
-          <Link className="dp-navbar-brand" href="/projects/">Daniel Pradilla</Link>
+          <a className="dp-navbar-brand" href="https://www.danielpradilla.info/projects/">Daniel Pradilla</a>
           <span className="dp-navbar-project">Swiss Commutes <span aria-hidden="true">🇨🇭</span></span>
         </div>
         <nav className="dp-navbar-links" aria-label="Site navigation">
-          <Link href="/">Commuting</Link>
-          <Link href="/live/">Traffic</Link>
-          <Link href="/trains/">Trains</Link>
-          <Link href="/mobility/">Shared mobility</Link>
-          <a href="#sources">Sources & method</a>
-          <Link href="/blog/">Blog</Link>
-          <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+          <SiteNavigation active="traffic" />
         </nav>
         <details className="dp-navbar-menu">
           <summary aria-label="Menu">☰</summary>
           <nav aria-label="Site navigation (mobile)">
-            <Link href="/">Commuting</Link>
-            <Link href="/live/">Traffic</Link>
-            <Link href="/trains/">Trains</Link>
-            <Link href="/mobility/">Shared mobility</Link>
-            <a href="#sources">Sources & method</a>
-            <Link href="/blog/">Blog</Link>
-            <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+            <SiteNavigation active="traffic" />
           </nav>
         </details>
       </div>
@@ -206,17 +194,13 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
       <h1>Live traffic in <span className="cityChoice"><select className="citySelect" aria-label="City" value={slug} onChange={event => changeCity(event.target.value)}>
         {cities.map(city => <option key={city.slug} value={city.slug}>{city.displayName}</option>)}
       </select><span aria-hidden="true">⌄</span></span></h1>
-      <p>Newest measured minute. Detectors without a count stay grey.</p>
+      <p>{feed ? minute > 0 ? <>Updated at <time dateTime={new Date(minute).toISOString()}>{dateFormat.format(new Date(minute))}</time></> : 'No usable counts in the latest collection.' : loading ? 'Connecting to road counters…' : 'No current update'}</p>
     </section>
     <div className={styles.dashboard}>
       <section className={styles.mapPanel} aria-label={`Live traffic counters around ${city.displayName}`}>
         <div ref={container} className={styles.map} />
         {mapError && <p className={styles.mapMessage}>The map could not load. Readings are available in the station list.</p>}
         {!feed && <p className={styles.mapMessage} role="status">{failed ? 'Live readings are temporarily unavailable. Retrying in a minute.' : 'Connecting to road counters…'}</p>}
-        {minute > 0 && <div className={styles.measured} role="status" aria-label="Measured minute">
-          <div><span>Measured minute</span><time dateTime={new Date(minute).toISOString()} title={dateFormat.format(new Date(minute))}>{time(new Date(minute).toISOString())}–{time(new Date(minute + 60_000).toISOString())}</time></div>
-          {loading && <small>Refreshing…</small>}
-        </div>}
         <div className={styles.legend}>
           <span className={styles.legendTitle}>Vehicles/min · busiest detector</span>
           {[0, 10, 20, 30].map(value => <span key={value}><i style={{ background: volumeColor(value) }} />{value === 30 ? '30+' : `${value}–${value + 9}`}</span>)}
@@ -264,7 +248,7 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
           <p>ASTRA / FEDRO and participating road authorities count vehicles at fixed sensors. The feed covers equipped roads, not every street or border approach.</p>
           <p>Counts cover a 60-second interval. Speeds are the measured average for that vehicle class. Light vehicles include cars, motorcycles, buses and small delivery vehicles.</p>
           <p>Map colours show the highest vehicle count from a station’s detectors, from green to red. Both vehicle classes must be reported. Grey means no complete count for the displayed minute. Colours show volume, not congestion.</p>
-          <p>The map shows the newest measured minute in the feed, refreshed every minute. When the source has not published a newer minute, the map keeps the last minute it collected and the clock still shows that minute. Detectors that report no usable count for it stay grey. Readings are provisional. Zero means none counted.</p>
+          <p>The map shows the newest measured minute in the feed, refreshed every minute. When the source has not published a newer minute, the map keeps the last minute it collected and the update time above the map still shows that minute. Detectors that report no usable count for it stay grey. Readings are provisional. Zero means none counted.</p>
           <p>Markers dim once per vehicle counted in the displayed minute, so five vehicles a minute means five dims a minute. Dimming stops above 120 vehicles a minute, where markers stay lit, and reduced-motion settings keep every marker steady. The dimming shows the average rate over the minute, not individual vehicles.</p>
           <p>The same vehicle can pass several sensors. These counts cannot be added to calculate a city’s population or number of commuters.</p>
           <a href="https://opentransportdata.swiss/en/cookbook/road-traffic-cookbook/rt-road-traffic-counters/" target="_blank" rel="noreferrer">Source and definitions ↗</a>
@@ -275,13 +259,8 @@ export default function LiveDashboard({ initialCity, cities }: { initialCity: st
       <div className="dp-footer">
         <span>© 2026 Daniel Pradilla</span>
         <nav aria-label="Footer navigation">
-          <Link href="/">Commuting</Link>
-          <Link href="/live/">Traffic</Link>
-          <Link href="/trains/">Trains</Link>
-          <Link href="/mobility/">Shared mobility</Link>
-          <Link href="/projects/">Projects</Link>
-          <Link href="/blog/">Blog</Link>
-          <a href="https://github.com/danielpradilla/swiss-commutes">GitHub</a>
+          <SiteNavigation active="traffic" />
+          <a href="https://www.danielpradilla.info/projects/">Projects</a>
         </nav>
       </div>
     </footer>

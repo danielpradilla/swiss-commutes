@@ -17,12 +17,12 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
   if (!city) return {};
   const title = `${city.displayName} / 24h | Swiss Commutes`;
   const description = `A 24-hour map of commuting in ${city.displayName} and the surrounding region.`;
-  const image = { url: `/swiss-commutes/social/${city.slug}.jpg`, width: 1388, height: 728,
+  const image = { url: `/projects/swiss-commutes/social/${city.slug}.jpg`, width: 1388, height: 728,
     alt: `Commuting in ${city.displayName} at 07:45: map and commuter statistics.` };
   return {
     title,
     description,
-    alternates: { canonical: `/swiss-commutes/${city.slug}/` },
+    alternates: { canonical: `/projects/swiss-commutes/${city.slug}/` },
     openGraph: { title, description, type: 'website', images: [image] },
     twitter: { card: 'summary_large_image', title, description, images: [image] },
   };
@@ -43,5 +43,5 @@ export default async function CityPage({ params }: CityPageProps) {
     hasRoadRoutes: !!map.roadFlow,
   };
   return <CommuteDashboard city={city} cityOptions={cityOptions} summary={summary}
-    routesUrl={`/swiss-commutes/${city.slug}/routes.json?v=${routes.version}`} />;
+    routesUrl={`/projects/swiss-commutes/${city.slug}/routes.json?v=${routes.version}`} />;
 }

@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   output: 'export',
-  basePath: '/swiss-commutes',
+  basePath: '/projects/swiss-commutes',
   trailingSlash: true,
 };
 

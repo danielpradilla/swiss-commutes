@@ -1,0 +1,2131 @@
+{
+  "createdUtc": "2026-10-14T15:44:55+00:00",
+  "verifiedUtc": "2026-10-14T15:57:44.193198+00:00",
+  "remote": "depr001@iad1-shared-b7-33.dreamhost.com:/home/depr001/danielpradilla.info/projects/swiss-commutes",
+  "status": "deployed-and-verified",
+  "change": "geOps moving trains, trams and buses with complete selected trip routes and stops",
+  "method": "Checksum rsync; _next assets first; no --delete",
+  "excluded": [
+    "live/.htaccess",
+    "live/.private/",
+    "trains/.private/",
+    "trains/timetable/",
+    "mobility/.private/"
+  ],
+  "privateRollback": "/home/depr001/danielpradilla.info/projects/swiss-commutes/trains/.private/deployments/20261014T154455Z",
+  "credentials": {
+    "setting": "GEOPS_API_KEY",
+    "mode": "0600",
+    "contentVerified": true,
+    "existingSettingsPreserved": true,
+    "notIncludedInExport": true
+  },
+  "cron": {
+    "obsoleteTransitJobsRemoved": 2,
+    "remainingEntries": 18,
+    "allOtherEntriesPreserved": true,
+    "trafficCollectorPreserved": true
+  },
+  "verification": {
+    "exportChecksumDryRun": "No source-file differences",
+    "serverPhp": "8.2.30; feed.php syntax valid",
+    "browserCities": [
+      "geneva",
+      "zurich"
+    ],
+    "genevaInitialFeed": {
+      "status": 200,
+      "fetchedAt": "2026-10-14T15:49:28Z",
+      "vehicles": 1056,
+      "modes": [
+        "rail",
+        "tram",
+        "subway",
+        "bus"
+      ]
+    },
+    "selectedTrip": {
+      "vehicle": "Bus 1",
+      "stops": 31,
+      "completeRouteVisible": true
+    },
+    "visibleMotionConfirmed": true,
+    "mobile": {
+      "viewportWidth": 390,
+      "documentWidth": 390
+    },
+    "privatePaths": {
+      "/trains/.private/": 403,
+      "/trains/.private/credentials.env": 403,
+      "/trains/.private/deployments/20261014T154455Z/credentials.env.before": 403,
+      "/live/.private/": 403
+    },
+    "browserRequestsToGeOps": 0,
+    "keyAbsentFromBrowserUrlsAndFeed": true,
+    "serverCache": {
+      "fetchedAt": "2026-10-14T15:55:08Z",
+      "vehicles": 1044,
+      "ageSeconds": 9,
+      "retryAgeSeconds": null
+    }
+  },
+  "priorImplementationChecks": {
+    "nodeTestsPassed": 54,
+    "phpTransitChecksPassed": true,
+    "productionBuildPassed": true,
+    "targetedLintPassed": true
+  },
+  "limitations": [
+    "geOps quota and licence not independently verified",
+    "Repository-wide lint fails on archived deployment JavaScript",
+    "Direct Python urllib HTTP request returned403; normal production browser feed requests returned200",
+    "Browser checks cover Geneva and Zurich, not every city; deployed export checksums matched for all included files"
+  ],
+  "files": [
+    {
+      "path": "404/index.html",
+      "bytes": 11894,
+      "sha256": "9fb0f70e7b8b0df1bd0cad5cde4b7cfb8291bb004e99b2a13f3f789bb1b8790d"
+    },
+    {
+      "path": "404.html",
+      "bytes": 11894,
+      "sha256": "9fb0f70e7b8b0df1bd0cad5cde4b7cfb8291bb004e99b2a13f3f789bb1b8790d"
+    },
+    {
+      "path": "__next.__PAGE__.txt",
+      "bytes": 831095,
+      "sha256": "de24939bcb32809b7fc97647b05aab37796d3b1e4d3399367b5f85ccb40780e4"
+    },
+    {
+      "path": "__next._full.txt",
+      "bytes": 695407,
+      "sha256": "b6f9a86f9e14c6b597a42d02a06810f2d9c3c2486ce485ee35a070dcacafcbd2"
+    },
+    {
+      "path": "__next._tree.txt",
+      "bytes": 273,
+      "sha256": "75e462e72d2fd1dcb5d5f639d6283aeddafa2226eecc2f69fa40a42d79c05e02"
+    },
+    {
+      "path": "_next/static/2gtl0iVpjBNt4-S7PXDDa/_buildManifest.js",
+      "bytes": 219,
+      "sha256": "9476e0afd3f9da68a64e6ec58631191fd3eaca62c9f5a377e7517fe9a89e59ea"
+    },
+    {
+      "path": "_next/static/2gtl0iVpjBNt4-S7PXDDa/_clientMiddlewareManifest.js",
+      "bytes": 96,
+      "sha256": "5483e3295dc35dfe29ea932efc85341c916f10ff78ff5b0e965e003710893a4a"
+    },
+    {
+      "path": "_next/static/2gtl0iVpjBNt4-S7PXDDa/_ssgManifest.js",
+      "bytes": 207,
+      "sha256": "5641baed50479b816fbb3151bf5d233137c93e7c82dddafb681567151c5cb651"
+    },
+    {
+      "path": "_next/static/chunks/06tx-lbjen76b.js",
+      "bytes": 32863,
+      "sha256": "f1b8e187584f1c1c3a30e1dca738b74a627f1b9c1430fe5e15fb2525e9da5485"
+    },
+    {
+      "path": "_next/static/chunks/0biv6h3sdx7o9.js",
+      "bytes": 25266,
+      "sha256": "d5a1d98bc307bfdfa31ba665e1ddc268949bb3d526159cc9c5ef906849df97ee"
+    },
+    {
+      "path": "_next/static/chunks/0cz1d0mv5g_q7.js",
+      "bytes": 112594,
+      "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+    },
+    {
+      "path": "_next/static/chunks/0ri7vtxqzw1x1.js",
+      "bytes": 229156,
+      "sha256": "fb01945ca3aea346f4259f8b4da3a470f126925d0d4d9756cc021c529236ae43"
+    },
+    {
+      "path": "_next/static/chunks/0uq5du_rsig6l.js",
+      "bytes": 26160,
+      "sha256": "02e6218d47e6ad11105af485b5441376193c65fea1f92fa6c80e2797f5e86e36"
+    },
+    {
+      "path": "_next/static/chunks/16djmba0nogy5.js",
+      "bytes": 215,
+      "sha256": "35405d3664bc3ce98c59022425cf5d31bb5c782f390e3bb7da31009160c51088"
+    },
+    {
+      "path": "_next/static/chunks/1rmvzixp35fv0.js",
+      "bytes": 533176,
+      "sha256": "f9e826a3ba4082ffd9c931e12ae7ae4f1d86229410e6934f3d713551557f13eb"
+    },
+    {
+      "path": "_next/static/chunks/1u5zan5bs9a7v.js",
+      "bytes": 23558,
+      "sha256": "acae8ef72ea008c5f229d8413485b155b54644a8bb7db257036c31c8c9366668"
+    },
+    {
+      "path": "_next/static/chunks/1wr82-6qzef_q.js",
+      "bytes": 175974,
+      "sha256": "a7e0f5d020c614b497b3e7ff21edf93f5bf2a00e88603ac87561be56ba781b8a"
+    },
+    {
+      "path": "_next/static/chunks/2f982vvtysjt8.css",
+      "bytes": 5810,
+      "sha256": "f009669d2d45886bc8a04255a4d26d0fd8e696bf1251e815f31db1ef83c4f72b"
+    },
+    {
+      "path": "_next/static/chunks/2r25ypzx9ktye.js",
+      "bytes": 163535,
+      "sha256": "46ee7df8bc640a382f7ac4cd7727bf292dae4e55581e940a58488bd613f865f3"
+    },
+    {
+      "path": "_next/static/chunks/2z_c2vrozdni8.css",
+      "bytes": 24867,
+      "sha256": "ad7fa7f307ffb812c6f54e7ff932ce3fb58137f71503f5055f55f4ef4db82201"
+    },
+    {
+      "path": "_next/static/chunks/31vzx3jpbu0dm.css",
+      "bytes": 9405,
+      "sha256": "d60fc7907230fb7864ab43de80be75073b759a45d012bb62a77128e4306d8d07"
+    },
+    {
+      "path": "_next/static/chunks/36wxj7nvtv3pd.css",
+      "bytes": 5264,
+      "sha256": "94adcddaa8fd2812ec05f2570c3e8d7b8025129af664e722e5a0720da7665d8a"
+    },
+    {
+      "path": "_next/static/chunks/37ux7yg4q_1bo.js",
+      "bytes": 148486,
+      "sha256": "6008a8799baa89d2dbb5eeb6d8b8e7a059ae1c6c3763f6bd123ae1a3c1804bc9"
+    },
+    {
+      "path": "_next/static/chunks/3fntmmi971322.js",
+      "bytes": 14377,
+      "sha256": "34ed6abf4c6d0d1bb3dc56d3f133d2a5dbc3a3c89c791deab314e27143ac14ce"
+    },
+    {
+      "path": "_next/static/chunks/41n_5l8rqwyh9.js",
+      "bytes": 9007,
+      "sha256": "b5a63ca9b353cd5cea2a49619291b7e303d8bc4a32ca4b36f63a6ec51fbc5b97"
+    },
+    {
+      "path": "_next/static/chunks/turbopack-0l5-32n1eozbf.js",
+      "bytes": 9712,
+      "sha256": "e4601ae2df87f6690ee8b4a5788041fde33655bc981b2fbc008991f03cd6f34e"
+    },
+    {
+      "path": "_next/static/media/layers-2x.23wrxu3xxu9-i.png",
+      "bytes": 1259,
+      "sha256": "066daca850d8ffbef007af00b06eac0015728dee279c51f3cb6c716df7c42edf"
+    },
+    {
+      "path": "_next/static/media/layers.3muxcl8sz6330.png",
+      "bytes": 696,
+      "sha256": "1dbbe9d028e292f36fcba8f8b3a28d5e8932754fc2215b9ac69e4cdecf5107c6"
+    },
+    {
+      "path": "_next/static/media/marker-icon.1le94j_pe_ih1.png",
+      "bytes": 1466,
+      "sha256": "574c3a5cca85f4114085b6841596d62f00d7c892c7b03f28cbfa301deb1dc437"
+    },
+    {
+      "path": "_not-found/__next._full.txt",
+      "bytes": 7130,
+      "sha256": "b1f86ae92fd9e53e018fd3dd1205842e0170dab60e3225a1538b78887d77e537"
+    },
+    {
+      "path": "_not-found/__next._not-found.__PAGE__.txt",
+      "bytes": 6118,
+      "sha256": "866435514eeb2fba519c87d67a6dd915e29b5d7b9ad9fc3ef6a427a6eeb840aa"
+    },
+    {
+      "path": "_not-found/__next._tree.txt",
+      "bytes": 351,
+      "sha256": "b6189940b2054ebe99311838efb0fd98b6c37b38a0ea06b63fb8307970a2ba84"
+    },
+    {
+      "path": "_not-found/index.html",
+      "bytes": 11894,
+      "sha256": "9fb0f70e7b8b0df1bd0cad5cde4b7cfb8291bb004e99b2a13f3f789bb1b8790d"
+    },
+    {
+      "path": "_not-found/index.txt",
+      "bytes": 7130,
+      "sha256": "b1f86ae92fd9e53e018fd3dd1205842e0170dab60e3225a1538b78887d77e537"
+    },
+    {
+      "path": "basel/__next.$d$city.__PAGE__.txt",
+      "bytes": 359930,
+      "sha256": "7c9b8c22eaf03191902d3726393b4fda65ca3451a040bf199cabee54d6941e15"
+    },
+    {
+      "path": "basel/__next._full.txt",
+      "bytes": 300594,
+      "sha256": "bca1963d8a487663aeb82ea064fdad195bd3d53393fe92b2e577770b8ea46862"
+    },
+    {
+      "path": "basel/__next._tree.txt",
+      "bytes": 426,
+      "sha256": "f69cde62a0cb95205f8085d268994cc4fb84070fab91b6d1dd1365851cb89d15"
+    },
+    {
+      "path": "basel/index.html",
+      "bytes": 363305,
+      "sha256": "1a5acbbdc6c81b1d35b5eef23200b9f60b3a6fee3a9483f0fb3064ff0a9cbb3d"
+    },
+    {
+      "path": "basel/index.txt",
+      "bytes": 300594,
+      "sha256": "bca1963d8a487663aeb82ea064fdad195bd3d53393fe92b2e577770b8ea46862"
+    },
+    {
+      "path": "basel/routes.json",
+      "bytes": 1115115,
+      "sha256": "7030deaa47d484b785882f0d2f92837249455e9bf7961653714a362a0dcc577c"
+    },
+    {
+      "path": "bern/__next.$d$city.__PAGE__.txt",
+      "bytes": 765299,
+      "sha256": "513abcc97c71ac4d21d5fab87cc011dcdb0a8967b3ecc47eb2772cf941cf0a8e"
+    },
+    {
+      "path": "bern/__next._full.txt",
+      "bytes": 640497,
+      "sha256": "4719fcf2525b6cc33dc858f56bc9f62f5b23f55012dc078a5e718aa8f8d6299a"
+    },
+    {
+      "path": "bern/__next._tree.txt",
+      "bytes": 425,
+      "sha256": "4756f7dbc842f8790e93ba0b9d17f56ee52daeb6609d9f4353647f177d517526"
+    },
+    {
+      "path": "bern/index.html",
+      "bytes": 757256,
+      "sha256": "a2a2ce909cf1c3299d4bd1b03d0f461889992dd328c1f00bf046d8e750228b52"
+    },
+    {
+      "path": "bern/index.txt",
+      "bytes": 640497,
+      "sha256": "4719fcf2525b6cc33dc858f56bc9f62f5b23f55012dc078a5e718aa8f8d6299a"
+    },
+    {
+      "path": "bern/routes.json",
+      "bytes": 3863110,
+      "sha256": "feeced24a5bec73081c0533507ad99076062a37221ba3b8e95b8549b34c8ea41"
+    },
+    {
+      "path": "biel-bienne/__next.$d$city.__PAGE__.txt",
+      "bytes": 406821,
+      "sha256": "ade9a97d9a1318fcf3591de50a6152595bf62f14f24b6662c5cd422ebf791b07"
+    },
+    {
+      "path": "biel-bienne/__next._full.txt",
+      "bytes": 341589,
+      "sha256": "1901d1d8a58ae07c6830f5519606483f83ac3fe52ae0ba487aab7fb912d087e1"
+    },
+    {
+      "path": "biel-bienne/__next._tree.txt",
+      "bytes": 432,
+      "sha256": "460095fda0aeac4f6d21810db14d90ca54f425e8a2b112389e6d97ed83c9aaf8"
+    },
+    {
+      "path": "biel-bienne/index.html",
+      "bytes": 411100,
+      "sha256": "fdaf457c00bacf60213e8cb7abf95f7770a4c6e98f7b2f050529bad41011491d"
+    },
+    {
+      "path": "biel-bienne/index.txt",
+      "bytes": 341589,
+      "sha256": "1901d1d8a58ae07c6830f5519606483f83ac3fe52ae0ba487aab7fb912d087e1"
+    },
+    {
+      "path": "biel-bienne/routes.json",
+      "bytes": 2495500,
+      "sha256": "59f825b70ec5ed933ea538de3d9f81f5f86d73d877a1481c6577048a0f8e8938"
+    },
+    {
+      "path": "chiasso/__next.$d$city.__PAGE__.txt",
+      "bytes": 85651,
+      "sha256": "f0a24e024240ca3c67b799f8575d4de1896436ab77562ca9334e8bfc8002a8bc"
+    },
+    {
+      "path": "chiasso/__next._full.txt",
+      "bytes": 74283,
+      "sha256": "625aa790607adec8bd2b178b82c0fac0050514d24ab4eaa91c8e8daffed8ee45"
+    },
+    {
+      "path": "chiasso/__next._tree.txt",
+      "bytes": 428,
+      "sha256": "4f157d3219ae43dc8416a57b53393baf749558fdbaae6e363d7bbc823474946f"
+    },
+    {
+      "path": "chiasso/index.html",
+      "bytes": 102641,
+      "sha256": "808ce05b65368bb9b7c1368f4367c2471e510fb8b0997dca7e962fe732bbbc48"
+    },
+    {
+      "path": "chiasso/index.txt",
+      "bytes": 74283,
+      "sha256": "625aa790607adec8bd2b178b82c0fac0050514d24ab4eaa91c8e8daffed8ee45"
+    },
+    {
+      "path": "chiasso/routes.json",
+      "bytes": 534754,
+      "sha256": "b197c3f238365fae14cbb6f2974a2a3865afa9205c8c79eb4e67739fcb5a8125"
+    },
+    {
+      "path": "favicon.svg",
+      "bytes": 712,
+      "sha256": "e6d2e59b7b5bbb0342e0fb496dfc262decbfe4426bbb7b047aec8d467d1dc6f7"
+    },
+    {
+      "path": "geneva/__next.$d$city.__PAGE__.txt",
+      "bytes": 1662563,
+      "sha256": "60db6c7ff2e067500824718b112158df3dcb754d895b2b289eb3c7b2438d1e9a"
+    },
+    {
+      "path": "geneva/__next._full.txt",
+      "bytes": 1586709,
+      "sha256": "30771f8957ed23c46b09c8829f1aff6850a366077e1dd28cccef2bed4e413671"
+    },
+    {
+      "path": "geneva/__next._tree.txt",
+      "bytes": 427,
+      "sha256": "7b680c5ee42c55b0b9fce75653466ac05243b763ff4fa65ebf8674722b4b804f"
+    },
+    {
+      "path": "geneva/index.html",
+      "bytes": 1842672,
+      "sha256": "0644b94cc6fd09bd89aa502928704f6ee1319f9a24c62b256a98482fb121ca0e"
+    },
+    {
+      "path": "geneva/index.txt",
+      "bytes": 1586709,
+      "sha256": "30771f8957ed23c46b09c8829f1aff6850a366077e1dd28cccef2bed4e413671"
+    },
+    {
+      "path": "geneva/routes.json",
+      "bytes": 11358688,
+      "sha256": "95e2cf237627842c18e5b505c938631f0c26a888b69addc945d366b832a73e94"
+    },
+    {
+      "path": "index.html",
+      "bytes": 817626,
+      "sha256": "c27868e5d6a5394f921066579acaf0ec4d19dadb4fcccb5dd214f765115e00e6"
+    },
+    {
+      "path": "index.txt",
+      "bytes": 695407,
+      "sha256": "b6f9a86f9e14c6b597a42d02a06810f2d9c3c2486ce485ee35a070dcacafcbd2"
+    },
+    {
+      "path": "la-chaux-de-fonds/__next.$d$city.__PAGE__.txt",
+      "bytes": 141768,
+      "sha256": "2cd6312e9db28094506f48c8261d7b072e1a3f9a784a68b3c4d017040ce3639f"
+    },
+    {
+      "path": "la-chaux-de-fonds/__next._full.txt",
+      "bytes": 120676,
+      "sha256": "c44857cd0df85143bf8551967e60e569263aaf4c2fab4471e995f0c19f9af716"
+    },
+    {
+      "path": "la-chaux-de-fonds/__next._tree.txt",
+      "bytes": 438,
+      "sha256": "b7a7b736b969111f8a3e9c7230bfd0a71ef58f5141ba4b6a3a942c6f93e06761"
+    },
+    {
+      "path": "la-chaux-de-fonds/index.html",
+      "bytes": 156067,
+      "sha256": "8e26195ad85c1f97fed16033e947bdafa100721cd6e04a1df301843577547b19"
+    },
+    {
+      "path": "la-chaux-de-fonds/index.txt",
+      "bytes": 120676,
+      "sha256": "c44857cd0df85143bf8551967e60e569263aaf4c2fab4471e995f0c19f9af716"
+    },
+    {
+      "path": "la-chaux-de-fonds/routes.json",
+      "bytes": 949760,
+      "sha256": "b9a6aeda3059e7083002edade228bd9d5092ff8e7f29064d434579c851cd13a4"
+    },
+    {
+      "path": "lausanne/__next.$d$city.__PAGE__.txt",
+      "bytes": 557252,
+      "sha256": "68a8e88793a105ea83c18eb08d10341956c816e29589edff4d722a97c7e0119c"
+    },
+    {
+      "path": "lausanne/__next._full.txt",
+      "bytes": 465946,
+      "sha256": "0574c6684e07c3c15cca37b61e95961ef0805e21b5ad586164b527f49d8c7e97"
+    },
+    {
+      "path": "lausanne/__next._tree.txt",
+      "bytes": 429,
+      "sha256": "3bb48d8ab01026ae500ee210fe637522a550fab6d16a94bd9d4e7644399656cc"
+    },
+    {
+      "path": "lausanne/index.html",
+      "bytes": 554082,
+      "sha256": "9268ca8a94f351368180baaf2148ad1275d2f05a43496dea1f69edccc0c8bdbf"
+    },
+    {
+      "path": "lausanne/index.txt",
+      "bytes": 465946,
+      "sha256": "0574c6684e07c3c15cca37b61e95961ef0805e21b5ad586164b527f49d8c7e97"
+    },
+    {
+      "path": "lausanne/routes.json",
+      "bytes": 2913594,
+      "sha256": "59594f308859d8e70085b673079539c52ca39dda260e323df3d9da4b04dd97ed"
+    },
+    {
+      "path": "live/__next._full.txt",
+      "bytes": 7196,
+      "sha256": "93d143758b5b996effad8e945c3b1a57addfac0da2df836ce363396f770dc0ed"
+    },
+    {
+      "path": "live/__next._tree.txt",
+      "bytes": 422,
+      "sha256": "543326e5975577addf6ebeec1bac4983094f131eadfdc12bc7f559af03b58116"
+    },
+    {
+      "path": "live/__next.live.__PAGE__.txt",
+      "bytes": 6278,
+      "sha256": "d1a2fdf412aa4a970883fef5d34fb7872ff95e74d59837c5a5ce85fb19cdaba4"
+    },
+    {
+      "path": "live/basel/__next._full.txt",
+      "bytes": 7759,
+      "sha256": "aa921c6ddd729f8cde2ed9b97542c6cb752f90a4b6e81c90fbf020ea36e897d6"
+    },
+    {
+      "path": "live/basel/__next._tree.txt",
+      "bytes": 529,
+      "sha256": "ff986700d593bf17ebe9fbd8c1c144d12178ae2f6160bd5b3f32003d96eeb69a"
+    },
+    {
+      "path": "live/basel/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6606,
+      "sha256": "b5c3227a3068be8f502473aeae8779b7513a88b8a749c354550ab4650b3638f8"
+    },
+    {
+      "path": "live/basel/index.html",
+      "bytes": 17209,
+      "sha256": "fbd2cd7461d64c94516b96e4a437de8ad291d65ec322cf5d8b9bccd53f11f4b8"
+    },
+    {
+      "path": "live/basel/index.txt",
+      "bytes": 7759,
+      "sha256": "aa921c6ddd729f8cde2ed9b97542c6cb752f90a4b6e81c90fbf020ea36e897d6"
+    },
+    {
+      "path": "live/bern/__next._full.txt",
+      "bytes": 7749,
+      "sha256": "de8e4b91f220f338d97613c0ee2641e620ffbc0fbe2a127cc958d20cdac824bc"
+    },
+    {
+      "path": "live/bern/__next._tree.txt",
+      "bytes": 528,
+      "sha256": "5cfda80d8374dfcb2e83f770e35f87046f7900a4fcdb3884406f5a65dac53436"
+    },
+    {
+      "path": "live/bern/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6598,
+      "sha256": "f42b1fccc344322386f56af6d06f2a26a03e6460516159fcecf2f09cc6740fc7"
+    },
+    {
+      "path": "live/bern/index.html",
+      "bytes": 17191,
+      "sha256": "52225d6925d841c6768c515dcd885ccc69643f061e1aad8ef9fcbccf073596ad"
+    },
+    {
+      "path": "live/bern/index.txt",
+      "bytes": 7749,
+      "sha256": "de8e4b91f220f338d97613c0ee2641e620ffbc0fbe2a127cc958d20cdac824bc"
+    },
+    {
+      "path": "live/biel-bienne/__next._full.txt",
+      "bytes": 7819,
+      "sha256": "061f55d14946ff035ed8c604ee9d23c6577b6e8e8ea602599a7c7f0740ad6b29"
+    },
+    {
+      "path": "live/biel-bienne/__next._tree.txt",
+      "bytes": 535,
+      "sha256": "c57760651e932375917a5e4ef39ae8ca85582bcaef70272e785b173811078742"
+    },
+    {
+      "path": "live/biel-bienne/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6654,
+      "sha256": "97e1a444a8cb55c77e8f121cb05ddee44d01de949f4b49e4fff01a10f63825a4"
+    },
+    {
+      "path": "live/biel-bienne/index.html",
+      "bytes": 17317,
+      "sha256": "ee78ab8a67cb22fd6b263e70c6d515aed5f910ab7e381d22954f28f10ec75150"
+    },
+    {
+      "path": "live/biel-bienne/index.txt",
+      "bytes": 7819,
+      "sha256": "061f55d14946ff035ed8c604ee9d23c6577b6e8e8ea602599a7c7f0740ad6b29"
+    },
+    {
+      "path": "live/chiasso/__next._full.txt",
+      "bytes": 7779,
+      "sha256": "957f94bd52f281b3801c2d0ef51ff9b54b479b5d7135b84c341313ecee44faa2"
+    },
+    {
+      "path": "live/chiasso/__next._tree.txt",
+      "bytes": 531,
+      "sha256": "d8b45e32853f4d60c5453e00472517bc23aabfc33fcec239b01a946f9aaf7dfa"
+    },
+    {
+      "path": "live/chiasso/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6622,
+      "sha256": "f71b57117527c9241708e7b47b9b115e1674521a7f4073b4fe261d7919a4c819"
+    },
+    {
+      "path": "live/chiasso/index.html",
+      "bytes": 17245,
+      "sha256": "3ed55be8b6eea5cd0984333ae7731205fce456aeec94497c59fa3ccdbec4e296"
+    },
+    {
+      "path": "live/chiasso/index.txt",
+      "bytes": 7779,
+      "sha256": "957f94bd52f281b3801c2d0ef51ff9b54b479b5d7135b84c341313ecee44faa2"
+    },
+    {
+      "path": "live/feed.php",
+      "bytes": 16541,
+      "sha256": "cdef1707cf705bdede2011f6576dedf4d07ed8bce8f5f1ca70a1b53f802f75c3"
+    },
+    {
+      "path": "live/geneva/__next._full.txt",
+      "bytes": 7769,
+      "sha256": "8d7889aa4772d436b7842dcb58dba650b38fb6f7ee2cf18611d5a647f83110cd"
+    },
+    {
+      "path": "live/geneva/__next._tree.txt",
+      "bytes": 530,
+      "sha256": "d5f25a911fd4f73079e9e9d7011bf167c9385caab982b726e351ebbbc0638be7"
+    },
+    {
+      "path": "live/geneva/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6614,
+      "sha256": "77d7a867740cf03b9ed319d744811746c9efa68184c18f96374f6a42bf3641f4"
+    },
+    {
+      "path": "live/geneva/index.html",
+      "bytes": 17227,
+      "sha256": "29eb1dd87358ce78c1a84bb15ae79fc4907af6eba6e93fac07b241fe22446ecc"
+    },
+    {
+      "path": "live/geneva/index.txt",
+      "bytes": 7769,
+      "sha256": "8d7889aa4772d436b7842dcb58dba650b38fb6f7ee2cf18611d5a647f83110cd"
+    },
+    {
+      "path": "live/index.html",
+      "bytes": 16451,
+      "sha256": "d742e1277ae8a4fed9b462ccf42b40c6551e7b7fc3f120fea1c89135251d7a56"
+    },
+    {
+      "path": "live/index.txt",
+      "bytes": 7196,
+      "sha256": "93d143758b5b996effad8e945c3b1a57addfac0da2df836ce363396f770dc0ed"
+    },
+    {
+      "path": "live/la-chaux-de-fonds/__next._full.txt",
+      "bytes": 7879,
+      "sha256": "b6171481ba5479b3480ae336ded293742b63094b364a049e6efe5570860570fa"
+    },
+    {
+      "path": "live/la-chaux-de-fonds/__next._tree.txt",
+      "bytes": 541,
+      "sha256": "bee173930d73f7b145101e73f47499cdf40a96bec4cd1c7b606fdd4d519b56f0"
+    },
+    {
+      "path": "live/la-chaux-de-fonds/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6712,
+      "sha256": "77dbb4f1638e9009886627395b9cc12ad90de845bba564ab3f1f387fdeb3173a"
+    },
+    {
+      "path": "live/la-chaux-de-fonds/index.html",
+      "bytes": 17425,
+      "sha256": "be118c35b0411a7224288041d6750206b43b51e2f292ae1c42a63a4dadfd4e62"
+    },
+    {
+      "path": "live/la-chaux-de-fonds/index.txt",
+      "bytes": 7879,
+      "sha256": "b6171481ba5479b3480ae336ded293742b63094b364a049e6efe5570860570fa"
+    },
+    {
+      "path": "live/lausanne/__next._full.txt",
+      "bytes": 7789,
+      "sha256": "d640a065a189db5c15e5008ac5d90debd52c8b17cdb997dcf1a50390631ff6b8"
+    },
+    {
+      "path": "live/lausanne/__next._tree.txt",
+      "bytes": 532,
+      "sha256": "8beb3b55395656d65a39ead618fcc9b8444f3a5888c2f711bb04d76de7df6cf2"
+    },
+    {
+      "path": "live/lausanne/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6630,
+      "sha256": "1de571b9b6e25fbb1d375a1a478aafda3f6e6f1bb655abfba96d28717f3d201d"
+    },
+    {
+      "path": "live/lausanne/index.html",
+      "bytes": 17263,
+      "sha256": "3b7ab0c143769ac505fe6cb2e85fe41fc5f5a05b8177cc1ea2cd8f73e0c2e6c9"
+    },
+    {
+      "path": "live/lausanne/index.txt",
+      "bytes": 7789,
+      "sha256": "d640a065a189db5c15e5008ac5d90debd52c8b17cdb997dcf1a50390631ff6b8"
+    },
+    {
+      "path": "live/lucerne/__next._full.txt",
+      "bytes": 7779,
+      "sha256": "847f0e05dc6182fd38553f8a4871336a074dbd538d1fbefd87ffe97bd20158b6"
+    },
+    {
+      "path": "live/lucerne/__next._tree.txt",
+      "bytes": 531,
+      "sha256": "269efbc58fea07d2278aaa50d0889c9c7794bfb1e0b9d5b15a3cc9759bb9a82f"
+    },
+    {
+      "path": "live/lucerne/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6622,
+      "sha256": "fb5b892e9fbdd1489688fb52576b138262601ea2bb782232e94eebc284a00754"
+    },
+    {
+      "path": "live/lucerne/index.html",
+      "bytes": 17245,
+      "sha256": "100eb55789f15da6c218d0a9250019fce6a1a710b5686e30c0b7a0924959dc87"
+    },
+    {
+      "path": "live/lucerne/index.txt",
+      "bytes": 7779,
+      "sha256": "847f0e05dc6182fd38553f8a4871336a074dbd538d1fbefd87ffe97bd20158b6"
+    },
+    {
+      "path": "live/lugano/__next._full.txt",
+      "bytes": 7769,
+      "sha256": "55abc6d3e287ea36787a52834e74527a05cd2991915f2079f89696c5b015de59"
+    },
+    {
+      "path": "live/lugano/__next._tree.txt",
+      "bytes": 530,
+      "sha256": "3cf0899a33923d59aa86cc8371f6bb4c51121acf90e954257da2957019ff35a0"
+    },
+    {
+      "path": "live/lugano/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6614,
+      "sha256": "cbd3df3e846e94fe593f8b11c148f3fc7a3beaefba9205d73e8ece6cd56d6bd1"
+    },
+    {
+      "path": "live/lugano/index.html",
+      "bytes": 17227,
+      "sha256": "52e960d65703d123c7f1f93db15cd59071f84d3c4640f9eb878b912eb2220b88"
+    },
+    {
+      "path": "live/lugano/index.txt",
+      "bytes": 7769,
+      "sha256": "55abc6d3e287ea36787a52834e74527a05cd2991915f2079f89696c5b015de59"
+    },
+    {
+      "path": "live/mendrisio/__next._full.txt",
+      "bytes": 7799,
+      "sha256": "a0e728e93494266eac3ac0a727e13de1e718d4ee97e7974e3b209dab7d852342"
+    },
+    {
+      "path": "live/mendrisio/__next._tree.txt",
+      "bytes": 533,
+      "sha256": "8123599a77795ebfdb43c1713376e80231ed4948bbaac4ace3dfb6b3d84fabb3"
+    },
+    {
+      "path": "live/mendrisio/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6638,
+      "sha256": "76ce0aba6254fd48a756218387cd7ce59724b99660e2a5d9c1958017b17c2c9a"
+    },
+    {
+      "path": "live/mendrisio/index.html",
+      "bytes": 17281,
+      "sha256": "876d5e306c9d0b3e5a18098e0bfe27a98dca34a08db90eaa57e14f1ff81e8e0d"
+    },
+    {
+      "path": "live/mendrisio/index.txt",
+      "bytes": 7799,
+      "sha256": "a0e728e93494266eac3ac0a727e13de1e718d4ee97e7974e3b209dab7d852342"
+    },
+    {
+      "path": "live/neuchatel/__next._full.txt",
+      "bytes": 7805,
+      "sha256": "6dba83f57acf5b99a7c6d1c009952af77f478025c70298246eb69a518d1e155b"
+    },
+    {
+      "path": "live/neuchatel/__next._tree.txt",
+      "bytes": 533,
+      "sha256": "f5cc5f92fc12e8749721e2a4e1c3787b80547c19019340622f3dd3dd0af7e9c7"
+    },
+    {
+      "path": "live/neuchatel/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6644,
+      "sha256": "091c2f1494669916eabe1d650fcfad5a2cd621ac17c152e86313b7fa262ac8e6"
+    },
+    {
+      "path": "live/neuchatel/index.html",
+      "bytes": 17294,
+      "sha256": "2ba0ec2c8ef72bac7ecd4bb747dc6b183f919adfb782245b8b50c43f15441f72"
+    },
+    {
+      "path": "live/neuchatel/index.txt",
+      "bytes": 7805,
+      "sha256": "6dba83f57acf5b99a7c6d1c009952af77f478025c70298246eb69a518d1e155b"
+    },
+    {
+      "path": "live/schaffhausen/__next._full.txt",
+      "bytes": 7829,
+      "sha256": "e49a80d885e376289cff84499a6f46a72885907e23a95dd49cf30fdd8036854e"
+    },
+    {
+      "path": "live/schaffhausen/__next._tree.txt",
+      "bytes": 536,
+      "sha256": "924002f573af647d47c3477e5dcf55b4039bbc431f6f4bf8593313edff017b23"
+    },
+    {
+      "path": "live/schaffhausen/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6662,
+      "sha256": "1bc4a26c642b09be3625bc6633751189db756f93cc5c8673963c1ff31c7f132e"
+    },
+    {
+      "path": "live/schaffhausen/index.html",
+      "bytes": 17335,
+      "sha256": "d4dcb98f528d5a914eed2dc618bff004491d7870206c30daec9ecd8ebf752012"
+    },
+    {
+      "path": "live/schaffhausen/index.txt",
+      "bytes": 7829,
+      "sha256": "e49a80d885e376289cff84499a6f46a72885907e23a95dd49cf30fdd8036854e"
+    },
+    {
+      "path": "live/st-gallen/__next._full.txt",
+      "bytes": 7805,
+      "sha256": "97b6194b17b14e6d6b01adc755843444fcf92bbd57cb8e8cb8c7c798ac5c5755"
+    },
+    {
+      "path": "live/st-gallen/__next._tree.txt",
+      "bytes": 533,
+      "sha256": "bbfa88af6b34560ffd2f715c1e0c9fedc3ab893fbf6d1c2253046eefd7d91b8f"
+    },
+    {
+      "path": "live/st-gallen/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6644,
+      "sha256": "69355314d34c5b67c3f7487c7d6c8dc405bf6defbd86e1971160c4e242b328c4"
+    },
+    {
+      "path": "live/st-gallen/index.html",
+      "bytes": 17294,
+      "sha256": "bd5ecf3500ef1cb0bab8779d7002700955067deff8f49323a43324e0ebe81847"
+    },
+    {
+      "path": "live/st-gallen/index.txt",
+      "bytes": 7805,
+      "sha256": "97b6194b17b14e6d6b01adc755843444fcf92bbd57cb8e8cb8c7c798ac5c5755"
+    },
+    {
+      "path": "live/station-names.json",
+      "bytes": 45769,
+      "sha256": "f41054318d4a47115bff9f9844bdaedf0ea14edb68b053083ff1b0c840873a20"
+    },
+    {
+      "path": "live/winterthur/__next._full.txt",
+      "bytes": 7809,
+      "sha256": "e0458a0d50f357ea65b5b299f8810acfd35c7e0d15eec00702ef9322dcb3f0fb"
+    },
+    {
+      "path": "live/winterthur/__next._tree.txt",
+      "bytes": 534,
+      "sha256": "22dc9781765c34a44ac4cdbb3ba1b7ceea989b5279448e34d321e0efeb10e1cc"
+    },
+    {
+      "path": "live/winterthur/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6646,
+      "sha256": "d3e0c33f72ce3b83c22c6a168aab5454bc36000544cae82baec2cc339244b40b"
+    },
+    {
+      "path": "live/winterthur/index.html",
+      "bytes": 17299,
+      "sha256": "9e86e477fad194929c9c12a09710f5b2de08e97e5327e091d8cfe17b48547515"
+    },
+    {
+      "path": "live/winterthur/index.txt",
+      "bytes": 7809,
+      "sha256": "e0458a0d50f357ea65b5b299f8810acfd35c7e0d15eec00702ef9322dcb3f0fb"
+    },
+    {
+      "path": "live/zug/__next._full.txt",
+      "bytes": 7739,
+      "sha256": "ad625f240841bea2737e76a3a12adf5070029e7d73fac2565cde89ee655ed7b9"
+    },
+    {
+      "path": "live/zug/__next._tree.txt",
+      "bytes": 527,
+      "sha256": "9564271f95f8d5db2db18bdda0c228b1005019277eb1c9f05a0b85246ebbcb95"
+    },
+    {
+      "path": "live/zug/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6590,
+      "sha256": "464942e2252d6aba40a5cc9bd481af71194a378df23f20e331e0d2a276b240be"
+    },
+    {
+      "path": "live/zug/index.html",
+      "bytes": 17173,
+      "sha256": "68e3e16a842e71744f6938abe17789064cdd5e0663f6b47200abd22b0d5a3879"
+    },
+    {
+      "path": "live/zug/index.txt",
+      "bytes": 7739,
+      "sha256": "ad625f240841bea2737e76a3a12adf5070029e7d73fac2565cde89ee655ed7b9"
+    },
+    {
+      "path": "live/zurich/__next._full.txt",
+      "bytes": 7775,
+      "sha256": "4579befb06b4d6a27454fb933f2b9b62a68643fc77e97cad47890cb505edf378"
+    },
+    {
+      "path": "live/zurich/__next._tree.txt",
+      "bytes": 530,
+      "sha256": "56a38f204f0cc6ff1dd38aacb031c9374840d0c54eea86c901a8f353c0416ddd"
+    },
+    {
+      "path": "live/zurich/__next.live.$d$city.__PAGE__.txt",
+      "bytes": 6620,
+      "sha256": "92be290231a23b53a8d75c4feccccfbc33e06a92122bbf6e43d15aca632976d6"
+    },
+    {
+      "path": "live/zurich/index.html",
+      "bytes": 17240,
+      "sha256": "59adb6db5d3746b6e529af939c7519d5f4dd56b3eb207d17e2cd7a6a28f38a7d"
+    },
+    {
+      "path": "live/zurich/index.txt",
+      "bytes": 7775,
+      "sha256": "4579befb06b4d6a27454fb933f2b9b62a68643fc77e97cad47890cb505edf378"
+    },
+    {
+      "path": "lucerne/__next.$d$city.__PAGE__.txt",
+      "bytes": 491179,
+      "sha256": "00bdf7d17e898800d69b1b856a565a5fdceabf317a8018a1bba379317ea2807c"
+    },
+    {
+      "path": "lucerne/__next._full.txt",
+      "bytes": 410959,
+      "sha256": "7e114a8515923de2b33b30f6bcc3a6dc9481407d5c4f2a903dd95a1427afba28"
+    },
+    {
+      "path": "lucerne/__next._tree.txt",
+      "bytes": 428,
+      "sha256": "2fa9fd72359b2940075013b3bda584ead3d41c6b76e95253c6675257bee1ccae"
+    },
+    {
+      "path": "lucerne/index.html",
+      "bytes": 491220,
+      "sha256": "de624b71021f64d4f0d0ebaedf017401e12f3140b6015114a45a5aff0efdd889"
+    },
+    {
+      "path": "lucerne/index.txt",
+      "bytes": 410959,
+      "sha256": "7e114a8515923de2b33b30f6bcc3a6dc9481407d5c4f2a903dd95a1427afba28"
+    },
+    {
+      "path": "lucerne/routes.json",
+      "bytes": 2451549,
+      "sha256": "99ec8e3bd3d93b2a47c8a49031157e88358993789054a296cfa6e0aa4fc124cd"
+    },
+    {
+      "path": "lugano/__next.$d$city.__PAGE__.txt",
+      "bytes": 176327,
+      "sha256": "1b4e6c5d88afd64179225ed5e0fa8902179657bc010057c03fc628f2829babb0"
+    },
+    {
+      "path": "lugano/__next._full.txt",
+      "bytes": 149641,
+      "sha256": "8b5cf29f1d15f4faa148ffe73d3bba86edaa98fe5400d01bc9b3de5f6d2ac531"
+    },
+    {
+      "path": "lugano/__next._tree.txt",
+      "bytes": 427,
+      "sha256": "868292e103f8f22d3d1be6a971c5b72b375d8d1f5564d16e2e1cd717700eff37"
+    },
+    {
+      "path": "lugano/index.html",
+      "bytes": 189562,
+      "sha256": "a46df8702163251941c27307a859cf12f21480a4456a47b3010d3ccf10518d64"
+    },
+    {
+      "path": "lugano/index.txt",
+      "bytes": 149641,
+      "sha256": "8b5cf29f1d15f4faa148ffe73d3bba86edaa98fe5400d01bc9b3de5f6d2ac531"
+    },
+    {
+      "path": "lugano/routes.json",
+      "bytes": 1130546,
+      "sha256": "3a94bbb48724d14a3be9198bf682aaa03c2c9cc25334af2a3e62071f4d448180"
+    },
+    {
+      "path": "mendrisio/__next.$d$city.__PAGE__.txt",
+      "bytes": 106271,
+      "sha256": "c3059a9847a0b90e0f41a82f0ff8e6d5007e347d6434a4095cfd46cefd30ee99"
+    },
+    {
+      "path": "mendrisio/__next._full.txt",
+      "bytes": 91239,
+      "sha256": "56522261459c6083362351ebcb139c6e44a54ac9889ca0291d48993324fb8365"
+    },
+    {
+      "path": "mendrisio/__next._tree.txt",
+      "bytes": 430,
+      "sha256": "49128b5742acdc0c38695ef5d4cc4ff926ccd8ab55bee3312d762a4d4fd48e25"
+    },
+    {
+      "path": "mendrisio/index.html",
+      "bytes": 122244,
+      "sha256": "c7db63681f5ca40171f47e318ab157bfca0a16a1934bf7000c1ab96e6872189a"
+    },
+    {
+      "path": "mendrisio/index.txt",
+      "bytes": 91239,
+      "sha256": "56522261459c6083362351ebcb139c6e44a54ac9889ca0291d48993324fb8365"
+    },
+    {
+      "path": "mendrisio/routes.json",
+      "bytes": 564775,
+      "sha256": "4085a8286523b80238d76a8440366ab37ec257e8c8e13041b2b7c0a4c628ad51"
+    },
+    {
+      "path": "mobility/__next._full.txt",
+      "bytes": 8555,
+      "sha256": "e1f976027eb1a507a3b4f99641b7141aa32fa700593a22c4a8d14670a6e7fa37"
+    },
+    {
+      "path": "mobility/__next._tree.txt",
+      "bytes": 426,
+      "sha256": "5eae359668f8828e2c612bb57bd677578f6f6b24900df9552d13047293135c1c"
+    },
+    {
+      "path": "mobility/__next.mobility.__PAGE__.txt",
+      "bytes": 7639,
+      "sha256": "b926cf125a4106577ef1941241954e64a1f8a115f6d2acdbc629df6f9f29a06b"
+    },
+    {
+      "path": "mobility/basel/__next._full.txt",
+      "bytes": 8240,
+      "sha256": "5391fb3b2f3b4cd7b2de5a190f41ac5fddbbb7cc2f305f24321ec8df8439c3f3"
+    },
+    {
+      "path": "mobility/basel/__next._tree.txt",
+      "bytes": 533,
+      "sha256": "d0649cd571f129c61d3887aa00ae7e2c87bdd7dbfc585e1ac12c8eb55cf92106"
+    },
+    {
+      "path": "mobility/basel/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7089,
+      "sha256": "2f3a492228a17d91ed8637631d5f0958fda83408db30cc826dad48b7a79caa53"
+    },
+    {
+      "path": "mobility/basel/index.html",
+      "bytes": 19418,
+      "sha256": "dec1fb9ad94cc7de48c75bf2a1a806d68d024834be901b84923556ac728ca928"
+    },
+    {
+      "path": "mobility/basel/index.txt",
+      "bytes": 8240,
+      "sha256": "5391fb3b2f3b4cd7b2de5a190f41ac5fddbbb7cc2f305f24321ec8df8439c3f3"
+    },
+    {
+      "path": "mobility/bern/__next._full.txt",
+      "bytes": 8230,
+      "sha256": "71784cac441ddadb301be0c9a37a3cd83c92b2d13868e17c3f34444cc271b707"
+    },
+    {
+      "path": "mobility/bern/__next._tree.txt",
+      "bytes": 532,
+      "sha256": "ae528cd1adbfdc8e53bc468ef03d1c9502b6b01fbc8b575f8269a39c3c54172c"
+    },
+    {
+      "path": "mobility/bern/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7081,
+      "sha256": "d0ba3faf9412f79097a9ab24f3118e6308dc144a68b094475ef999248bea34fa"
+    },
+    {
+      "path": "mobility/bern/index.html",
+      "bytes": 19400,
+      "sha256": "d5a0295d53456a8caa85e60b4a2f3b408807a01dc3ef1cb1f3425b9b6ba477d7"
+    },
+    {
+      "path": "mobility/bern/index.txt",
+      "bytes": 8230,
+      "sha256": "71784cac441ddadb301be0c9a37a3cd83c92b2d13868e17c3f34444cc271b707"
+    },
+    {
+      "path": "mobility/biel-bienne/__next._full.txt",
+      "bytes": 8300,
+      "sha256": "0a562fecec26bde632ee06920a9832447ef0139fbda24f4f139033858555d6b3"
+    },
+    {
+      "path": "mobility/biel-bienne/__next._tree.txt",
+      "bytes": 539,
+      "sha256": "03c3a11db40eaea66b9bb766ec777b7e760025212a30fae31f0d945ff937b61e"
+    },
+    {
+      "path": "mobility/biel-bienne/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7137,
+      "sha256": "8cf2c61db53cc8b4cd3e6736d7ccc279976b1e80c997127cc0ac2594542bfcbd"
+    },
+    {
+      "path": "mobility/biel-bienne/index.html",
+      "bytes": 19526,
+      "sha256": "3e8f0be03b6fc0611f45909780a2d1839d6a93136c8755416909449d93c417c6"
+    },
+    {
+      "path": "mobility/biel-bienne/index.txt",
+      "bytes": 8300,
+      "sha256": "0a562fecec26bde632ee06920a9832447ef0139fbda24f4f139033858555d6b3"
+    },
+    {
+      "path": "mobility/chiasso/__next._full.txt",
+      "bytes": 8260,
+      "sha256": "72da93fdb8868c930521243856f26dc9c81f51f0c368dd5427462f7dc165e1f4"
+    },
+    {
+      "path": "mobility/chiasso/__next._tree.txt",
+      "bytes": 535,
+      "sha256": "2721a2d6424f919b8c729d4607f21a03271bdcc3c866a4ddbb917d8331f2358c"
+    },
+    {
+      "path": "mobility/chiasso/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7105,
+      "sha256": "e248602f76949c25d90b61b6872669df90d914e1590a5b5028d28a05a6ba94f5"
+    },
+    {
+      "path": "mobility/chiasso/index.html",
+      "bytes": 19454,
+      "sha256": "3858fbd2f69ad4645b58263e76158a77d026c45576602296c42928b91ba766b7"
+    },
+    {
+      "path": "mobility/chiasso/index.txt",
+      "bytes": 8260,
+      "sha256": "72da93fdb8868c930521243856f26dc9c81f51f0c368dd5427462f7dc165e1f4"
+    },
+    {
+      "path": "mobility/feed.php",
+      "bytes": 2421,
+      "sha256": "e112af3ab15172c3b4d42c4ba3f3d5b8d07f34f452b12cd7d83bd662b9ae25ee"
+    },
+    {
+      "path": "mobility/geneva/__next._full.txt",
+      "bytes": 8250,
+      "sha256": "83185aa49f1a0d0fabdb56cd500d8f6a893e1b813f05447b0e2494952df93260"
+    },
+    {
+      "path": "mobility/geneva/__next._tree.txt",
+      "bytes": 534,
+      "sha256": "164cd9df55dd2d13cae6b24c0c7ddf62c3909e564764cbb5c17343ddabc673d9"
+    },
+    {
+      "path": "mobility/geneva/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7097,
+      "sha256": "6e68667353d2d79886fe0c23632f39fd507a4743ed3a56cbb53bc4d6e757b1ef"
+    },
+    {
+      "path": "mobility/geneva/index.html",
+      "bytes": 19436,
+      "sha256": "e9a7bfb90b93e7af23be730c51feb33e7872e3c7d479b6c62c0e4ea6308f8356"
+    },
+    {
+      "path": "mobility/geneva/index.txt",
+      "bytes": 8250,
+      "sha256": "83185aa49f1a0d0fabdb56cd500d8f6a893e1b813f05447b0e2494952df93260"
+    },
+    {
+      "path": "mobility/index.html",
+      "bytes": 20455,
+      "sha256": "64c4fde1cac17b96616c29f59b158ee1caf62d4a19c5b231eefb252ae6772e3e"
+    },
+    {
+      "path": "mobility/index.txt",
+      "bytes": 8555,
+      "sha256": "e1f976027eb1a507a3b4f99641b7141aa32fa700593a22c4a8d14670a6e7fa37"
+    },
+    {
+      "path": "mobility/la-chaux-de-fonds/__next._full.txt",
+      "bytes": 8360,
+      "sha256": "7cdf06c1cca7f5664382d48ec19ce1b5603e81e1d27ff47571e7cf47ffe4b7eb"
+    },
+    {
+      "path": "mobility/la-chaux-de-fonds/__next._tree.txt",
+      "bytes": 545,
+      "sha256": "4f311b6e58e31c8ed826d201f43557640ccc615aa7033757a215f84588a5ba16"
+    },
+    {
+      "path": "mobility/la-chaux-de-fonds/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7175,
+      "sha256": "6adaa5b13990b48e22a3cb50f3b5bc8eb46909a36f85a2666aee3f26424b8637"
+    },
+    {
+      "path": "mobility/la-chaux-de-fonds/index.html",
+      "bytes": 19634,
+      "sha256": "da76ceb3d50df5f3cc019688359feeb867afb913f854012b0eed5298a81e2f31"
+    },
+    {
+      "path": "mobility/la-chaux-de-fonds/index.txt",
+      "bytes": 8360,
+      "sha256": "7cdf06c1cca7f5664382d48ec19ce1b5603e81e1d27ff47571e7cf47ffe4b7eb"
+    },
+    {
+      "path": "mobility/lausanne/__next._full.txt",
+      "bytes": 8270,
+      "sha256": "129d65e7c96171c5371d5a2477b6370836ac456ed4dedba2f19a2b671941328a"
+    },
+    {
+      "path": "mobility/lausanne/__next._tree.txt",
+      "bytes": 536,
+      "sha256": "a82f6614b086219830bef99acae98ea150f6b80e9bc927b3c55130ead5ea32a3"
+    },
+    {
+      "path": "mobility/lausanne/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7113,
+      "sha256": "8e63f9aec64d560c05be246dac566d3981ba76092d364974467768aedd50a29a"
+    },
+    {
+      "path": "mobility/lausanne/index.html",
+      "bytes": 19472,
+      "sha256": "cdd340d3d856f78c6380b04a5e6f2724a492c9a21d4b5dfec3b03f5d77a5f195"
+    },
+    {
+      "path": "mobility/lausanne/index.txt",
+      "bytes": 8270,
+      "sha256": "129d65e7c96171c5371d5a2477b6370836ac456ed4dedba2f19a2b671941328a"
+    },
+    {
+      "path": "mobility/lucerne/__next._full.txt",
+      "bytes": 8260,
+      "sha256": "44ef4c7d83c9613168cc2586d927ce2712a20232cc4bbff65457d713c151cca2"
+    },
+    {
+      "path": "mobility/lucerne/__next._tree.txt",
+      "bytes": 535,
+      "sha256": "c150d424fc35af55898836de2afd17d828eca37034ca3aca2d8f98e184955bd8"
+    },
+    {
+      "path": "mobility/lucerne/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7105,
+      "sha256": "e476bafb558e8eeb70f642afedddf3f21969f5373c3d41f01d2707ad8444d5f7"
+    },
+    {
+      "path": "mobility/lucerne/index.html",
+      "bytes": 19454,
+      "sha256": "acdbe420275bacb56ee4168db41de99ca0ba46b0f1ff819107892823e6f9f5d0"
+    },
+    {
+      "path": "mobility/lucerne/index.txt",
+      "bytes": 8260,
+      "sha256": "44ef4c7d83c9613168cc2586d927ce2712a20232cc4bbff65457d713c151cca2"
+    },
+    {
+      "path": "mobility/lugano/__next._full.txt",
+      "bytes": 8250,
+      "sha256": "3a04ad3754bad0921ca9f42f592c6929f6fe685d7d8e2ddd3bd67954018e0d00"
+    },
+    {
+      "path": "mobility/lugano/__next._tree.txt",
+      "bytes": 534,
+      "sha256": "c9d407c16a2a869746d7735c3f0c92042da9afb9dfdd0b823d8b84f874243fa2"
+    },
+    {
+      "path": "mobility/lugano/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7097,
+      "sha256": "c3cd69860fbe0ac9035395e9c02dc413e245f41b76a5d99f77f41164329f2f5f"
+    },
+    {
+      "path": "mobility/lugano/index.html",
+      "bytes": 19436,
+      "sha256": "92d70ea35d0a3414ca9ade796b3172931eb2789d8197b71ee73230d1b51856ba"
+    },
+    {
+      "path": "mobility/lugano/index.txt",
+      "bytes": 8250,
+      "sha256": "3a04ad3754bad0921ca9f42f592c6929f6fe685d7d8e2ddd3bd67954018e0d00"
+    },
+    {
+      "path": "mobility/mendrisio/__next._full.txt",
+      "bytes": 8280,
+      "sha256": "885641f044249fdb2fe8f28b466b684e3eea6b18a5190f245e18bd3860efd058"
+    },
+    {
+      "path": "mobility/mendrisio/__next._tree.txt",
+      "bytes": 537,
+      "sha256": "dcf5975eb06f4bd79edb8cf68a79f197f645185b0c4c0890a8054837ae61cc2b"
+    },
+    {
+      "path": "mobility/mendrisio/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7121,
+      "sha256": "b312831c91ca50199f7500deb2c30634ce5ef79e66df1fdadb30073c5e4d7396"
+    },
+    {
+      "path": "mobility/mendrisio/index.html",
+      "bytes": 19490,
+      "sha256": "832f62d09fd8460f4a1028355c069b82e18205c567d61067bedc79be0f500faf"
+    },
+    {
+      "path": "mobility/mendrisio/index.txt",
+      "bytes": 8280,
+      "sha256": "885641f044249fdb2fe8f28b466b684e3eea6b18a5190f245e18bd3860efd058"
+    },
+    {
+      "path": "mobility/neuchatel/__next._full.txt",
+      "bytes": 8286,
+      "sha256": "fddae3208e360293077207144f985e135274b5638295a575c422332367704c8a"
+    },
+    {
+      "path": "mobility/neuchatel/__next._tree.txt",
+      "bytes": 537,
+      "sha256": "2d44ca47d392b4951a1ca01c16ab6a3d74a62c40aa4ba46b9b75d71f8ac13b15"
+    },
+    {
+      "path": "mobility/neuchatel/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7127,
+      "sha256": "15cee85c8ba1614aeec0ba3b737d808f156ec65f1aae6daa457e5652a7899d21"
+    },
+    {
+      "path": "mobility/neuchatel/index.html",
+      "bytes": 19503,
+      "sha256": "cbadc998ac6f282dc0cc159058adffa01e4be93199e21236acaaaacf0a6d2608"
+    },
+    {
+      "path": "mobility/neuchatel/index.txt",
+      "bytes": 8286,
+      "sha256": "fddae3208e360293077207144f985e135274b5638295a575c422332367704c8a"
+    },
+    {
+      "path": "mobility/schaffhausen/__next._full.txt",
+      "bytes": 8310,
+      "sha256": "ed1a541c951eeff277e80fd2c33873a732f9c715684cc9da8d1fcbc91429c096"
+    },
+    {
+      "path": "mobility/schaffhausen/__next._tree.txt",
+      "bytes": 540,
+      "sha256": "855f8038c49a0d14f0d36f98104bc4d53e3cfad1716edb087049f54ad30f101c"
+    },
+    {
+      "path": "mobility/schaffhausen/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7145,
+      "sha256": "49bbce65a29f1cc53e52f74fb2f6a136528f3f5144a4514818946a855adb102f"
+    },
+    {
+      "path": "mobility/schaffhausen/index.html",
+      "bytes": 19544,
+      "sha256": "8971c8045a0b042b3ae67e348c6ba5db5932dc1a9cb641bbf2ee2f958c8e69d5"
+    },
+    {
+      "path": "mobility/schaffhausen/index.txt",
+      "bytes": 8310,
+      "sha256": "ed1a541c951eeff277e80fd2c33873a732f9c715684cc9da8d1fcbc91429c096"
+    },
+    {
+      "path": "mobility/st-gallen/__next._full.txt",
+      "bytes": 8286,
+      "sha256": "5cefbcb5b03a9ff971fa5a1a86e0d7751458edea216420d2f0d005209fbf8e2a"
+    },
+    {
+      "path": "mobility/st-gallen/__next._tree.txt",
+      "bytes": 537,
+      "sha256": "617c1969c48491e9f632deb85c9c8e34c76dc6aa16711794355a3eb62334ece0"
+    },
+    {
+      "path": "mobility/st-gallen/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7127,
+      "sha256": "ccc20ee478865101b7f50f09beb1890548ed470bdc7cdc7e4e0d32c393812555"
+    },
+    {
+      "path": "mobility/st-gallen/index.html",
+      "bytes": 19503,
+      "sha256": "f4115eaf2ce1e081b51aca8e2e5d776b4718f12179f30b06e7372c118371b82f"
+    },
+    {
+      "path": "mobility/st-gallen/index.txt",
+      "bytes": 8286,
+      "sha256": "5cefbcb5b03a9ff971fa5a1a86e0d7751458edea216420d2f0d005209fbf8e2a"
+    },
+    {
+      "path": "mobility/winterthur/__next._full.txt",
+      "bytes": 8290,
+      "sha256": "4a5437be3119e4ee1eb77dc4b6f3d617f981339d1f99e0704a5275c5caa34e8b"
+    },
+    {
+      "path": "mobility/winterthur/__next._tree.txt",
+      "bytes": 538,
+      "sha256": "427625fc3f7c4ea8b114ad43aba11d4044163f4f18fa5702ba919ab39577d512"
+    },
+    {
+      "path": "mobility/winterthur/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7129,
+      "sha256": "dc1b11d2f5a8446cc24711b4abc8416f640730458f71dacc209f4317a74d6ba9"
+    },
+    {
+      "path": "mobility/winterthur/index.html",
+      "bytes": 19508,
+      "sha256": "25354fcddf6871e32e79d77d82db5c770446022f28c4725b852d65d439715394"
+    },
+    {
+      "path": "mobility/winterthur/index.txt",
+      "bytes": 8290,
+      "sha256": "4a5437be3119e4ee1eb77dc4b6f3d617f981339d1f99e0704a5275c5caa34e8b"
+    },
+    {
+      "path": "mobility/zug/__next._full.txt",
+      "bytes": 8220,
+      "sha256": "6ab7fcc8a5268d0e5b70c145fea36fd76db1b2c21ec726b511f203ca735a7ed7"
+    },
+    {
+      "path": "mobility/zug/__next._tree.txt",
+      "bytes": 531,
+      "sha256": "23734c78ad6e3cfdf68db14d5ae6c8f2ca64be761eacc7d4f5b65aaccd3fb18a"
+    },
+    {
+      "path": "mobility/zug/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7073,
+      "sha256": "130a56e089806e4e78ec5862558a84f2c922c88834662cbb0e89493a903eccae"
+    },
+    {
+      "path": "mobility/zug/index.html",
+      "bytes": 19382,
+      "sha256": "296c709b3476dc1990075c57d78534bfcc8177e9bf76dfd2e687dbaa1c9cd778"
+    },
+    {
+      "path": "mobility/zug/index.txt",
+      "bytes": 8220,
+      "sha256": "6ab7fcc8a5268d0e5b70c145fea36fd76db1b2c21ec726b511f203ca735a7ed7"
+    },
+    {
+      "path": "mobility/zurich/__next._full.txt",
+      "bytes": 8256,
+      "sha256": "ce62eae35b44b355ab79776e59c148c0798f922b7de2b29db2706cc46c454aa2"
+    },
+    {
+      "path": "mobility/zurich/__next._tree.txt",
+      "bytes": 534,
+      "sha256": "2c13baf2f8a04e5c103609c2051b0878d3bed50440b6c1eb7f1a214ce27fc3ac"
+    },
+    {
+      "path": "mobility/zurich/__next.mobility.$d$city.__PAGE__.txt",
+      "bytes": 7103,
+      "sha256": "42453466f263bdcc8e5dc5704023071d44a47d74118df0278de47d1352557994"
+    },
+    {
+      "path": "mobility/zurich/index.html",
+      "bytes": 19449,
+      "sha256": "51641c37b7ba0bbf6901bd522be9bd2d2fabdec817f5a90749e7eeadec05c519"
+    },
+    {
+      "path": "mobility/zurich/index.txt",
+      "bytes": 8256,
+      "sha256": "ce62eae35b44b355ab79776e59c148c0798f922b7de2b29db2706cc46c454aa2"
+    },
+    {
+      "path": "neuchatel/__next.$d$city.__PAGE__.txt",
+      "bytes": 252259,
+      "sha256": "57ca9ee06bd3017b0fd2d7aebfc2139c2981ebed09900a1d66f31d3ee2460201"
+    },
+    {
+      "path": "neuchatel/__next._full.txt",
+      "bytes": 211775,
+      "sha256": "1fb4d8b6d36b69567902d2bc122697c6e355feeefc47f1727b7eb9f434470abe"
+    },
+    {
+      "path": "neuchatel/__next._tree.txt",
+      "bytes": 430,
+      "sha256": "43782356964a755b7edbf83e61e15620d6c053928e3ef52d3a3503a8fe332467"
+    },
+    {
+      "path": "neuchatel/index.html",
+      "bytes": 261507,
+      "sha256": "b72c226eda94ea3a94fb577bc1178863219c408f3880fb90848e5b03552ff3b2"
+    },
+    {
+      "path": "neuchatel/index.txt",
+      "bytes": 211775,
+      "sha256": "1fb4d8b6d36b69567902d2bc122697c6e355feeefc47f1727b7eb9f434470abe"
+    },
+    {
+      "path": "neuchatel/routes.json",
+      "bytes": 1121384,
+      "sha256": "f893e8ff73ae6e9173c73887bf510e8f422187e8eb03519d9874f229cc7ee46f"
+    },
+    {
+      "path": "schaffhausen/__next.$d$city.__PAGE__.txt",
+      "bytes": 202651,
+      "sha256": "05080952839e3883f4ba0f4969d612293e917bc4076414ee458e6882b1c13429"
+    },
+    {
+      "path": "schaffhausen/__next._full.txt",
+      "bytes": 171609,
+      "sha256": "1a9a4ff9f2c147f0eb60c4505bfb4a8bf9a48c144c2652e6df01790f5004cb04"
+    },
+    {
+      "path": "schaffhausen/__next._tree.txt",
+      "bytes": 433,
+      "sha256": "c1725b700c69c4b7585e614c8fa790530647e832c7cc4b047720c1767e9e2db2"
+    },
+    {
+      "path": "schaffhausen/index.html",
+      "bytes": 214449,
+      "sha256": "38a4a7c3084f91cb69684c3aeb4382034a586d63e50fb6df7e1033f9e1ac5cb6"
+    },
+    {
+      "path": "schaffhausen/index.txt",
+      "bytes": 171609,
+      "sha256": "1a9a4ff9f2c147f0eb60c4505bfb4a8bf9a48c144c2652e6df01790f5004cb04"
+    },
+    {
+      "path": "schaffhausen/routes.json",
+      "bytes": 1057277,
+      "sha256": "4222b4049893cc1459949c492018a9358d3363ee440594722e6c44bf1a97a14f"
+    },
+    {
+      "path": "social/basel.jpg",
+      "bytes": 147527,
+      "sha256": "3e10cec72583ee919b57ae3e4104338b3d7208eaa7c5c99a0b399e0bda314756"
+    },
+    {
+      "path": "social/bern.jpg",
+      "bytes": 151652,
+      "sha256": "e5cc5d26d3817b81e0574c87bc1d57fa51822cd0b8ca307ddec123500a66c19d"
+    },
+    {
+      "path": "social/biel-bienne.jpg",
+      "bytes": 146883,
+      "sha256": "d13721321eb2163a8495bdc2a4df3627005e672dd4a47293af9575a99ee4d494"
+    },
+    {
+      "path": "social/chiasso.jpg",
+      "bytes": 150980,
+      "sha256": "66bf57a40bb00dbaf58ecb67ff8947fa398e7b8e87557c225ba905ce05900ec0"
+    },
+    {
+      "path": "social/geneva.jpg",
+      "bytes": 149560,
+      "sha256": "f2e759a56522596136678d79bb6a7d0727f512c39aa4dce63cce28fb46940dc4"
+    },
+    {
+      "path": "social/la-chaux-de-fonds.jpg",
+      "bytes": 143443,
+      "sha256": "eb7ccfdd0a116c2f57f871a4d96e6cbab9a9f9e0583ee06287bcc86f324de975"
+    },
+    {
+      "path": "social/lausanne.jpg",
+      "bytes": 141162,
+      "sha256": "48fba023fa4ada5f587e2b400e3e46fcd0998768ffa3d3a304f8fdd4902c4d11"
+    },
+    {
+      "path": "social/lucerne.jpg",
+      "bytes": 146840,
+      "sha256": "388e09a9fce9cfdea231ef2e7a09f29e3ecd9c1eedb557d0ea3202392502ef4d"
+    },
+    {
+      "path": "social/lugano.jpg",
+      "bytes": 135391,
+      "sha256": "e48602cba91047e8d53ef29e10a12c47bca7c2a7d8b0996cd74ffbc25761a66c"
+    },
+    {
+      "path": "social/mendrisio.jpg",
+      "bytes": 150002,
+      "sha256": "f2a8303fdd4614d3176632f0772ead453e5fdaea6336940cf9b4909c0d21fb77"
+    },
+    {
+      "path": "social/neuchatel.jpg",
+      "bytes": 144426,
+      "sha256": "819122698238c784dfc70ff29f71f0a2a182fc7481599c866c35e258af253b83"
+    },
+    {
+      "path": "social/schaffhausen.jpg",
+      "bytes": 144017,
+      "sha256": "30f6f3ad138adef5a4df64984b611ef872d2252d361fe959a5dcc71ce9600d5b"
+    },
+    {
+      "path": "social/st-gallen.jpg",
+      "bytes": 155664,
+      "sha256": "e021a10e8567d0788e43c6d7110b849fcb2a2e6f5c84ccdd073291f59e6dfe36"
+    },
+    {
+      "path": "social/winterthur.jpg",
+      "bytes": 164648,
+      "sha256": "af41b40a4f5a7d09f185706b7e24a183ee347525ee4297b60d8bda413d0f9d9c"
+    },
+    {
+      "path": "social/zug.jpg",
+      "bytes": 149868,
+      "sha256": "b014b6f3984dd31f1d828158530356e07db46232c2308636cbb500cc33df08de"
+    },
+    {
+      "path": "social/zurich.jpg",
+      "bytes": 171567,
+      "sha256": "45d0db6ddddf9b2857014b69cbb2914dcc5e9367649d98e086b3fbac96876bfb"
+    },
+    {
+      "path": "st-gallen/__next.$d$city.__PAGE__.txt",
+      "bytes": 362825,
+      "sha256": "8ec6e004a0fa2326b14140c818d5ad2c7341e464c13a7e12f583eabd4670801c"
+    },
+    {
+      "path": "st-gallen/__next._full.txt",
+      "bytes": 306997,
+      "sha256": "86309db10ceb43f44cac7d323b0cbbc78c4cc156b3f5a8f89cbe675e8fc47510"
+    },
+    {
+      "path": "st-gallen/__next._tree.txt",
+      "bytes": 430,
+      "sha256": "d4fc5e912ae6c730b2d89f77039b07ea6055d627c12ff6fd384c1d8e8006b2f0"
+    },
+    {
+      "path": "st-gallen/index.html",
+      "bytes": 372670,
+      "sha256": "98fcb51bdd8baf2b2da6658bc8aab686015c4fb66c9a04fb659551aa8aad51cd"
+    },
+    {
+      "path": "st-gallen/index.txt",
+      "bytes": 306997,
+      "sha256": "86309db10ceb43f44cac7d323b0cbbc78c4cc156b3f5a8f89cbe675e8fc47510"
+    },
+    {
+      "path": "st-gallen/routes.json",
+      "bytes": 1944004,
+      "sha256": "4f9572d614d1455159d81ea28118bccc9d2a627eb9f19219a532c7ea2133ef16"
+    },
+    {
+      "path": "trains/__next._full.txt",
+      "bytes": 7985,
+      "sha256": "0d280780ea76b156800416c7e02955b9c9c805dd5bb356aa65eb0783c6808b42"
+    },
+    {
+      "path": "trains/__next._tree.txt",
+      "bytes": 424,
+      "sha256": "fcd14e73405959361fe70c0f877abf2689685e232f6f817bf0b9ebc949fa6b27"
+    },
+    {
+      "path": "trains/__next.trains.__PAGE__.txt",
+      "bytes": 7062,
+      "sha256": "5dbbf5dfa5b8a5763198f592cd07dbef258cd1502d48e540ef629f15c965148e"
+    },
+    {
+      "path": "trains/basel/__next._full.txt",
+      "bytes": 8540,
+      "sha256": "ece03ae028a288d4584e8ea166f639a56fb50e9f0d91872657569c07b6c099cc"
+    },
+    {
+      "path": "trains/basel/__next._tree.txt",
+      "bytes": 544,
+      "sha256": "20a55b3476357ac945a456b045a46a2d7a23e86e74dcbcb046f69a3dd7266a61"
+    },
+    {
+      "path": "trains/basel/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7349,
+      "sha256": "1600c2859425c88cce05e3a0d469444085778e2d8e6a46079d2b29dc944f1d76"
+    },
+    {
+      "path": "trains/basel/index.html",
+      "bytes": 19303,
+      "sha256": "42a19974fd9f7cb27bce6c83db684d56b8681bd5b3beaab6271db8fa3c456fa9"
+    },
+    {
+      "path": "trains/basel/index.txt",
+      "bytes": 8540,
+      "sha256": "ece03ae028a288d4584e8ea166f639a56fb50e9f0d91872657569c07b6c099cc"
+    },
+    {
+      "path": "trains/bern/__next._full.txt",
+      "bytes": 8529,
+      "sha256": "316c6956a30026e2692e36e6769ee012e9c052bc43af85f6bb47a38e098e7ef8"
+    },
+    {
+      "path": "trains/bern/__next._tree.txt",
+      "bytes": 543,
+      "sha256": "f1ad8f0ae9d4e004a9e5ad36432d054281cf0a0f00226cbc583843ae1484b286"
+    },
+    {
+      "path": "trains/bern/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7340,
+      "sha256": "b33733066283d0721daa129eac4549e1de2cacbb08fda7c5ff43802fad799267"
+    },
+    {
+      "path": "trains/bern/index.html",
+      "bytes": 19284,
+      "sha256": "2f99a1570e595f676efef17446c6a20af76e4cd52346c934f889be4eda84eb36"
+    },
+    {
+      "path": "trains/bern/index.txt",
+      "bytes": 8529,
+      "sha256": "316c6956a30026e2692e36e6769ee012e9c052bc43af85f6bb47a38e098e7ef8"
+    },
+    {
+      "path": "trains/biel-bienne/__next._full.txt",
+      "bytes": 8606,
+      "sha256": "641f10c014563301ceb28391320d3e72d8e2967e0c736e7b1b52e70313770fb2"
+    },
+    {
+      "path": "trains/biel-bienne/__next._tree.txt",
+      "bytes": 550,
+      "sha256": "027695313d0ba3c78d2a432fc084e5dd3c5f533cb04751611034078544d40ace"
+    },
+    {
+      "path": "trains/biel-bienne/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7403,
+      "sha256": "3b594dcc70ef88b6318a7b55bf19d437c9eaa48be82a37f6405eed1e45ef0efa"
+    },
+    {
+      "path": "trains/biel-bienne/index.html",
+      "bytes": 19417,
+      "sha256": "c41a7608ae84781fd0b4af8f10113aba55fd30a10b69b9544c0a2fdeb5eeb765"
+    },
+    {
+      "path": "trains/biel-bienne/index.txt",
+      "bytes": 8606,
+      "sha256": "641f10c014563301ceb28391320d3e72d8e2967e0c736e7b1b52e70313770fb2"
+    },
+    {
+      "path": "trains/chiasso/__next._full.txt",
+      "bytes": 8562,
+      "sha256": "2f90a8fa3b615837905ba25483dad2790bb69535588de82dabb1462e9dfc1b24"
+    },
+    {
+      "path": "trains/chiasso/__next._tree.txt",
+      "bytes": 546,
+      "sha256": "728310311e75073c92ad4017b1a6b0eeee6a713b5a1704d0df52bf6be8deacc7"
+    },
+    {
+      "path": "trains/chiasso/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7367,
+      "sha256": "9dbdba03c3c0d0f5a2def8402fabb3f3b1ad7076f066cf4b531347ae73aa280d"
+    },
+    {
+      "path": "trains/chiasso/index.html",
+      "bytes": 19341,
+      "sha256": "6375ff073ad0645cb66d2a12e16f12db1a395aba15aea238821c7cbb622ad078"
+    },
+    {
+      "path": "trains/chiasso/index.txt",
+      "bytes": 8562,
+      "sha256": "2f90a8fa3b615837905ba25483dad2790bb69535588de82dabb1462e9dfc1b24"
+    },
+    {
+      "path": "trains/cities.json",
+      "bytes": 1181,
+      "sha256": "e97f2c0a32f68bb117ff8d7f4c65687e9c89c23ea9f9c661684c1208ac5793ec"
+    },
+    {
+      "path": "trains/feed.php",
+      "bytes": 13445,
+      "sha256": "0a2ced661860a69172f68fa266fbc78f2f63942b0ed719f140ff67d9a9eb1350"
+    },
+    {
+      "path": "trains/geneva/__next._full.txt",
+      "bytes": 8551,
+      "sha256": "b18893d39d6c943b2acbbf17aa3500729253d73262e7e679603a29e2699dd7d8"
+    },
+    {
+      "path": "trains/geneva/__next._tree.txt",
+      "bytes": 545,
+      "sha256": "ad8e2f549edd6ae0c146b8541a12d1d154aba5398bf57e7ee2884704edd3f77e"
+    },
+    {
+      "path": "trains/geneva/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7358,
+      "sha256": "fa22e56b8c01e003358def5a94f50ef06b091db7cb84a8b9d6cac5b8fd9040ce"
+    },
+    {
+      "path": "trains/geneva/index.html",
+      "bytes": 19322,
+      "sha256": "d9cce003e5aca7763c04a56cd9b1d277ba16013722b323fb99e9cdea10022283"
+    },
+    {
+      "path": "trains/geneva/index.txt",
+      "bytes": 8551,
+      "sha256": "b18893d39d6c943b2acbbf17aa3500729253d73262e7e679603a29e2699dd7d8"
+    },
+    {
+      "path": "trains/index.html",
+      "bytes": 18571,
+      "sha256": "83f11a28afa1b7f79b2237797b44d538c22adfcdb3c83d19a0ac3cb66249c955"
+    },
+    {
+      "path": "trains/index.txt",
+      "bytes": 7985,
+      "sha256": "0d280780ea76b156800416c7e02955b9c9c805dd5bb356aa65eb0783c6808b42"
+    },
+    {
+      "path": "trains/la-chaux-de-fonds/__next._full.txt",
+      "bytes": 8672,
+      "sha256": "da756ec5ff06d6e0091baae1ca9d2ca4ad63ffba9c976ae7a289b7139ef042dc"
+    },
+    {
+      "path": "trains/la-chaux-de-fonds/__next._tree.txt",
+      "bytes": 556,
+      "sha256": "01750f3d7febafab5659c762dafea99fd9858033b09fede27490de6c0eeceb31"
+    },
+    {
+      "path": "trains/la-chaux-de-fonds/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7457,
+      "sha256": "97a4bf4815626d79e57ad67df41fa382ccb701cfc825838f756b51981e86caa2"
+    },
+    {
+      "path": "trains/la-chaux-de-fonds/index.html",
+      "bytes": 19531,
+      "sha256": "fdee4aee0d419f10916e764e14f3ad51100316d2d30dcfbce0a76003ae6c8706"
+    },
+    {
+      "path": "trains/la-chaux-de-fonds/index.txt",
+      "bytes": 8672,
+      "sha256": "da756ec5ff06d6e0091baae1ca9d2ca4ad63ffba9c976ae7a289b7139ef042dc"
+    },
+    {
+      "path": "trains/lausanne/__next._full.txt",
+      "bytes": 8573,
+      "sha256": "97d380bf260aed516e6f29bd5f75e2736a31c753f2e52deee9a1e744c14361b6"
+    },
+    {
+      "path": "trains/lausanne/__next._tree.txt",
+      "bytes": 547,
+      "sha256": "ba099dc56fa9d747f1c36098507f0c2e1a8216efc99e98a4dfa3163e58dd48f2"
+    },
+    {
+      "path": "trains/lausanne/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7376,
+      "sha256": "a16d5ec577b950999b788887b39b1565a00bef65dd4f85921e946c6c2c16d8f4"
+    },
+    {
+      "path": "trains/lausanne/index.html",
+      "bytes": 19360,
+      "sha256": "c60aec073d215e690dc9d3fa37dedf04606f5bb99fd622afd0830a036a4f6e28"
+    },
+    {
+      "path": "trains/lausanne/index.txt",
+      "bytes": 8573,
+      "sha256": "97d380bf260aed516e6f29bd5f75e2736a31c753f2e52deee9a1e744c14361b6"
+    },
+    {
+      "path": "trains/lucerne/__next._full.txt",
+      "bytes": 8562,
+      "sha256": "83bfdda159f4ed28b6c16868fa02d8d66e845e2f2dfc19e92426c75a636478c0"
+    },
+    {
+      "path": "trains/lucerne/__next._tree.txt",
+      "bytes": 546,
+      "sha256": "93651130392ca90fe0f52a8b5f64a86a596f230873918f4ab6efae94c360a3c0"
+    },
+    {
+      "path": "trains/lucerne/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7367,
+      "sha256": "132f139e35846a66b921f3908bf48b99ca588236a345eff8e3a58659c4811466"
+    },
+    {
+      "path": "trains/lucerne/index.html",
+      "bytes": 19341,
+      "sha256": "70b7161f29a9385ec12736ec3c974530a1c913af7d3ff2e062b4884cc5de75e1"
+    },
+    {
+      "path": "trains/lucerne/index.txt",
+      "bytes": 8562,
+      "sha256": "83bfdda159f4ed28b6c16868fa02d8d66e845e2f2dfc19e92426c75a636478c0"
+    },
+    {
+      "path": "trains/lugano/__next._full.txt",
+      "bytes": 8551,
+      "sha256": "b9bc4097cf8b0590d1af5388c5021cb9b6508eb813f3dcaf8910d5646a525ece"
+    },
+    {
+      "path": "trains/lugano/__next._tree.txt",
+      "bytes": 545,
+      "sha256": "64b2a5abfe13d99b1d445c9de29a594fd1113ba79ddf2cff3f937ffda34cad2e"
+    },
+    {
+      "path": "trains/lugano/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7358,
+      "sha256": "5b5deac2476101b9e912901cbc5428186c913b0d6e894de4e087a920d96d776a"
+    },
+    {
+      "path": "trains/lugano/index.html",
+      "bytes": 19322,
+      "sha256": "a43437e7a7f9f05f6eab004b9e55a506e106cd2797b6e6ef2b08dfc26c4ed8ed"
+    },
+    {
+      "path": "trains/lugano/index.txt",
+      "bytes": 8551,
+      "sha256": "b9bc4097cf8b0590d1af5388c5021cb9b6508eb813f3dcaf8910d5646a525ece"
+    },
+    {
+      "path": "trains/mendrisio/__next._full.txt",
+      "bytes": 8584,
+      "sha256": "3a15b4cf600de8b1262b996c757810fea3f911e8bb5ef624de080f2339be845e"
+    },
+    {
+      "path": "trains/mendrisio/__next._tree.txt",
+      "bytes": 548,
+      "sha256": "645a7b3e0bcf29ceace12554f4582ed852e04fc37f4a1ee259757a6a309dc84f"
+    },
+    {
+      "path": "trains/mendrisio/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7385,
+      "sha256": "ec67cecfe5ddd0164ce1d467d4d1b0638b0599c6ce964228caedc923acf1e1e5"
+    },
+    {
+      "path": "trains/mendrisio/index.html",
+      "bytes": 19379,
+      "sha256": "350fbea19efc2ad181554cde8078654c08e0b4bd33ae6b4ffa4a65ad97cda729"
+    },
+    {
+      "path": "trains/mendrisio/index.txt",
+      "bytes": 8584,
+      "sha256": "3a15b4cf600de8b1262b996c757810fea3f911e8bb5ef624de080f2339be845e"
+    },
+    {
+      "path": "trains/neuchatel/__next._full.txt",
+      "bytes": 8590,
+      "sha256": "cab88e8239559da50f8930d858137fd693a82f22cd6fddeecc1616311e71359c"
+    },
+    {
+      "path": "trains/neuchatel/__next._tree.txt",
+      "bytes": 548,
+      "sha256": "a2e2f1fabddd292635bfcf28df45f135f57cafc52f796440bf1a3b3ff7f1dd84"
+    },
+    {
+      "path": "trains/neuchatel/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7391,
+      "sha256": "6dbbe7b9e850e742136ef35f257d62fc8bb5171c3ccfdaae818fce91d8b465c4"
+    },
+    {
+      "path": "trains/neuchatel/index.html",
+      "bytes": 19392,
+      "sha256": "18ec17ddd25a2258ea49afec554b6dd5c24e68453be5e065bb887e5e6dce1497"
+    },
+    {
+      "path": "trains/neuchatel/index.txt",
+      "bytes": 8590,
+      "sha256": "cab88e8239559da50f8930d858137fd693a82f22cd6fddeecc1616311e71359c"
+    },
+    {
+      "path": "trains/schaffhausen/__next._full.txt",
+      "bytes": 8617,
+      "sha256": "301fc9d9bd9c3410957ae63da636f137e17c1ad46c8586d2c03a16c8d87dbde8"
+    },
+    {
+      "path": "trains/schaffhausen/__next._tree.txt",
+      "bytes": 551,
+      "sha256": "86ee229a3b53381d1fba3e2d5d773979508d452514b9daf9c96bdf07539a4f7b"
+    },
+    {
+      "path": "trains/schaffhausen/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7412,
+      "sha256": "c736ed61f49cc28b09e59e07f50f7878acb3da67a36a166867ca38c609a19dc7"
+    },
+    {
+      "path": "trains/schaffhausen/index.html",
+      "bytes": 19436,
+      "sha256": "c2ee836a75021026c74d2fe4e0dec689dcdd32aa3ee56f176e0af42b6e2b6a9a"
+    },
+    {
+      "path": "trains/schaffhausen/index.txt",
+      "bytes": 8617,
+      "sha256": "301fc9d9bd9c3410957ae63da636f137e17c1ad46c8586d2c03a16c8d87dbde8"
+    },
+    {
+      "path": "trains/st-gallen/__next._full.txt",
+      "bytes": 8590,
+      "sha256": "853f81b60511edd0400b084b7ccdc311c780e114d6ecc75a345b7567209aa438"
+    },
+    {
+      "path": "trains/st-gallen/__next._tree.txt",
+      "bytes": 548,
+      "sha256": "40337e2bcf84820abfcb5db5ed11ac9d8fb4e930f663acd783619c37a76d9aa4"
+    },
+    {
+      "path": "trains/st-gallen/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7391,
+      "sha256": "598577ac52450fc9be2c4b083a59ff85c796a818901a2b2bea52cb2ebc1b6814"
+    },
+    {
+      "path": "trains/st-gallen/index.html",
+      "bytes": 19392,
+      "sha256": "bad2dce35c483501768387cc8763e46769a4ed1812f8419fbaccb6ef6ab3f69d"
+    },
+    {
+      "path": "trains/st-gallen/index.txt",
+      "bytes": 8590,
+      "sha256": "853f81b60511edd0400b084b7ccdc311c780e114d6ecc75a345b7567209aa438"
+    },
+    {
+      "path": "trains/winterthur/__next._full.txt",
+      "bytes": 8595,
+      "sha256": "d3185163d6a59deefd36fa12360aca605173b9c86d2cfc64b01f9872a60162bf"
+    },
+    {
+      "path": "trains/winterthur/__next._tree.txt",
+      "bytes": 549,
+      "sha256": "fec9a064ae755eb5dcf1e78c34fcc2762ac6695b7adc9b5997cd7715bc2aa049"
+    },
+    {
+      "path": "trains/winterthur/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7394,
+      "sha256": "6365dd76e13797e9a614570c050237c336abe2af1425ecf1e88b6ca2da3b3ad3"
+    },
+    {
+      "path": "trains/winterthur/index.html",
+      "bytes": 19398,
+      "sha256": "fbc86cbf3f33ee4e2c882537c2f595d429ee7a3642bbb4f6ee0d86a4ed1bcdd9"
+    },
+    {
+      "path": "trains/winterthur/index.txt",
+      "bytes": 8595,
+      "sha256": "d3185163d6a59deefd36fa12360aca605173b9c86d2cfc64b01f9872a60162bf"
+    },
+    {
+      "path": "trains/zug/__next._full.txt",
+      "bytes": 8518,
+      "sha256": "1ae0184181b923bd0e54ce81f5fb4e99f4fad084f7045f71240c5a1085f07c43"
+    },
+    {
+      "path": "trains/zug/__next._tree.txt",
+      "bytes": 542,
+      "sha256": "e93713c30ed23ba8c8b72b8b40c988f0a2aad8b3d6f7e011769ed426432600ca"
+    },
+    {
+      "path": "trains/zug/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7331,
+      "sha256": "64fa4ce35eaf7b96e79a939e548297735cf98d6efc7fcde3918145215ba80b86"
+    },
+    {
+      "path": "trains/zug/index.html",
+      "bytes": 19265,
+      "sha256": "24cbeee67c4c367afeaaf54f50fc0fc04ea5ca40bda05888c58f632249cedf02"
+    },
+    {
+      "path": "trains/zug/index.txt",
+      "bytes": 8518,
+      "sha256": "1ae0184181b923bd0e54ce81f5fb4e99f4fad084f7045f71240c5a1085f07c43"
+    },
+    {
+      "path": "trains/zurich/__next._full.txt",
+      "bytes": 8557,
+      "sha256": "9c9207189129c8015638cff09e24c085ccf74917004f5bc6e0b9f1e66d4dd6f3"
+    },
+    {
+      "path": "trains/zurich/__next._tree.txt",
+      "bytes": 545,
+      "sha256": "0bc5e1b30cf82a5d79b001f93669f244dddb2807961b2e7617901c5d35bc0809"
+    },
+    {
+      "path": "trains/zurich/__next.trains.$d$city.__PAGE__.txt",
+      "bytes": 7364,
+      "sha256": "3842a12da75d7d4bf7987f873da9c090786c7ae37281d03d8d44ba32f8be6502"
+    },
+    {
+      "path": "trains/zurich/index.html",
+      "bytes": 19335,
+      "sha256": "f3e0251578919f2ef07ef10d839b6ef9afb7d4d1d9b41d192011149030249d91"
+    },
+    {
+      "path": "trains/zurich/index.txt",
+      "bytes": 8557,
+      "sha256": "9c9207189129c8015638cff09e24c085ccf74917004f5bc6e0b9f1e66d4dd6f3"
+    },
+    {
+      "path": "winterthur/__next.$d$city.__PAGE__.txt",
+      "bytes": 470866,
+      "sha256": "94ae5a487da389dc4da66f705947a1a66a946fcc2338565f96000d7ca07328ab"
+    },
+    {
+      "path": "winterthur/__next._full.txt",
+      "bytes": 397400,
+      "sha256": "7acbfc5a753c9e50cebab1f842de4d3a4e719738c22e5be714353b199cbf1e81"
+    },
+    {
+      "path": "winterthur/__next._tree.txt",
+      "bytes": 431,
+      "sha256": "925e852e5335b7de75ea5509a12cd7ad0b85b05546af1c15ab0cc170f0683bd2"
+    },
+    {
+      "path": "winterthur/index.html",
+      "bytes": 476417,
+      "sha256": "ef9f2f8b6319acefb1cc3aa2eb112010339d1fe5b7dbedb0bde670c9f9dd9402"
+    },
+    {
+      "path": "winterthur/index.txt",
+      "bytes": 397400,
+      "sha256": "7acbfc5a753c9e50cebab1f842de4d3a4e719738c22e5be714353b199cbf1e81"
+    },
+    {
+      "path": "winterthur/routes.json",
+      "bytes": 2732437,
+      "sha256": "3b4a57e4cda9c27c8bd8744c2037b7f33de0bf46aadb6b3721e78fc1fbacbb52"
+    },
+    {
+      "path": "zug/__next.$d$city.__PAGE__.txt",
+      "bytes": 411706,
+      "sha256": "f399ff1faadc6e81e986eb0bea34069dc2e2daee2ca6cfdfaefed66f54aa3ca5"
+    },
+    {
+      "path": "zug/__next._full.txt",
+      "bytes": 345590,
+      "sha256": "0abdc5fc7e57eb00e81878e8f3b65a20c39339d3171cd02fb6cf8171e09ad474"
+    },
+    {
+      "path": "zug/__next._tree.txt",
+      "bytes": 424,
+      "sha256": "9b236c6ca7840f3a75e6188d35a1f699731c86ac86354660819f95a58c56fd6f"
+    },
+    {
+      "path": "zug/index.html",
+      "bytes": 416904,
+      "sha256": "d9e3614435f1c612d9c89ca2f6423a75b809024fa91e35fdff8609d9bde1441c"
+    },
+    {
+      "path": "zug/index.txt",
+      "bytes": 345590,
+      "sha256": "0abdc5fc7e57eb00e81878e8f3b65a20c39339d3171cd02fb6cf8171e09ad474"
+    },
+    {
+      "path": "zug/routes.json",
+      "bytes": 2402695,
+      "sha256": "45e7a655d0103c1275f32694c2f318af7c5096c73b5327cefd61f63804eba2f3"
+    },
+    {
+      "path": "zurich/__next.$d$city.__PAGE__.txt",
+      "bytes": 831312,
+      "sha256": "9f5f7c5dc58dc7230e6132e1a8736a4d965c5b0e838ec9b070ff6c64eed89e1d"
+    },
+    {
+      "path": "zurich/__next._full.txt",
+      "bytes": 695902,
+      "sha256": "3703bef5885f0cb49937e3c9d63cc6c81f925d77e6035f634e76020f7c4ec447"
+    },
+    {
+      "path": "zurich/__next._tree.txt",
+      "bytes": 427,
+      "sha256": "748d487ad4bccf99af65a50e1c08763b48f19e6a29130a99c07d79feb1f32bae"
+    },
+    {
+      "path": "zurich/index.html",
+      "bytes": 818205,
+      "sha256": "032d83b56faeaa6ce73cd8da85627b444483f19a39e6482b35f104af4c677ec4"
+    },
+    {
+      "path": "zurich/index.txt",
+      "bytes": 695902,
+      "sha256": "3703bef5885f0cb49937e3c9d63cc6c81f925d77e6035f634e76020f7c4ec447"
+    },
+    {
+      "path": "zurich/routes.json",
+      "bytes": 3939792,
+      "sha256": "25d341ae0cc67d60dbd43589b6af86f3155ae78b24d70bd7989af1f88b284a4a"
+    }
+  ]
+}
