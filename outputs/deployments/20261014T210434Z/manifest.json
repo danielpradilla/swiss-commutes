@@ -1,0 +1,113 @@
+{
+  "createdUtc": "2026-10-14T21:12:35.303Z",
+  "status": "deployed-and-verified",
+  "sourceCommit": "2a39057",
+  "change": "Clear selected transit trip on map background click; retain selected route/stop clicks and switch on vehicle clicks in both views.",
+  "remote": {
+    "host": "depr001@iad1-shared-b7-33.dreamhost.com",
+    "path": "/home/depr001/danielpradilla.info/projects/swiss-commutes"
+  },
+  "method": "Checksum rsync; _next first; no --delete; previously built and locally verified export.",
+  "excluded": [
+    "live/.htaccess",
+    "live/.private/",
+    "trains/.private/",
+    "trains/timetable/",
+    "mobility/.private/",
+    ".env*"
+  ],
+  "privateRollback": "/home/depr001/danielpradilla.info/projects/swiss-commutes/trains/.private/deployments/20261014T210434Z/site-before.tar.gz",
+  "verification": {
+    "exportChecksumDryRun": "No source-file differences",
+    "applicationTests": 63,
+    "transitDataTests": 17,
+    "phpFeedAndNetworkChecks": "passed",
+    "priorBuild": {
+      "staticRoutes": 120,
+      "targetedLint": "passed"
+    },
+    "desktop": [
+      {
+        "view": "trains",
+        "original": "Train IR95",
+        "originalId": "sbb_140173062058992",
+        "routeClickPreserved": true,
+        "stopClickPreserved": true,
+        "stopTooltips": [
+          "IR95",
+          "Genève-Aéroport"
+        ],
+        "switched": "Train R",
+        "switchedId": "sbb_140172851843088",
+        "backgroundCleared": true,
+        "networkRestored": null
+      },
+      {
+        "view": "public-transport",
+        "original": "Bus 1",
+        "originalId": "sbb_140173504648752",
+        "routeClickPreserved": true,
+        "stopClickPreserved": true,
+        "stopTooltips": [
+          "1",
+          "Genève, Jardin Botanique"
+        ],
+        "switched": "Bus 52",
+        "switchedId": "sbb_140173611544240",
+        "backgroundCleared": true,
+        "networkRestored": {
+          "tiles": 20,
+          "tramsEnabled": "false"
+        }
+      }
+    ],
+    "mobile": [
+      {
+        "view": "trains",
+        "nativeBackgroundTapCleared": true,
+        "viewport": 390,
+        "documentWidth": 390,
+        "touch": 1,
+        "networkTiles": 1
+      },
+      {
+        "view": "public-transport",
+        "nativeBackgroundTapCleared": true,
+        "viewport": 390,
+        "documentWidth": 390,
+        "touch": 1,
+        "networkTiles": 6
+      }
+    ],
+    "privatePaths": [
+      {
+        "path": "/trains/.private/credentials.env",
+        "status": 403
+      },
+      {
+        "path": "/trains/.private/network/12/2117/1452.pbf",
+        "status": 403
+      },
+      {
+        "path": "/trains/.private/deployments/20261014T210434Z/site-before.tar.gz",
+        "status": 403
+      },
+      {
+        "path": "/live/.private/",
+        "status": 403
+      }
+    ],
+    "credentialsAccessRulesAndCronUnchanged": true,
+    "permissions": [
+      "755 /home/depr001/danielpradilla.info/projects/swiss-commutes",
+      "600 /home/depr001/danielpradilla.info/projects/swiss-commutes/trains/.private/credentials.env",
+      "600 /home/depr001/danielpradilla.info/projects/swiss-commutes/trains/.private/deployments/20261014T210434Z/site-before.tar.gz"
+    ]
+  },
+  "limitations": [
+    "Production interaction checks cover Geneva in both views, not every city.",
+    "Mobile touch was Chromium emulation, not a physical phone.",
+    "Maps quota and publication licence not independently verified.",
+    "Post/Reddit drafts were left untracked and unpublished."
+  ]
+}
